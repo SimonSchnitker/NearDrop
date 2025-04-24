@@ -1,0 +1,15 @@
+{
+	"app_name": "Near Drop",
+	"welcome_subtitle": "Share files nearby",
+	"welcome_preview_info_text": "Preview version",
+	"app_info_button": "App information",
+	"continue_button": "Next",
+	"app_info_title": "App information",
+	"imprint_title": "Imprint",
+	"imprint_subtitle": "About the developer",
+	"data_privacy_title": "Data protection",
+	"data_privacy_subtitle": "About the data processing",
+	"licenses_title": "Licences",
+	"licenses_subtitle": "About used licenses",
+	"version_title": "Version"
+}
