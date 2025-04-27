@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:near_drop/Runtime.dart';
-import 'package:near_drop/tools/WidgetModifier.dart';
+import 'package:near_drop/tools/ui/WidgetModifier.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import 'Routes.dart';
 
 class WelcomePage extends StatelessWidget
 {
@@ -57,7 +59,7 @@ class WelcomePage extends StatelessWidget
                         Spacer(),
                         FilledButton(
                             onPressed: () {
-                                //Navigator.pushNamed(context, Routes.guest);
+                                Navigator.pushNamed(context, Routes.guestLogin);
                             }, child: Text(AppLocalizations.of(context)!.continue_button)
                         ),
                     ],

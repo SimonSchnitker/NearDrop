@@ -41,6 +41,24 @@ extension WidgetModifier on Widget
         );
     }
 
+    Widget expanded({int flex = 1})
+    {
+        return Expanded(
+            flex: flex,
+            child: this,
+        );
+    }
+
+    Widget centered({Key? key, double? widthFactor, double? heightFactor})
+    {
+        return Center(
+            key: key,
+            widthFactor: widthFactor,
+            heightFactor: heightFactor,
+            child: this,
+        );
+    }
+
     Widget clickable({
         Key? key,
         void Function()? onTap,
