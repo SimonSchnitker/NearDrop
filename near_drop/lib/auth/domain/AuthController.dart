@@ -1,3 +1,4 @@
+import 'package:near_drop/Runtime.dart';
 import 'package:near_drop/auth/data/AuthGateway.dart';
 import 'package:near_drop/settings/domain/SettingsController.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -24,6 +25,7 @@ class AuthController
         }
 
         await _settingsController.set(firstnameSetting, firstname);
+        Runtime.firstname = firstname;
         return response;
     }
 }

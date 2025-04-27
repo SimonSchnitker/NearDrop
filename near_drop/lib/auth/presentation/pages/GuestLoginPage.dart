@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:near_drop/auth/presentation/viewmodel/GuestLoginViewModel.dart';
 import '../../../Routes.dart';
 import '../../../tools/ui/LoadingOverlay.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class GuestLoginPage extends StatelessWidget
 {
@@ -17,7 +18,7 @@ class GuestLoginPage extends StatelessWidget
                 body: CustomScrollView(
                     physics: PageScrollPhysics(),
                     slivers: [
-                        FlexibleAppBar(title: "Als Gast anmelden"),
+                        FlexibleAppBar(title: AppLocalizations.of(context)!.guest_login_title),
                         SliverToBoxAdapter(
                             child: Column(
                                 children: [
@@ -27,9 +28,9 @@ class GuestLoginPage extends StatelessWidget
                                             border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(8),
                                             ),
-                                            labelText: "Vorname",
+                                            labelText: AppLocalizations.of(context)!.firstname_textfield_label,
                                             prefixIcon: Icon(Icons.person_outline),
-                                            helperText: "Diesen Namen sehen andere Geräte in der Nähe.",
+                                            helperText: AppLocalizations.of(context)!.firstname_textfield_helper_text,
                                             helperMaxLines: 2,
                                         ),
                                         maxLength: 12,
@@ -49,11 +50,11 @@ class GuestLoginPage extends StatelessWidget
                                                 }),
                                                 RichText(
                                                     text: TextSpan(
-                                                    text: "Ich habe die ",
+                                                    text: AppLocalizations.of(context)!.data_protection_info_text_1,
                                                     style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                                                     children: [
                                                         TextSpan(
-                                                            text: "Datenschutzrichtlinien",
+                                                            text: AppLocalizations.of(context)!.data_protection_info_text_2,
                                                             style: TextStyle(
                                                                 color: Theme.of(context).colorScheme.primary,
                                                                 fontWeight: FontWeight.bold
@@ -64,7 +65,7 @@ class GuestLoginPage extends StatelessWidget
                                                                 }
                                                         ),
                                                         TextSpan(
-                                                            text: " gelesen und akzeptiere diese.",
+                                                            text: AppLocalizations.of(context)!.data_protection_info_text_3,
                                                         ),
                                                     ]
                                                     )
@@ -82,7 +83,7 @@ class GuestLoginPage extends StatelessWidget
                             hasScrollBody: false,
                             child: FilledButton(
                                 onPressed: context.watch<GuestLoginViewModel>().isTermsAccepted && context.watch<GuestLoginViewModel>().firstnameController.text.isNotEmpty ? () => _handleLogin(context) : null,
-                                child: Text("Weiter")
+                                child: Text(AppLocalizations.of(context)!.continue_button),
                             )
                             .align(Alignment.bottomRight)
                             .safeArea()
@@ -105,7 +106,7 @@ class GuestLoginPage extends StatelessWidget
         {
             ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                    content: Text("Beim Anmelden ist ein Fehler aufgetreten. Versuche es später erneut."),
+                    content: Text(AppLocalizations.of(context)!.guest_login_error_message),
                 )
             );
         }

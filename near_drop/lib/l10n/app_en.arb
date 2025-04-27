@@ -11,5 +11,16 @@
 	"data_privacy_subtitle": "About the data processing",
 	"licenses_title": "Licences",
 	"licenses_subtitle": "About used licenses",
-	"version_title": "Version"
+	"version_title": "Version",
+	"guest_login_title": "Login as guest",
+	"firstname_textfield_label": "Firstname",
+	"firstname_textfield_helper_text": "Other devices nearby will see this name.",
+	"guest_login_error_message": "An error occurred while logging in. Please try again later.",
+	"data_protection_info_text_1": "I have read and accept the ",
+	"data_protection_info_text_2": "data protection regulations",
+	"data_protection_info_text_3": ".",
+	"nearby_page_menu_icon_tooltip": "Menu",
+	"nearby_page_account_icon_tooltip": "My account",
+	"nearby_page_manual_connection_tooltip": "Connect manually",
+	"nearby_page_visibility_info_prefix": "You are visible as "
 }

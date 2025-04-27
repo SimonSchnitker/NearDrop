@@ -6,6 +6,7 @@ import 'package:near_drop/Runtime.dart';
 import 'package:near_drop/WelcomePage.dart';
 import 'package:near_drop/auth/domain/AuthController.dart';
 import 'package:near_drop/device/data/DeviceGateway.dart';
+import 'package:near_drop/nearby/data/scan/ble/BleAdvertiser.dart';
 import 'package:near_drop/settings/data/SettingsGateway.dart';
 import 'package:near_drop/settings/domain/SettingsController.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -13,6 +14,8 @@ import 'Routes.dart';
 import 'auth/data/AuthGateway.dart';
 import 'auth/presentation/pages/GuestLoginPage.dart';
 import 'device/domain/DeviceController.dart';
+import 'nearby/data/scan/ble/BleScanner.dart';
+import 'nearby/domain/NearbyController.dart';
 import 'nearby/presentation/pages/NearbyPage.dart';
 
 void main() async
@@ -48,6 +51,9 @@ void initializeDIContainer()
     final authController = AuthController(authGateway, settingsController);
     final deviceGateway = DeviceGateway();
     final deviceController = DeviceController(deviceGateway, settingsController);
+    final bleScanner = BleScanner();
+    final bleAdvertiser = BleAdvertiser();
+    final nearbyController = NearbyController(bleScanner, bleAdvertiser);
 
     KiwiContainer().registerInstance(settingsGateway);
     KiwiContainer().registerInstance(settingsController);
@@ -55,6 +61,9 @@ void initializeDIContainer()
     KiwiContainer().registerInstance(authController);
     KiwiContainer().registerInstance(deviceGateway);
     KiwiContainer().registerInstance(deviceController);
+    KiwiContainer().registerInstance(bleScanner);
+    KiwiContainer().registerInstance(bleAdvertiser);
+    KiwiContainer().registerInstance(nearbyController);
 }
 
 class MyApp extends StatelessWidget {

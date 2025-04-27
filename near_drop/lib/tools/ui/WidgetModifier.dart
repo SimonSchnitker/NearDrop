@@ -59,6 +59,16 @@ extension WidgetModifier on Widget
         );
     }
 
+    Widget sized({Key? key, double? width, double? height})
+    {
+        return SizedBox(
+            key: key,
+            width: width,
+            height: height,
+            child: this,
+        );
+    }
+
     Widget clickable({
         Key? key,
         void Function()? onTap,
