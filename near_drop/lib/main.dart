@@ -14,6 +14,7 @@ import 'Routes.dart';
 import 'auth/data/AuthGateway.dart';
 import 'auth/presentation/pages/GuestLoginPage.dart';
 import 'device/domain/DeviceController.dart';
+import 'nearby/data/NearbyGateway.dart';
 import 'nearby/data/scan/ble/BleScanner.dart';
 import 'nearby/domain/NearbyController.dart';
 import 'nearby/presentation/pages/NearbyPage.dart';
@@ -53,7 +54,8 @@ void initializeDIContainer()
     final deviceController = DeviceController(deviceGateway, settingsController);
     final bleScanner = BleScanner();
     final bleAdvertiser = BleAdvertiser();
-    final nearbyController = NearbyController(bleScanner, bleAdvertiser);
+    final nearbyGateway = NearbyGateway();
+    final nearbyController = NearbyController(bleScanner, bleAdvertiser, nearbyGateway);
 
     KiwiContainer().registerInstance(settingsGateway);
     KiwiContainer().registerInstance(settingsController);
@@ -63,6 +65,7 @@ void initializeDIContainer()
     KiwiContainer().registerInstance(deviceController);
     KiwiContainer().registerInstance(bleScanner);
     KiwiContainer().registerInstance(bleAdvertiser);
+    KiwiContainer().registerInstance(nearbyGateway);
     KiwiContainer().registerInstance(nearbyController);
 }
 

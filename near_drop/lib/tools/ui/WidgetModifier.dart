@@ -69,6 +69,22 @@ extension WidgetModifier on Widget
         );
     }
 
+    Widget opacity(double opacity)
+    {
+        return Opacity(
+            opacity: opacity,
+            child: this,
+        );
+    }
+
+    Widget tooltip({required String message, bool? preferBelow}) {
+        return Tooltip(
+            message: message,
+            preferBelow: preferBelow,
+            child: this,
+        );
+    }
+
     Widget clickable({
         Key? key,
         void Function()? onTap,

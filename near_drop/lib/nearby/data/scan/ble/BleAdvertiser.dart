@@ -12,7 +12,7 @@ class BleAdvertiser
         await BlePeripheral.initialize();
 
         BlePeripheral.setAdvertisingStatusUpdateCallback((bool advertising, String? error) {
-            print("BleAdvertiser status changed. AdvertisingStatus: $advertising, Error?: $error");
+            print("BleAdvertiser status changed. AdvertisingStatus: $advertising, Error: $error");
         });
 
         _isInitialized = true;

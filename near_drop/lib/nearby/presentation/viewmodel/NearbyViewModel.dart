@@ -3,32 +3,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus_windows/flutter_blue_plus_windows.dart';
 import 'package:kiwi/kiwi.dart';
 import 'package:near_drop/nearby/domain/NearbyController.dart';
+import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import '../../../core/entity/Device.dart';
 
 /// Interaktionslogik der NearbyPage.
 class NearbyViewModel extends ChangeNotifier
 {
     final NearbyController _nearbyController = KiwiContainer().resolve<NearbyController>();
 
+    final List<Device> nearbyDevices = [];
     bool isBluetoothSupported = true;
     bool isBluetoothEnabled = true;
     bool hasBluetoothPermissions = true;
 
     NearbyViewModel()
     {
-        print("NearbyViewModel initialized");
+        NearbyDevicesContainer.onAdded.stream.listen((device) {
+            nearbyDevices.add(device);
+            notifyListeners();
+        });
+
+        NearbyDevicesContainer.onRemoved.stream.listen((device) {
+            nearbyDevices.remove(device);
+            notifyListeners();
+        });
 
         _checkBluetoothSupport();
-
         if (isBluetoothSupported)
         {
             _listenForBluetoothStateChanged();
         }
-    }
 
-    void a()
-    {
-        print("a");
+        _nearbyController.startListeningForDeviceData();
     }
 
     /// Prüft, ob das Gerät Bluetooth unterstützt.

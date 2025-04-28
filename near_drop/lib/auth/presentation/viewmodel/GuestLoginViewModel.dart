@@ -3,6 +3,8 @@ import 'package:kiwi/kiwi.dart';
 import 'package:near_drop/auth/domain/AuthController.dart';
 import 'package:near_drop/device/domain/DeviceController.dart';
 
+import '../../../Runtime.dart';
+
 /// Interaktionslogik der GuestLoginPage.
 class GuestLoginViewModel extends ChangeNotifier
 {
@@ -28,6 +30,13 @@ class GuestLoginViewModel extends ChangeNotifier
     {
         await _authController.signInAnonymous(firstnameController.text);
         await _deviceController.updateNearbyUuid();
+
+        bool realtimeChannelInitialized = await Runtime.initializeChannel();
+        if (!realtimeChannelInitialized)
+        {
+            throw Exception("RealtimeChannel konnte nicht initialisiert werden");
+        }
+
         firstnameController.clear();
         isTermsAccepted = false;
     }

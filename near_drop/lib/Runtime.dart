@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:near_drop/core/enums/DeviceType.dart';
 import 'package:near_drop/core/enums/OS.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Stellt Laufzeit-Daten bereit.
 class Runtime
@@ -17,6 +20,9 @@ class Runtime
     static OS os = OS.unknown;
     static String nearbyUuid = "";
 
+    // Unser Supabase-Channel, auf dem wir Nachrichten empfangen.
+    static late RealtimeChannel realtimeChannel;
+
     static String getVersionString()
     {
         if (versionMap.containsKey(version))
@@ -25,5 +31,38 @@ class Runtime
         }
 
         return version.toString();
+    }
+
+    /// Initialisiert unseren Supabase-Realtime-Channel, auf dem wir Nachrichten empfangen.
+    static Future<bool> initializeChannel() async
+    {
+        Completer<bool> completer = Completer<bool>();
+
+        realtimeChannel = Supabase.instance.client.channel(nearbyUuid);
+        realtimeChannel.subscribe((status, o) {
+           print("Supabase RealtimeChannel status changed: $status");
+
+           if (completer.isCompleted)
+           {
+               return;
+           }
+
+           if (status == RealtimeSubscribeStatus.subscribed)
+           {
+               completer.complete(true);
+           }
+           else
+           {
+               completer.complete(false);
+           }
+        });
+
+        return await completer.future;
+    }
+
+    /// Beendet das Lauschen auf Nachrichten an unserem Channel.
+    static Future<void> unsubscribeChannel() async
+    {
+        realtimeChannel.unsubscribe();
     }
 }

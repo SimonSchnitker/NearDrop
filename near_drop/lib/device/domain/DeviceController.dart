@@ -81,10 +81,9 @@ class DeviceController
     Future<void> loadThis() async
     {
         String? firstname = await _settingsController.get(firstnameSetting);
-
         if (firstname == null)
         {
-            throw Exception("Firstname is null");
+            throw Exception("Firstname ist null.");
         }
 
         String? nearbyUuid = await _settingsController.get(nearbyUuidSetting);
@@ -108,6 +107,12 @@ class DeviceController
             {
                 Runtime.nearbyUuid = nearbyUuid;
             }
+        }
+
+        bool realtimeChannelInitialized = await Runtime.initializeChannel();
+        if (!realtimeChannelInitialized)
+        {
+            throw Exception("RealtimeChannel konnte nicht initialisiert werden");
         }
 
         // Laufzeitdaten setzen
