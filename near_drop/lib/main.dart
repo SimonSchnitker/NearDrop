@@ -87,6 +87,12 @@ class MyApp extends StatelessWidget {
             Locale('de'), // Deutsch
         ],
       theme: ThemeData(
+          tooltipTheme: TooltipThemeData(
+              decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.inverseSurface,
+                  borderRadius: BorderRadius.circular(4),
+              ),
+          ),
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.light),
       ),
       darkTheme: ThemeData(
