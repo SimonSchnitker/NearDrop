@@ -27,6 +27,7 @@ class BleScanner
 
             if (nearbyUuid != null)
             {
+                print("BleScanner: Found device with UUID: ${nearbyUuid.toString()}");
                 onDeviceSpotted.add(nearbyUuid.toString());
             }
         });

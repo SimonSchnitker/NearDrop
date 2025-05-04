@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus_windows/flutter_blue_plus_windows.dart';
 import 'package:kiwi/kiwi.dart';
@@ -78,23 +79,40 @@ class NearbyViewModel extends ChangeNotifier
     {
         if (Platform.isAndroid)
         {
-            if (await Permission.bluetoothScan.isGranted && await Permission.bluetoothAdvertise.isGranted && await Permission.bluetoothConnect.isGranted)
+            final androidInfo = await DeviceInfoPlugin().androidInfo;
+
+            if (androidInfo.version.sdkInt >= 31) // Android 12 und höher
             {
+                if (await Permission.bluetoothScan.isGranted && await Permission.bluetoothAdvertise.isGranted && await Permission.bluetoothConnect.isGranted)
+                {
+                    return true;
+                }
+
+                Map<Permission, PermissionStatus> statuses = await [
+                    Permission.bluetoothScan,
+                    Permission.bluetoothAdvertise,
+                    Permission.bluetoothConnect
+                ].request();
+
+                for (var status in statuses.values)
+                {
+                    if (status != PermissionStatus.granted)
+                    {
+                        return false;
+                    }
+                }
+
                 return true;
             }
-
-            Map<Permission, PermissionStatus> statuses = await [
-                Permission.bluetoothScan,
-                Permission.bluetoothAdvertise,
-                Permission.bluetoothConnect
-            ].request();
-
-            if (statuses[Permission.bluetoothScan] == PermissionStatus.granted && statuses[Permission.bluetoothAdvertise] == PermissionStatus.granted && statuses[Permission.bluetoothConnect] == PermissionStatus.granted)
+            else // Für Android 11 und niedriger wird für Bluetooth die Standortberechtigung benötigt
             {
-                return true;
-            }
+                if (await Permission.location.isGranted)
+                {
+                    return true;
+                }
 
-            return false;
+                return await Permission.location.request() == PermissionStatus.granted;
+            }
         }
         else if (Platform.isIOS)
         {
@@ -109,5 +127,25 @@ class NearbyViewModel extends ChangeNotifier
         {
             return true; // Für Windows und macOS ist keine Berechtigung erforderlich
         }
+    }
+
+    Future<void> startBleScan() async
+    {
+        await _nearbyController.startBleScanner();
+    }
+
+    Future<void> stopBleScan() async
+    {
+        await _nearbyController.stopBleScanner();
+    }
+
+    Future<void> startBleAdvertiser() async
+    {
+        await _nearbyController.startBleAdvertiser();
+    }
+
+    Future<void> stopBleAdvertiser() async
+    {
+        await _nearbyController.stopBleAdvertiser();
     }
 }

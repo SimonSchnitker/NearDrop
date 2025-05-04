@@ -29,6 +29,7 @@ class NearbyDevicesContainer
 
             _nearbyDevices.add(device);
             onAdded.add(device);
+            print("Device added in NearbyDevicesContainer: ${device.firstname}, ${device.name}, ${device.type}, ${device.os}, ${device.version}");
         });
     }
 

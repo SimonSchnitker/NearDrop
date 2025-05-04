@@ -41,7 +41,7 @@ class NearbyPage extends StatelessWidget
                 _appBar(context),
                 SliverToBoxAdapter(
                   child: Text(
-                      "Geräte in der Nähe",
+                      Runtime.nearbyUuid,
                     style: TextStyle(
                       fontWeight: FontWeight.w500,
                       color: Theme.of(context).colorScheme.primary,
@@ -55,7 +55,24 @@ class NearbyPage extends StatelessWidget
                 SliverToBoxAdapter(
                   child: SafeArea(
                     top: false,
-                    child: SizedBox()
+                    child: SizedBox(
+                        child: Column(
+                            children: [
+                                FilledButton(onPressed: () {
+                                    context.read<NearbyViewModel>().startBleScan();
+                                }, child: Text("BLE scan")),
+                                FilledButton(onPressed: () {
+                                    context.read<NearbyViewModel>().startBleAdvertiser();
+                                }, child: Text("BLE advertise")),
+                                FilledButton(onPressed: () {
+                                    context.read<NearbyViewModel>().stopBleScan();
+                                }, child: Text("Stop BLE scan")),
+                                FilledButton(onPressed: () {
+                                    context.read<NearbyViewModel>().stopBleAdvertiser();
+                                }, child: Text("Stop BLE advertise")),
+                            ],
+                        ),
+                    )
                   ),
                 )
               ],

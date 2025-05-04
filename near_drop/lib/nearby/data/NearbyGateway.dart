@@ -5,9 +5,22 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/enums/DeviceType.dart';
 import '../../core/enums/OS.dart';
 
+/// Gateway für die Kommunikation mit anderen Geräten in der Nähe.
 class NearbyGateway
 {
     final StreamController<Device> onDeviceDataReceived = StreamController<Device>.broadcast();
+    final StreamController<String> onDeviceRequestReceived = StreamController<String>.broadcast();
+
+    /// Fordert die Gerätedaten eines anderen Geräts an.
+    Future<bool> sendDeviceDataRequest(String destinationUuid) async
+    {
+        RealtimeChannel channel = Supabase.instance.client.channel(destinationUuid);
+        ChannelResponse response = await channel.sendBroadcastMessage(event: "device_request", payload: {
+            "sender": Runtime.nearbyUuid,
+        });
+
+        return response == ChannelResponse.ok;
+    }
 
     /// Sendet unsere Gerätedaten an ein anderes Gerät über Supabase.
     Future<bool> sendDeviceData(String destinationUuid) async
@@ -28,6 +41,13 @@ class NearbyGateway
     /// Startet das Lauschen auf Gerätedaten.
     void startListeningForDeviceData()
     {
+        Runtime.realtimeChannel.onBroadcast(event: "device_request", callback: (data) async
+        {
+            data = data["payload"];
+            String nearbyUuid = data["sender"];
+            onDeviceRequestReceived.add(nearbyUuid);
+        });
+
         Runtime.realtimeChannel.onBroadcast(event: "device", callback: (data) async
         {
             data = data["payload"];
