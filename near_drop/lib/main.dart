@@ -5,7 +5,6 @@ import 'package:kiwi/kiwi.dart';
 import 'package:near_drop/Runtime.dart';
 import 'package:near_drop/WelcomePage.dart';
 import 'package:near_drop/auth/domain/AuthController.dart';
-import 'package:near_drop/device/data/DeviceGateway.dart';
 import 'package:near_drop/nearby/data/scan/ble/BleAdvertiser.dart';
 import 'package:near_drop/settings/data/SettingsGateway.dart';
 import 'package:near_drop/settings/domain/SettingsController.dart';
@@ -13,7 +12,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'Routes.dart';
 import 'auth/data/AuthGateway.dart';
 import 'auth/presentation/pages/GuestLoginPage.dart';
-import 'device/domain/DeviceController.dart';
 import 'nearby/data/NearbyGateway.dart';
 import 'nearby/data/scan/ble/BleScanner.dart';
 import 'nearby/domain/NearbyController.dart';
@@ -21,7 +19,9 @@ import 'nearby/presentation/pages/NearbyPage.dart';
 
 void main() async
 {
+    WidgetsFlutterBinding.ensureInitialized();
     initializeDIContainer();
+    await Runtime.initializeDeviceData();
 
     await Supabase.initialize(
         url: "https://cjqgfozwhdrakszcnxkj.supabase.co",
@@ -32,12 +32,13 @@ void main() async
     {
         try
         {
-            await KiwiContainer().resolve<DeviceController>().loadThis();
+            await KiwiContainer().resolve<AuthController>().loadThisDevice();
         }
         catch (e)
         {
             //await Supabase.instance.client.auth.signOut();
             print("Error loading device data: $e");
+            // TODO: Fehler-Page anzeigen
         }
     }
 
@@ -50,8 +51,6 @@ void initializeDIContainer()
     final settingsController = SettingsController(settingsGateway);
     final authGateway = AuthGateway();
     final authController = AuthController(authGateway, settingsController);
-    final deviceGateway = DeviceGateway();
-    final deviceController = DeviceController(deviceGateway, settingsController);
     final bleScanner = BleScanner();
     final bleAdvertiser = BleAdvertiser();
     final nearbyGateway = NearbyGateway();
@@ -61,8 +60,6 @@ void initializeDIContainer()
     KiwiContainer().registerInstance(settingsController);
     KiwiContainer().registerInstance(authGateway);
     KiwiContainer().registerInstance(authController);
-    KiwiContainer().registerInstance(deviceGateway);
-    KiwiContainer().registerInstance(deviceController);
     KiwiContainer().registerInstance(bleScanner);
     KiwiContainer().registerInstance(bleAdvertiser);
     KiwiContainer().registerInstance(nearbyGateway);
@@ -75,6 +72,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Near Drop',
         localizationsDelegates: [
             AppLocalizations.delegate,

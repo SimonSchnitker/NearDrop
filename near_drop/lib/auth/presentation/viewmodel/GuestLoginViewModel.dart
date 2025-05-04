@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:kiwi/kiwi.dart';
 import 'package:near_drop/auth/domain/AuthController.dart';
-import 'package:near_drop/device/domain/DeviceController.dart';
-
 import '../../../Runtime.dart';
 
 /// Interaktionslogik der GuestLoginPage.
 class GuestLoginViewModel extends ChangeNotifier
 {
     final AuthController _authController = KiwiContainer().resolve<AuthController>();
-    final DeviceController _deviceController = KiwiContainer().resolve<DeviceController>();
     final TextEditingController firstnameController = TextEditingController();
     bool isTermsAccepted = false;
 
@@ -29,7 +26,7 @@ class GuestLoginViewModel extends ChangeNotifier
     Future<void> createGuestUser() async
     {
         await _authController.signInAnonymous(firstnameController.text);
-        await _deviceController.updateNearbyUuid();
+        await _authController.updateNearbyUuid();
 
         bool realtimeChannelInitialized = await Runtime.initializeChannel();
         if (!realtimeChannelInitialized)

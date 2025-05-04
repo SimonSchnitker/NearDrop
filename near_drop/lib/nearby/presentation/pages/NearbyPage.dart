@@ -41,7 +41,7 @@ class NearbyPage extends StatelessWidget
                 _appBar(context),
                 SliverToBoxAdapter(
                   child: Text(
-                      Runtime.nearbyUuid,
+                      "Geräte in der Nähe",
                     style: TextStyle(
                       fontWeight: FontWeight.w500,
                       color: Theme.of(context).colorScheme.primary,

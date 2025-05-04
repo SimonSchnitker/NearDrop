@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:near_drop/core/enums/DeviceType.dart';
 import 'package:near_drop/core/enums/OS.dart';
+import 'package:near_drop/tools/DeviceHelper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Stellt Laufzeit-Daten bereit.
@@ -31,6 +32,14 @@ class Runtime
         }
 
         return version.toString();
+    }
+
+    /// Lädt die statischen Laufzeitdaten des Geräts.
+    static Future<void> initializeDeviceData() async
+    {
+        deviceName = await DeviceHelper.getDeviceName();
+        deviceType = await DeviceHelper.getDeviceType();
+        os = DeviceHelper.getOS();
     }
 
     /// Initialisiert unseren Supabase-Realtime-Channel, auf dem wir Nachrichten empfangen.
