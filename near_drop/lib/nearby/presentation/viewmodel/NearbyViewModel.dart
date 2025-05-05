@@ -6,7 +6,6 @@ import 'package:kiwi/kiwi.dart';
 import 'package:near_drop/nearby/domain/NearbyController.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
 import 'package:permission_handler/permission_handler.dart';
-
 import '../../../core/entity/Device.dart';
 
 /// Interaktionslogik der NearbyPage.
@@ -18,6 +17,9 @@ class NearbyViewModel extends ChangeNotifier
     bool isBluetoothSupported = true;
     bool isBluetoothEnabled = true;
     bool hasBluetoothPermissions = true;
+
+    bool isDeviceNotFoundBalloonVisible = false;
+    final Duration deviceNotFoundBalloonDelay = const Duration(seconds: 8);
 
     NearbyViewModel()
     {
@@ -38,6 +40,12 @@ class NearbyViewModel extends ChangeNotifier
         }
 
         _nearbyController.startListeningForDeviceData();
+    }
+
+    void toggleDeviceNotFoundBalloonVisible()
+    {
+        isDeviceNotFoundBalloonVisible = !isDeviceNotFoundBalloonVisible;
+        notifyListeners();
     }
 
     /// Prüft, ob das Gerät Bluetooth unterstützt.
@@ -62,6 +70,7 @@ class NearbyViewModel extends ChangeNotifier
                 {
                     hasBluetoothPermissions = true;
                     await _nearbyController.startBleServices();
+                    _showDeviceNotFoundBalloonAfterDelay();
                 }
             }
             else if (state == BluetoothAdapterState.off)
@@ -126,6 +135,19 @@ class NearbyViewModel extends ChangeNotifier
         else
         {
             return true; // Für Windows und macOS ist keine Berechtigung erforderlich
+        }
+    }
+
+    /// Zeigt eine Ballon-Nachricht an, wenn nach einem Delay immer noch keine Geräte gefunden wurden.
+    Future<void> _showDeviceNotFoundBalloonAfterDelay() async
+    {
+        await Future.delayed(deviceNotFoundBalloonDelay);
+
+        // Wenn nach dem Delay immer noch keine Geräte gefunden wurden, zeige die Ballon-Nachricht an
+        if (nearbyDevices.isEmpty)
+        {
+            isDeviceNotFoundBalloonVisible = true;
+            notifyListeners();
         }
     }
 

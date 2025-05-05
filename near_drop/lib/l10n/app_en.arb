@@ -22,5 +22,8 @@
 	"nearby_page_menu_icon_tooltip": "Menu",
 	"nearby_page_account_icon_tooltip": "My account",
 	"nearby_page_manual_connection_tooltip": "Connect manually",
-	"nearby_page_visibility_info_prefix": "You are visible as "
+	"nearby_page_visibility_info_prefix": "You are visible as ",
+  "nearby_page_devices_label": "Nearby devices",
+  "nearby_page_no_devices_found_balloon_title": "Device not found?",
+  "nearby_page_no_devices_found_balloon_subtitle": "Connect you device via qr code."
 }

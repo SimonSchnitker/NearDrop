@@ -1,3 +1,4 @@
+import 'package:animated_visibility/animated_visibility.dart';
 import 'package:flutter/material.dart';
 
 extension WidgetModifier on Widget
@@ -77,10 +78,26 @@ extension WidgetModifier on Widget
         );
     }
 
+    Widget visible(bool visible)
+    {
+        return Visibility(
+            visible: visible,
+            child: this,
+        );
+    }
+
     Widget tooltip({required String message, bool? preferBelow}) {
         return Tooltip(
             message: message,
             preferBelow: preferBelow,
+            child: this,
+        );
+    }
+
+    Widget onTap(void Function()? onTap) {
+        return GestureDetector(
+            onTap: onTap,
+            behavior: HitTestBehavior.opaque,
             child: this,
         );
     }

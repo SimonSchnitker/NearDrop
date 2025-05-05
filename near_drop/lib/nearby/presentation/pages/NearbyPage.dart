@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:balloon_widget/balloon_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:near_drop/core/enums/DeviceType.dart';
 import 'package:near_drop/nearby/presentation/viewmodel/NearbyViewModel.dart';
@@ -32,62 +33,67 @@ class NearbyPage extends StatelessWidget
 
     return ChangeNotifierProvider(
       create: (context) => NearbyViewModel(),
-      builder: (context, child) => Scaffold(
-        body: Stack(
-          children: [
-            CustomScrollView(
-              physics: PageScrollPhysics(),
-              slivers: [
-                _appBar(context),
-                SliverToBoxAdapter(
-                  child: Text(
-                      "Geräte in der Nähe",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ).paddingOnly(left: 16, top: 8, right: 16, bottom: 8),
-                ),
-                SliverPadding(
-                    padding: EdgeInsets.only(left: 16, right: 16, bottom: 88),
-                    sliver: _nearbyDevicesGrid(context, context.watch<NearbyViewModel>().nearbyDevices)
-                ),
-                SliverToBoxAdapter(
-                  child: SafeArea(
-                    top: false,
-                    child: SizedBox(
-                        child: Column(
-                            children: [
-                                FilledButton(onPressed: () {
-                                    context.read<NearbyViewModel>().startBleScan();
-                                }, child: Text("BLE scan")),
-                                FilledButton(onPressed: () {
-                                    context.read<NearbyViewModel>().startBleAdvertiser();
-                                }, child: Text("BLE advertise")),
-                                FilledButton(onPressed: () {
-                                    context.read<NearbyViewModel>().stopBleScan();
-                                }, child: Text("Stop BLE scan")),
-                                FilledButton(onPressed: () {
-                                    context.read<NearbyViewModel>().stopBleAdvertiser();
-                                }, child: Text("Stop BLE advertise")),
-                            ],
-                        ),
-                    )
+      builder: (context, child) => BalloonTapDelegator(
+        child: Scaffold(
+          body: Stack(
+            children: [
+              CustomScrollView(
+                physics: PageScrollPhysics(),
+                slivers: [
+                  _appBar(context),
+                  SliverToBoxAdapter(
+                    child: Text(
+                        AppLocalizations.of(context)!.nearby_page_devices_label,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ).paddingOnly(left: 16, top: 8, right: 16, bottom: 8),
                   ),
-                )
-              ],
-            ),
-            Column(
-                spacing: 8,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                    //_infoBar(context, "Bluetooth deaktiviert", "Aktiviere Bluetooth, um Geräte in der Nähe zu finden", Icons.bluetooth_disabled),
-                    _bottomBar(context)
+                  SliverPadding(
+                      padding: EdgeInsets.only(left: 16, right: 16, bottom: 88),
+                      sliver: _nearbyDevicesGrid(context, context.watch<NearbyViewModel>().nearbyDevices)
+                  ),
+                  SliverToBoxAdapter(
+                    child: SafeArea(
+                      top: false,
+                      child: SizedBox(
+                          child: Column(
+                              children: [
+                                  FilledButton(onPressed: () {
+                                      context.read<NearbyViewModel>().toggleDeviceNotFoundBalloonVisible();
+                                  }, child: Text("Balloon widget")),
+                                  FilledButton(onPressed: () {
+                                      context.read<NearbyViewModel>().startBleScan();
+                                  }, child: Text("BLE scan")),
+                                  FilledButton(onPressed: () {
+                                      context.read<NearbyViewModel>().startBleAdvertiser();
+                                  }, child: Text("BLE advertise")),
+                                  FilledButton(onPressed: () {
+                                      context.read<NearbyViewModel>().stopBleScan();
+                                  }, child: Text("Stop BLE scan")),
+                                  FilledButton(onPressed: () {
+                                      context.read<NearbyViewModel>().stopBleAdvertiser();
+                                  }, child: Text("Stop BLE advertise")),
+                              ],
+                          ),
+                      )
+                    ),
+                  )
                 ],
-            )
-            .safeArea()
-            .paddingAll(16)
-          ],
+              ),
+              Column(
+                  spacing: 8,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                      //_infoBar(context, "Bluetooth deaktiviert", "Aktiviere Bluetooth, um Geräte in der Nähe zu finden", Icons.bluetooth_disabled),
+                      _bottomBar(context)
+                  ],
+              )
+              .safeArea()
+              .paddingAll(16)
+            ],
+          ),
         ),
       ),
     );
@@ -211,24 +217,52 @@ class NearbyPage extends StatelessWidget
         )
         .sized(height: 56),
       ),
-      Material(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(28),
-        child: Icon(
-            Icons.qr_code_2
-        )
-        .clickable(
+      PositionedBalloon(
+          show: context.watch<NearbyViewModel>().isDeviceNotFoundBalloonVisible,
+          balloon: Balloon(
+              color: Theme.of(context).colorScheme.inverseSurface,
+              child: Container(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                        AppLocalizations.of(context)!.nearby_page_no_devices_found_balloon_title,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onInverseSurface,
+                        ),
+                    ),
+                      Text(
+                          AppLocalizations.of(context)!.nearby_page_no_devices_found_balloon_subtitle,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onInverseSurface,
+                            ),
+                      )
+                  ],
+                ).paddingSymmetric(horizontal: 8, vertical: 4),
+              )
+              .onTap(() {
+                  context.read<NearbyViewModel>().toggleDeviceNotFoundBalloonVisible();
+              })
+          ),
+        child: Material(
+          color: Theme.of(context).colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(28),
-          onTap: () {
+          child: Icon(
+              Icons.qr_code_2
+          )
+          .clickable(
+            borderRadius: BorderRadius.circular(28),
+            onTap: () {
 
-          }
+            }
+          ),
+        )
+        .sized(height: 56, width: 56)
+        .tooltip(
+          message: AppLocalizations.of(context)!.nearby_page_manual_connection_tooltip,
+          preferBelow: false,
         ),
       )
-      .sized(height: 56, width: 56)
-      .tooltip(
-        message: AppLocalizations.of(context)!.nearby_page_manual_connection_tooltip,
-        preferBelow: false,
-      ),
     ]);
   }
 
