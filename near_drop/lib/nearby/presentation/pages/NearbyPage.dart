@@ -77,10 +77,16 @@ class NearbyPage extends StatelessWidget
                 )
               ],
             ),
-            _bottomBar(context)
-                .safeArea()
-                .paddingAll(16)
-                .align(Alignment.bottomCenter),
+            Column(
+                spacing: 8,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                    //_infoBar(context, "Bluetooth deaktiviert", "Aktiviere Bluetooth, um Geräte in der Nähe zu finden", Icons.bluetooth_disabled),
+                    _bottomBar(context)
+                ],
+            )
+            .safeArea()
+            .paddingAll(16)
           ],
         ),
       ),
@@ -224,5 +230,38 @@ class NearbyPage extends StatelessWidget
         preferBelow: false,
       ),
     ]);
+  }
+
+  Widget _infoBar(BuildContext context, String title, String subtitle, IconData icon) {
+      return Material(
+          color: Theme.of(context).colorScheme.errorContainer,
+          borderRadius: BorderRadius.circular(12),
+          child: Row(
+              spacing: 12,
+              children: [
+                  Icon(
+                      icon,
+                      color: Theme.of(context).colorScheme.onErrorContainer,
+                  ),
+                  Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                          Text(
+                              title,
+                              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onErrorContainer),
+                          ),
+                          Text(
+                              subtitle,
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onErrorContainer,
+                              ),
+                          )
+                      ],
+                  )
+                  .expanded()
+              ],
+          )
+          .paddingAll(16)
+      );
   }
 }

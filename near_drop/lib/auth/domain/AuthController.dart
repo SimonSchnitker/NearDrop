@@ -63,6 +63,7 @@ class AuthController
             }
         }
 
+
         bool realtimeChannelInitialized = await Runtime.initializeChannel();
         if (!realtimeChannelInitialized)
         {
