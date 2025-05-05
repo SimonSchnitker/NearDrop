@@ -25,6 +25,13 @@ class NearbyViewModel extends ChangeNotifier
     {
         NearbyDevicesContainer.onAdded.stream.listen((device) {
             nearbyDevices.add(device);
+
+            // Balloon-Nachricht wieder ausblenden, wenn ein Gerät gefunden wurde
+            if (isDeviceNotFoundBalloonVisible)
+            {
+                isDeviceNotFoundBalloonVisible = false;
+            }
+
             notifyListeners();
         });
 

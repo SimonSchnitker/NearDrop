@@ -217,7 +217,8 @@ class NearbyPage extends StatelessWidget
         )
         .sized(height: 56),
       ),
-      PositionedBalloon(
+      PositionedBalloon.fade(
+          duration: Duration(milliseconds: 300),
           show: context.watch<NearbyViewModel>().isDeviceNotFoundBalloonVisible,
           balloon: Balloon(
               color: Theme.of(context).colorScheme.inverseSurface,
