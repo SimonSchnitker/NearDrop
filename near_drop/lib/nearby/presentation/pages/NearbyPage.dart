@@ -1,11 +1,15 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:balloon_widget/balloon_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:near_drop/core/entity/CommunicationInfo.dart';
 import 'package:near_drop/core/enums/DeviceType.dart';
 import 'package:near_drop/nearby/presentation/viewmodel/NearbyViewModel.dart';
 import 'package:near_drop/tools/ui/FlexibleAppBar.dart';
 import 'package:near_drop/tools/ui/WidgetModifier.dart';
+import 'package:near_drop/transport/presentation/TransportViewModel.dart';
 import 'package:provider/provider.dart';
 import '../../../Runtime.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -16,84 +20,77 @@ class NearbyPage extends StatelessWidget
 {
   @override
   Widget build(BuildContext context) {
-    List<Device> devices = [];
+      final transportViewModel = TransportViewModel();
+      transportViewModel.init();
 
-    // Testdaten
-    for (int i = 0; i < 20; i++)
-    {
-      devices.add(Device(
-        "Simon",
-        "Pixel 9 Pro",
-        DeviceType.phone,
-        OS.android,
-        1,
-        ""
-      ));
-    }
-
-    return ChangeNotifierProvider(
-      create: (context) => NearbyViewModel(),
-      builder: (context, child) => BalloonTapDelegator(
-        child: Scaffold(
-          body: Stack(
-            children: [
-              CustomScrollView(
-                physics: PageScrollPhysics(),
-                slivers: [
-                  _appBar(context),
-                  SliverToBoxAdapter(
-                    child: Text(
-                        AppLocalizations.of(context)!.nearby_page_devices_label,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ).paddingOnly(left: 16, top: 8, right: 16, bottom: 8),
-                  ),
-                  SliverPadding(
-                      padding: EdgeInsets.only(left: 16, right: 16, bottom: 88),
-                      sliver: _nearbyDevicesGrid(context, context.watch<NearbyViewModel>().nearbyDevices)
-                  ),
-                  SliverToBoxAdapter(
-                    child: SafeArea(
-                      top: false,
-                      child: SizedBox(
-                          child: Column(
-                              children: [
-                                  FilledButton(onPressed: () {
-                                      context.read<NearbyViewModel>().toggleDeviceNotFoundBalloonVisible();
-                                  }, child: Text("Balloon widget")),
-                                  FilledButton(onPressed: () {
-                                      context.read<NearbyViewModel>().startBleScan();
-                                  }, child: Text("BLE scan")),
-                                  FilledButton(onPressed: () {
-                                      context.read<NearbyViewModel>().startBleAdvertiser();
-                                  }, child: Text("BLE advertise")),
-                                  FilledButton(onPressed: () {
-                                      context.read<NearbyViewModel>().stopBleScan();
-                                  }, child: Text("Stop BLE scan")),
-                                  FilledButton(onPressed: () {
-                                      context.read<NearbyViewModel>().stopBleAdvertiser();
-                                  }, child: Text("Stop BLE advertise")),
-                              ],
-                          ),
-                      )
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<NearbyViewModel>(
+          create: (context) => NearbyViewModel(),
+        ),
+        ChangeNotifierProvider<TransportViewModel>(
+            create: (context) => transportViewModel
+        )
+      ],
+      builder: (context, child) => Scaffold(
+        body: Stack(
+          children: [
+            CustomScrollView(
+              physics: PageScrollPhysics(),
+              slivers: [
+                _appBar(context),
+                SliverToBoxAdapter(
+                  child: Text(
+                      AppLocalizations.of(context)!.nearby_page_devices_label,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
-                  )
+                  ).paddingOnly(left: 16, top: 8, right: 16, bottom: 8),
+                ),
+                SliverPadding(
+                    padding: EdgeInsets.only(left: 16, right: 16, bottom: 88),
+                    sliver: _nearbyDevicesGrid(context, context.watch<NearbyViewModel>().nearbyDevices)
+                ),
+                SliverToBoxAdapter(
+                  child: SafeArea(
+                    top: false,
+                    child: SizedBox(
+                        child: Column(
+                            children: [
+                                FilledButton(onPressed: () {
+                                    context.read<NearbyViewModel>().toggleDeviceNotFoundBalloonVisible();
+                                }, child: Text("Balloon widget")),
+                                FilledButton(onPressed: () {
+                                    context.read<NearbyViewModel>().startBleScan();
+                                }, child: Text("BLE scan")),
+                                FilledButton(onPressed: () {
+                                    context.read<NearbyViewModel>().startBleAdvertiser();
+                                }, child: Text("BLE advertise")),
+                                FilledButton(onPressed: () {
+                                    context.read<NearbyViewModel>().stopBleScan();
+                                }, child: Text("Stop BLE scan")),
+                                FilledButton(onPressed: () {
+                                    context.read<NearbyViewModel>().stopBleAdvertiser();
+                                }, child: Text("Stop BLE advertise")),
+                            ],
+                        ),
+                    )
+                  ),
+                )
+              ],
+            ),
+            Column(
+                spacing: 8,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                    //_infoBar(context, "Bluetooth deaktiviert", "Aktiviere Bluetooth, um Geräte in der Nähe zu finden", Icons.bluetooth_disabled),
+                    _bottomBar(context)
                 ],
-              ),
-              Column(
-                  spacing: 8,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                      //_infoBar(context, "Bluetooth deaktiviert", "Aktiviere Bluetooth, um Geräte in der Nähe zu finden", Icons.bluetooth_disabled),
-                      _bottomBar(context)
-                  ],
-              )
-              .safeArea()
-              .paddingAll(16)
-            ],
-          ),
+            )
+            .safeArea()
+            .paddingAll(16)
+          ],
         ),
       ),
     );
@@ -119,26 +116,39 @@ class NearbyPage extends StatelessWidget
   Widget _deviceItem(BuildContext context, Device device) {
     return ChangeNotifierProvider(
         create: (context) => device,
-      builder: (context, child) => Material(
+        builder: (context, child) => Material(
         color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(44),
         child: Row(
           spacing: 12,
           children: [
-            CircleAvatar(
-              radius: 32,
-              backgroundColor: Theme.of(context).colorScheme.surface,
-              child: Icon(
-                Icons.phone_iphone_outlined,
-                size: 28,
-              ),
+            ChangeNotifierProvider(
+                create: (context) => device.communicationInfo,
+                builder: (context, child) => Stack(
+                    alignment: Alignment.center,
+                    children: [
+                        CircleAvatar(
+                            radius: 32,
+                            backgroundColor: Theme.of(context).colorScheme.surface,
+                            child: Icon(
+                                Icons.phone_iphone_outlined,
+                                size: 28,
+                            ),
+                        ),
+                        CircularProgressIndicator(
+                            value: context.watch<CommunicationInfo>().progress,
+                            strokeCap: StrokeCap.round,
+                            strokeWidth: 6,
+                        ).sized(height: 58, width: 58)
+                    ],
+                )
             ),
             Column(
                 mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  device.firstname,
+                  context.watch<Device>().firstname,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                       fontSize: 15,
@@ -160,7 +170,10 @@ class NearbyPage extends StatelessWidget
         .clickable(
           borderRadius: BorderRadius.circular(44),
           onTap: () {
-
+            showDialog(
+                context: context,
+                builder: (dialogContext) => _sendDialog(context, device)
+            );
           }
     ),
       )
@@ -174,6 +187,9 @@ class NearbyPage extends StatelessWidget
 
       }, icon: Icon(Icons.menu), tooltip: AppLocalizations.of(context)!.nearby_page_menu_icon_tooltip),
       actions: [
+          IconButton(onPressed: () {
+
+          }, icon: Icon(Icons.help_outline)),
         IconButton(onPressed: () {
 
       }, icon: Icon(Icons.person_outline), tooltip: AppLocalizations.of(context)!.nearby_page_account_icon_tooltip)
@@ -298,5 +314,65 @@ class NearbyPage extends StatelessWidget
           )
           .paddingAll(16)
       );
+  }
+
+  Widget _sendDialog(BuildContext context, Device device) {
+      return AlertDialog(shadowColor: Theme.of(context).colorScheme.shadow,
+          actionsPadding: EdgeInsets.only(bottom: 16, right: 24),
+          title: Text(
+              "An ${device.firstname} senden",
+          ),
+          content: Column(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 4,
+              children: [
+                Material(
+                    clipBehavior: Clip.hardEdge,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(16), bottom: Radius.circular(4)),
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    child: ListTile(
+                        leading: Icon(Icons.insert_photo_outlined),
+                        title: Text("Fotos & Videos"),
+                        onTap: () async {
+                            final List<XFile> medias = await ImagePicker().pickMultipleMedia();
+                            if (medias.isNotEmpty) {
+                                List<File> files = medias.map((e) => File(e.path)).toList();
+                                await _handleSendFiles(context, device, files);
+                            }
+                        },
+                    ),
+                ),
+                  Material(
+                      clipBehavior: Clip.hardEdge,
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(4), bottom: Radius.circular(16)),
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      child: ListTile(
+                          leading: Icon(Icons.file_copy_outlined),
+                          title: Text("Dateien"),
+                          onTap: () {
+
+                          },
+                      ),
+                  )
+              ],
+          ),
+          actions: [
+            TextButton(
+                onPressed: () {
+                    Navigator.of(context).pop();
+                },
+                child: Text(
+                    "Abbrechen",
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary
+                    ),
+                )
+            )
+          ],
+      );
+  }
+
+  Future<void> _handleSendFiles(BuildContext context, Device device, List<File> files) async {
+     await context.read<TransportViewModel>().sendFiles(device, files);
   }
 }

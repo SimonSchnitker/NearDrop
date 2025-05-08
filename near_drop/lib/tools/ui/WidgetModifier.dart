@@ -1,4 +1,3 @@
-import 'package:animated_visibility/animated_visibility.dart';
 import 'package:flutter/material.dart';
 
 extension WidgetModifier on Widget

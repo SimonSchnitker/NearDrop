@@ -1,4 +1,6 @@
 import 'package:flutter/widgets.dart';
+import 'package:near_drop/core/entity/CommunicationInfo.dart';
+import 'package:near_drop/transport/domain/models/Connection.dart';
 import '../enums/DeviceType.dart';
 import '../enums/OS.dart';
 
@@ -11,13 +13,21 @@ class Device extends ChangeNotifier
     OS os;
     int version;
     String nearbyUuid;
+    final communicationInfo = CommunicationInfo();
+    final Map<int, Connection> connections = {};
 
     Device(this.firstname, this.name, this.type, this.os, this.version, this.nearbyUuid);
+
+    Connection? getConnection(int connectionId)
+    {
+        return connections[connectionId];
+    }
 
     void updateUsername(String username)
     {
         this.firstname = username;
         notifyListeners();
+        print(hasListeners);
     }
 
     Map<String, dynamic> toMap()

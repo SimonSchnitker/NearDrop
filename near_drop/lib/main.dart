@@ -8,6 +8,9 @@ import 'package:near_drop/auth/domain/AuthController.dart';
 import 'package:near_drop/nearby/data/scan/ble/BleAdvertiser.dart';
 import 'package:near_drop/settings/data/SettingsGateway.dart';
 import 'package:near_drop/settings/domain/SettingsController.dart';
+import 'package:near_drop/transport/data/SignalingGateway.dart';
+import 'package:near_drop/transport/domain/SignalingController.dart';
+import 'package:near_drop/transport/domain/TransportController.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'Routes.dart';
 import 'auth/data/AuthGateway.dart';
@@ -16,12 +19,22 @@ import 'nearby/data/NearbyGateway.dart';
 import 'nearby/data/scan/ble/BleScanner.dart';
 import 'nearby/domain/NearbyController.dart';
 import 'nearby/presentation/pages/NearbyPage.dart';
+import 'package:image_picker_android/image_picker_android.dart';
+import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 
 void main() async
 {
     WidgetsFlutterBinding.ensureInitialized();
-    initializeDIContainer();
+
+    // Neuen Foto-Picker unter Android aktivieren
+    final ImagePickerPlatform imagePickerImplementation = ImagePickerPlatform.instance;
+    if (imagePickerImplementation is ImagePickerAndroid)
+    {
+        imagePickerImplementation.useAndroidPhotoPicker = true;
+    }
+
     await Runtime.initializeDeviceData();
+    initializeDIContainer();
 
     await Supabase.initialize(
         url: "https://cjqgfozwhdrakszcnxkj.supabase.co",
@@ -55,6 +68,9 @@ void initializeDIContainer()
     final bleAdvertiser = BleAdvertiser();
     final nearbyGateway = NearbyGateway();
     final nearbyController = NearbyController(bleScanner, bleAdvertiser, nearbyGateway);
+    final signalingGateway = SignalingGateway();
+    final signalingController = SignalingController(signalingGateway);
+    final transportController = TransportController(signalingController);
 
     KiwiContainer().registerInstance(settingsGateway);
     KiwiContainer().registerInstance(settingsController);
@@ -64,6 +80,9 @@ void initializeDIContainer()
     KiwiContainer().registerInstance(bleAdvertiser);
     KiwiContainer().registerInstance(nearbyGateway);
     KiwiContainer().registerInstance(nearbyController);
+    KiwiContainer().registerInstance(signalingGateway);
+    KiwiContainer().registerInstance(signalingController);
+    KiwiContainer().registerInstance(transportController);
 }
 
 class MyApp extends StatelessWidget {

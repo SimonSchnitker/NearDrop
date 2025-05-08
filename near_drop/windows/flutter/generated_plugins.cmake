@@ -5,6 +5,8 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
   ble_peripheral
+  file_selector_windows
+  flutter_webrtc
   permission_handler_windows
   url_launcher_windows
 )

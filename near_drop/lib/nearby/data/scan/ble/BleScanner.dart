@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter_blue_plus_windows/flutter_blue_plus_windows.dart';
-import 'package:near_drop/tools/UuidHelper.dart';
+import 'package:near_drop/tools/IdHelper.dart';
 
 /// Diese Klasse ist verantwortlich für das Scannen von BLE-Geräten.
 class BleScanner
@@ -23,11 +23,11 @@ class BleScanner
             }
 
             ScanResult result = results.first;
-            Guid? nearbyUuid = result.advertisementData.serviceUuids.firstWhereOrNull((uuid) => uuid.toString().toString().startsWith(UuidHelper.NEARBY_UUID_PREFIX));
+            Guid? nearbyUuid = result.advertisementData.serviceUuids.firstWhereOrNull((uuid) => uuid.toString().toString().startsWith(IdHelper.NEARBY_UUID_PREFIX));
 
             if (nearbyUuid != null)
             {
-                print("BleScanner: Found device with UUID: ${nearbyUuid.toString()}");
+                //print("BleScanner: Found device with UUID: ${nearbyUuid.toString()}");
                 onDeviceSpotted.add(nearbyUuid.toString());
             }
         });

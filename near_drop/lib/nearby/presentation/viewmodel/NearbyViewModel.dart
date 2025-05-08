@@ -7,6 +7,8 @@ import 'package:near_drop/nearby/domain/NearbyController.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../core/entity/Device.dart';
+import '../../../core/enums/DeviceType.dart';
+import '../../../core/enums/OS.dart';
 
 /// Interaktionslogik der NearbyPage.
 class NearbyViewModel extends ChangeNotifier
@@ -23,6 +25,19 @@ class NearbyViewModel extends ChangeNotifier
 
     NearbyViewModel()
     {
+        // Testdaten
+        for (int i = 0; i < 2; i++)
+        {
+            nearbyDevices.add(Device(
+                "Simon",
+                "Pixel 9 Pro",
+                DeviceType.phone,
+                OS.android,
+                1,
+                ""
+            ));
+        }
+
         NearbyDevicesContainer.onAdded.stream.listen((device) {
             nearbyDevices.add(device);
 

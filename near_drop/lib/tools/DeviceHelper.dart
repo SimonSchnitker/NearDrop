@@ -14,7 +14,7 @@ class DeviceHelper
     {
         if (Platform.isAndroid)
         {
-            final deviceInfo = await _deviceInfoPlugin.androidInfo;
+            final deviceInfo = await DeviceInfoPlugin().androidInfo;
             return deviceInfo.model;
         }
         else if (Platform.isIOS)

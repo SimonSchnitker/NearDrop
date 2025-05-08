@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:near_drop/core/enums/DeviceType.dart';
 import 'package:near_drop/core/enums/OS.dart';
 import 'package:near_drop/tools/DeviceHelper.dart';
