@@ -18,6 +18,9 @@ import '../../../core/enums/OS.dart';
 
 class NearbyPage extends StatelessWidget
 {
+    // Key, um Dialoge von überall anzuzeigen
+    static final GlobalKey<NavigatorState> scaffoldKey = GlobalKey<NavigatorState>();
+
   @override
   Widget build(BuildContext context) {
       final transportViewModel = TransportViewModel();
@@ -33,6 +36,7 @@ class NearbyPage extends StatelessWidget
         )
       ],
       builder: (context, child) => Scaffold(
+          key: scaffoldKey,
         body: Stack(
           children: [
             CustomScrollView(
@@ -320,7 +324,7 @@ class NearbyPage extends StatelessWidget
       return AlertDialog(shadowColor: Theme.of(context).colorScheme.shadow,
           actionsPadding: EdgeInsets.only(bottom: 16, right: 24),
           title: Text(
-              "An ${device.firstname} senden",
+              AppLocalizations.of(context)!.send_dialog_title(device.firstname),
           ),
           content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -332,7 +336,7 @@ class NearbyPage extends StatelessWidget
                     color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     child: ListTile(
                         leading: Icon(Icons.insert_photo_outlined),
-                        title: Text("Fotos & Videos"),
+                        title: Text(AppLocalizations.of(context)!.send_dialog_media_label),
                         onTap: () async {
                             final List<XFile> medias = await ImagePicker().pickMultipleMedia();
                             if (medias.isNotEmpty) {
@@ -348,7 +352,7 @@ class NearbyPage extends StatelessWidget
                       color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       child: ListTile(
                           leading: Icon(Icons.file_copy_outlined),
-                          title: Text("Dateien"),
+                          title: Text(AppLocalizations.of(context)!.send_dialog_files_label),
                           onTap: () {
 
                           },
@@ -362,7 +366,7 @@ class NearbyPage extends StatelessWidget
                     Navigator.of(context).pop();
                 },
                 child: Text(
-                    "Abbrechen",
+                    AppLocalizations.of(context)!.cancel_button,
                     style: TextStyle(
                         color: Theme.of(context).colorScheme.primary
                     ),
@@ -373,6 +377,7 @@ class NearbyPage extends StatelessWidget
   }
 
   Future<void> _handleSendFiles(BuildContext context, Device device, List<File> files) async {
-     await context.read<TransportViewModel>().sendFiles(device, files);
+      Navigator.of(context).pop();
+      await context.read<TransportViewModel>().sendFiles(device, files);
   }
 }

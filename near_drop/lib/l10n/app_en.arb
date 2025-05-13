@@ -23,7 +23,44 @@
 	"nearby_page_account_icon_tooltip": "My account",
 	"nearby_page_manual_connection_tooltip": "Connect manually",
 	"nearby_page_visibility_info_prefix": "You are visible as ",
-  "nearby_page_devices_label": "Nearby devices",
-  "nearby_page_no_devices_found_balloon_title": "Device not found?",
-  "nearby_page_no_devices_found_balloon_subtitle": "Connect you device via qr code."
+    "nearby_page_devices_label": "Nearby devices",
+    "nearby_page_no_devices_found_balloon_title": "Device not found?",
+    "nearby_page_no_devices_found_balloon_subtitle": "Connect you device via qr code.",
+    "send_dialog_title": "Send to {firstname}",
+    "@send_dialog_title": {
+      "placeholders": {
+        "firstname": {
+          "type": "String"
+        }
+      }
+    },
+    "send_dialog_files_label": "Files",
+    "send_dialog_media_label": "Photos & Videos",
+    "cancel_button": "Cancel",
+  "send_request_dialog_title": "Send request",
+  "send_request_dialog_content": "{firstname} wants to send you {filesCount} {mimeType}.",
+  "@send_request_dialog_content": {
+    "placeholders": {
+      "firstname": {
+        "type": "String"
+      },
+      "filesCount": {
+        "type": "int"
+      },
+      "mimeType": {
+        "type": "String"
+      }
+    }
+  },
+  "mime_type_image": "image",
+  "mime_type_images": "images",
+  "mime_type_video": "video",
+  "mime_type_videos": "videos",
+  "mime_type_audio": "audio",
+  "mime_type_audios": "audios",
+  "mime_type_media": "media files",
+  "mime_type_file": "file",
+  "mime_type_files": "files",
+  "accept_button": "Accept",
+  "decline_button": "Decline"
 }

@@ -118,8 +118,8 @@ class RTCNetworkStream
     /// Schließt den zugrunde liegenden RTCDataChannel.
     Future<void> close() async
     {
-        await _dataChannel?.close();
         await _stringStreamController.close();
         await _binaryStreamController.close();
+        await _dataChannel?.close();
     }
 }

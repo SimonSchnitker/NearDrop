@@ -4,6 +4,7 @@ enum SendResponse
     ok,
     receiverDeclined,
     receiverNotFound,
+    receiverError,
     fileAccessError,
     connectionError,
     timeout,

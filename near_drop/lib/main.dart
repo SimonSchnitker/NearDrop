@@ -9,6 +9,7 @@ import 'package:near_drop/nearby/data/scan/ble/BleAdvertiser.dart';
 import 'package:near_drop/settings/data/SettingsGateway.dart';
 import 'package:near_drop/settings/domain/SettingsController.dart';
 import 'package:near_drop/transport/data/SignalingGateway.dart';
+import 'package:near_drop/transport/data/TransportGateway.dart';
 import 'package:near_drop/transport/domain/SignalingController.dart';
 import 'package:near_drop/transport/domain/TransportController.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -70,7 +71,8 @@ void initializeDIContainer()
     final nearbyController = NearbyController(bleScanner, bleAdvertiser, nearbyGateway);
     final signalingGateway = SignalingGateway();
     final signalingController = SignalingController(signalingGateway);
-    final transportController = TransportController(signalingController);
+    final transportGateway = TransportGateway();
+    final transportController = TransportController(signalingController, transportGateway);
 
     KiwiContainer().registerInstance(settingsGateway);
     KiwiContainer().registerInstance(settingsController);
@@ -83,6 +85,7 @@ void initializeDIContainer()
     KiwiContainer().registerInstance(signalingGateway);
     KiwiContainer().registerInstance(signalingController);
     KiwiContainer().registerInstance(transportController);
+    KiwiContainer().registerInstance(transportGateway);
 }
 
 class MyApp extends StatelessWidget {

@@ -4,6 +4,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:near_drop/core/entity/Device.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
 import 'package:near_drop/transport/data/SignalingGateway.dart';
+import 'package:near_drop/transport/domain/event_args/ConnectionCreatedEventArgs.dart';
 import 'package:near_drop/transport/domain/models/RTCNetworkStream.dart';
 import 'models/Connection.dart';
 
@@ -19,6 +20,7 @@ class SignalingController
     };
 
     final SignalingGateway _signalingGateway;
+    StreamController<ConnectionCreatedEventArgs> onConnectionCreated = StreamController<ConnectionCreatedEventArgs>.broadcast();
 
     SignalingController(this._signalingGateway)
     {
@@ -97,7 +99,7 @@ class SignalingController
                 if (state == RTCDataChannelState.RTCDataChannelOpen)
                 {
                     print("Datenkanal geöffnet: ${dataChannel.label}");
-                    // TODO: Daten von Peer empfangen
+                    onConnectionCreated.add(ConnectionCreatedEventArgs(device, connection, connectionId));
                 }
             };
         };
@@ -258,41 +260,7 @@ class SignalingController
             return;
         }
 
-        try
-        {
-            await connection.close();
-        }
-        on PlatformException catch (e) // Oft kommt es hier zu einer PlatformException
-        {
-            print("PlatformException: Fehler beim Schließen der Verbindung: $e");
-        }
-        catch (e)
-        {
-            print("Unbekannter Fehler beim Schließen der Verbindung: $e");
-        }
-
+        await connection.close();
         device.connections.remove(connectionId);
-    }
-
-    /// Schließt alle Verbindungen zu einem Gerät.
-    Future<void> clearAllConnections(Device device) async
-    {
-        for (Connection connection in device.connections.values)
-        {
-            try
-            {
-                await connection.close();
-            }
-            on PlatformException catch (e) // Oft kommt es hier zu einer PlatformException
-            {
-                print("PlatformException: Fehler beim Schließen der Verbindung: $e");
-            }
-            catch (e)
-            {
-                print("Unbekannter Fehler beim Schließen der Verbindung: $e");
-            }
-        }
-
-        device.connections.clear();
     }
 }

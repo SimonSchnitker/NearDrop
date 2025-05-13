@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'RTCNetworkStream.dart';
 
@@ -13,8 +14,23 @@ class Connection
     /// Schließt die Verbindung und gibt alle Ressourcen frei.
     Future<void> close() async
     {
-        await networkStream?.close();
-        await dataChannel?.close();
-        await peerConnection.close();
+        // Hinweis: Oft kommt es hier zu einer PlatformException. Deshalb abfangen.
+        try
+        {
+            await networkStream?.close(); // Schließt ebenfalls den DataChannel
+        }
+        catch (e)
+        {
+            print("Unbekannter Fehler beim Schließen der Verbindung: $e");
+        }
+
+        try
+        {
+            await peerConnection.close();
+        }
+        catch (e)
+        {
+            print("Unbekannter Fehler beim Schließen der Verbindung: $e");
+        }
     }
 }
