@@ -62,5 +62,14 @@
   "mime_type_file": "file",
   "mime_type_files": "files",
   "accept_button": "Accept",
-  "decline_button": "Decline"
+  "decline_button": "Decline",
+  "communication_state_connecting": "Connecting...",
+  "communication_state_requesting": "Requesting...",
+  "communication_state_sending": "Sending...",
+  "communication_state_receiving": "Receiving...",
+  "success_state_sended": "Sent!",
+  "success_state_received": "Received!",
+  "error_state_error": "Error",
+  "error_state_receiver_declined": "Declined",
+  "error_state_canceled": "Aborted"
 }

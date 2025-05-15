@@ -1,15 +1,25 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
 import 'package:mime/mime.dart';
+import 'package:near_drop/core/enums/ErrorState.dart';
+import 'package:near_drop/core/enums/SuccessState.dart';
 import 'package:near_drop/nearby/presentation/pages/NearbyPage.dart';
 import 'package:near_drop/transport/data/TransportGateway.dart';
 import 'package:near_drop/transport/domain/SignalingController.dart';
+import 'package:near_drop/transport/domain/enums/FileReceiveResult.dart';
+import 'package:near_drop/transport/domain/enums/FileSendResult.dart';
 import 'package:near_drop/transport/domain/enums/MimeTypeGroup.dart';
 import 'package:near_drop/transport/domain/enums/SendRequestAnswer.dart';
 import 'package:near_drop/transport/domain/enums/SendResponse.dart';
 import 'package:near_drop/transport/domain/models/Connection.dart';
+import 'package:near_drop/transport/domain/models/Progress.dart';
+import 'package:near_drop/transport/data/dto/SendRequestDTO.dart';
+import 'package:near_drop/transport/data/dto/SendRequestFilesDTO.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../core/entity/Device.dart';
 import 'event_args/ConnectionCreatedEventArgs.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -17,65 +27,156 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 /// Steuert den Transportprozess zwischen Geräten.
 class TransportController
 {
+    static const String FOLDER_NAME = "Near Drop";
+    Directory? _downloadsDirectory;
+
     final SignalingController _signalingController;
     final TransportGateway _transportGateway;
 
     TransportController(this._signalingController, this._transportGateway);
 
-    /// Startet den Signalisierungsprozess und wartet auf eingehende Verbindungen.
-    void startSignalingListening()
+    /// Startet den Signalisierungsprozess, wartet auf eingehende Verbindungen und initialisiert grundlegende Einstellungen.
+    Future<void> init() async
     {
-        _signalingController.onConnectionCreated.stream.listen(_onConnectionCreated);
+        _downloadsDirectory = await _getDownloadsDirectory();
+        if (_downloadsDirectory == null)
+        {
+            print("Zugriff auf den Download-Ordner nicht möglich.");
+            return;
+        }
 
+        _signalingController.onConnectionCreated.stream.listen(_onConnectionCreated);
         _signalingController.startListening();
-        print("Signalisierung gestartet");
+        print("Signalisierung gestartet.");
     }
 
     /// Wird aufgerufen, wenn sich ein Gerät mit uns verbunden hat.
     Future<void> _onConnectionCreated(ConnectionCreatedEventArgs args) async
     {
-        int filesCount = 0;
-        int totalSize = 0;
-        MimeTypeGroup mimeTypeGroup = MimeTypeGroup.mixed;
-
         // Sendeanfrage empfangen
+        SendRequestDTO? sendRequest;
         try
         {
-            String request = await args.connection.networkStream!.readString();
-            Map<String, dynamic> payload = jsonDecode(request);
-            filesCount = payload["filesCount"];
-            totalSize = payload["totalSize"];
-            mimeTypeGroup = MimeTypeGroup.values.byName(payload["mimeTypes"]);
+            sendRequest = await _transportGateway.receiveRequest(args.connection.networkStream!);
         }
         on Exception catch (e)
         {
-            print("Fehler beim Empfangen der Anfrage: $e");
+            print("Fehler beim Empfangen der Sendeanfrage: $e");
             await args.connection.close();
+            args.device.connection = null;
             return;
         }
 
+        if (sendRequest == null)
+        {
+            print("Ungültige Sendeanfrage empfangen.");
+            await args.connection.close();
+            args.device.connection = null;
+            return;
+        }
+
+        // Je nach Typ der Sendeanfrage verarbeiten
+        if (sendRequest is SendRequestFilesDTO)
+        {
+            await _handleReceiveFiles(sendRequest, args.connection, args.device);
+        }
+        else
+        {
+            await args.connection.close();
+            args.device.connection = null;
+        }
+    }
+
+    /// Verarbeitet die eingehende Sendeanfrage.
+    Future<void> _handleReceiveFiles(SendRequestFilesDTO sendRequest, Connection connection, Device device) async
+    {
         // Dem Benutzer die Anfrage anzeigen
-        SendRequestAnswer answer = await _showSendRequestDialog(args.device, filesCount, totalSize, mimeTypeGroup);
+        print("Sendeanfrage-Dialog wird angezeigt");
+        SendRequestAnswer answer = await _showSendRequestDialog(device, sendRequest.filesCount, sendRequest.totalSize, sendRequest.mimeTypeGroup);
 
         // Antwort senden
         try
         {
-            await args.connection.networkStream!.writeString(answer.name);
+            await connection.networkStream!.writeString(answer.name);
         }
         on Exception catch (e)
         {
             print("Fehler beim Senden der Antwort: $e");
-            await args.connection.close();
+            device.communicationInfo.setErrorState(ErrorState.error);
+            await connection.close();
+            device.connection = null;
             return;
         }
 
-        // Wenn die Anfrage abgelehnt wurde, Verbindung schließen
-        if (answer == SendRequestAnswer.declined)
+        // Wenn der Benutzer die Anfrage nicht akzeptiert hat, Verbindung schließen
+        if (answer != SendRequestAnswer.accepted)
         {
-            await Future.delayed(const Duration(seconds: 2)); // Kurz warten, um sicherzustellen, dass die Antwort gesendet wurde
-            await args.connection.close();
+            await connection.close();
+            device.connection = null;
             return;
         }
+
+        // Dateien empfangen
+        device.communicationInfo.setReceiving(0);
+        Progress progress = Progress(sendRequest.totalSize);
+        for (int i = 0; i < sendRequest.filesCount; i++)
+        {
+            try
+            {
+                FileReceiveResult result = await _transportGateway.receiveFile(device, connection.networkStream!, progress, _downloadsDirectory!);
+
+                if (result == FileReceiveResult.error)
+                {
+                    print("Fehler beim Empfangen der Datei.");
+                    device.communicationInfo.setErrorState(ErrorState.error);
+                    await connection.close();
+                    device.connection = null;
+                    return;
+                }
+            }
+            catch (e)
+            {
+                print("Fehler beim Empfangen der Datei: $e");
+                device.communicationInfo.setErrorState(ErrorState.error);
+                await connection.close();
+                device.connection = null;
+                return;
+            }
+        }
+
+        // Status auf "Erfolg" setzen und Verbindung schließen
+        device.communicationInfo.setSuccessState(SuccessState.receivedSuccessfully);
+        await connection.close();
+        device.connection = null;
+    }
+
+    /// Gibt den Ordner zurück, in den empfangene Dateien gespeichert werden soll.
+    Future<Directory?> _getDownloadsDirectory() async
+    {
+        Directory? targetDirectory;
+
+        if (Platform.isWindows || Platform.isMacOS || Platform.isLinux)
+        {
+            targetDirectory = await getDownloadsDirectory();
+        }
+        else if (Platform.isAndroid || Platform.isIOS)
+        {
+            // Öffentlicher Download-Ordner
+            String path = await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
+            targetDirectory = Directory(join(path, FOLDER_NAME));
+        }
+
+        if (targetDirectory == null)
+        {
+            return null;
+        }
+
+        if (await targetDirectory.exists() == false)
+        {
+            return await targetDirectory.create(recursive: true);
+        }
+
+        return targetDirectory;
     }
 
     /// Zeigt ein Dialogfeld an, um die Sendeanfrage des Geräts zu akzeptieren oder abzulehnen.
@@ -230,6 +331,50 @@ class TransportController
         {
             print("Fehler beim Senden der Anfrage: $e");
             return SendResponse.connectionError;
+        }
+
+        // Dateien senden
+        device.communicationInfo.setSending(0);
+        Progress progress = Progress(totalSize);
+        for (File file in files)
+        {
+            FileSendResult sendResult;
+            try
+            {
+                sendResult = await _transportGateway.sendFile(device, connection.networkStream!, file, progress);
+            }
+            on Exception catch (e)
+            {
+                print("Fehler beim Senden der Datei: $e");
+                return SendResponse.connectionError;
+            }
+
+            if (sendResult == FileSendResult.fileReadError)
+            {
+                // Todo: Dialog anzeigen, dass die Datei nicht gesendet werden konnte
+                int length = await file.length();
+                bool response;
+                try
+                {
+                     response = await _transportGateway.sendFileSkip(connection.networkStream!, length);
+                }
+                catch (e)
+                {
+                    print("Zugriff auf Datei nicht möglich: $e");
+                    return SendResponse.connectionError;
+                }
+
+                if (!response)
+                {
+                    print("Fehler beim Überspringen der Datei.");
+                    return SendResponse.receiverError;
+                }
+            }
+            else if (sendResult == FileSendResult.error)
+            {
+                print("Fehler beim Senden der Datei.");
+                return SendResponse.receiverError;
+            }
         }
 
         return SendResponse.ok;

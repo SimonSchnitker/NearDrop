@@ -57,6 +57,8 @@ class SignalingGateway
     /// Wartet auf WebRTC-Events an unserem Channel von anderen Geräten.
     void startListening()
     {
+        print("Listening for WebRTC evefgnts...");
+
         Runtime.realtimeChannel.onBroadcast(event: "webrtc-offer", callback: (data) async {
             final offer = data["payload"];
             onOfferReceived.add(offer);

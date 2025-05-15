@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:near_drop/core/entity/CommunicationInfo.dart';
 import 'package:near_drop/core/enums/DeviceType.dart';
+import 'package:near_drop/core/enums/SuccessState.dart';
 import 'package:near_drop/nearby/presentation/viewmodel/NearbyViewModel.dart';
 import 'package:near_drop/tools/ui/FlexibleAppBar.dart';
 import 'package:near_drop/tools/ui/WidgetModifier.dart';
@@ -14,6 +15,8 @@ import 'package:provider/provider.dart';
 import '../../../Runtime.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../core/entity/Device.dart';
+import '../../../core/enums/CommunicationState.dart';
+import '../../../core/enums/ErrorState.dart';
 import '../../../core/enums/OS.dart';
 
 class NearbyPage extends StatelessWidget
@@ -24,7 +27,7 @@ class NearbyPage extends StatelessWidget
   @override
   Widget build(BuildContext context) {
       final transportViewModel = TransportViewModel();
-      transportViewModel.init();
+      transportViewModel.initSignaling();
 
     return MultiProvider(
       providers: [
@@ -123,12 +126,12 @@ class NearbyPage extends StatelessWidget
         builder: (context, child) => Material(
         color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(44),
-        child: Row(
-          spacing: 12,
-          children: [
-            ChangeNotifierProvider(
-                create: (context) => device.communicationInfo,
-                builder: (context, child) => Stack(
+        child: ChangeNotifierProvider(
+            create: (context) => device.communicationInfo,
+            builder: (context, child) => Row(
+              spacing: 12,
+              children: [
+                Stack(
                     alignment: Alignment.center,
                     children: [
                         CircleAvatar(
@@ -139,36 +142,93 @@ class NearbyPage extends StatelessWidget
                                 size: 28,
                             ),
                         ),
-                        CircularProgressIndicator(
-                            value: context.watch<CommunicationInfo>().progress,
-                            strokeCap: StrokeCap.round,
-                            strokeWidth: 6,
-                        ).sized(height: 58, width: 58)
+                        SizedBox(
+                            width: 58,
+                            height: 58,
+                            child: context.watch<CommunicationInfo>().progress == null ?
+                            CircularProgressIndicator(
+                                value: null,
+                                strokeWidth: 6,
+                                strokeCap: StrokeCap.round,
+                            ) :
+                            TweenAnimationBuilder(
+                                tween: Tween<double>(end: context.watch<CommunicationInfo>().progress == null ? 0.0 : context.watch<CommunicationInfo>().progress!),
+                                duration: Duration(milliseconds: 400),
+                                curve: Curves.linearToEaseOut,
+                                builder: (context, double value, child) => CircularProgressIndicator(
+                                    value: value,
+                                    strokeCap: StrokeCap.round,
+                                    strokeWidth: 6,
+                                ),
+                            ),
+                        ),
+                        Builder(builder: (context) {
+                            if (context.watch<CommunicationInfo>().successState != SuccessState.none) {
+                                return CircleAvatar(
+                                    backgroundColor: Theme.of(context).colorScheme.primary,
+                                    radius: 32,
+                                    child: Icon(
+                                        Icons.check,
+                                        size: 28,
+                                        color: Theme.of(context).colorScheme.onPrimary,
+                                    ),
+                                );
+                            }
+                            else if (context.watch<CommunicationInfo>().errorState != ErrorState.none) {
+                                return CircleAvatar(
+                                    backgroundColor: Theme.of(context).colorScheme.error,
+                                    radius: 32,
+                                    child: Icon(
+                                        Icons.error_outline,
+                                        size: 28,
+                                        color: Theme.of(context).colorScheme.onError,
+                                    ),
+                                );
+                            }
+                            return SizedBox();
+                        },
+                        ),
                     ],
-                )
-            ),
-            Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.watch<Device>().firstname,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500
-                  ),
                 ),
-                Text(
-                  device.name,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12
-                  ),
-                ).opacity(0.5),
+                  Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                          Text(
+                              context.watch<Device>().firstname,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500
+                              ),
+                          ),
+                          Builder(builder: (context) {
+                              CommunicationInfo info = context.watch<CommunicationInfo>();
+                              if (info.communicationState == CommunicationState.none && info.successState == SuccessState.none && info.errorState == ErrorState.none) {
+                                  return Text(
+                                      device.name,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                      ),
+                                  ).opacity(0.5);
+                              }
+                              return Text(
+                                  _getCommunicationInfoText(context, info),
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      color: info.errorState != ErrorState.none ?
+                                      Theme.of(context).colorScheme.error :
+                                      Theme.of(context).colorScheme.primary,
+                                  ),
+                              );
+                          }
+                          )
+                      ],
+                  ).expanded()
               ],
-            ).expanded()
-          ],
+            )
         )
         .paddingSymmetric(horizontal: 12)
         .clickable(
@@ -182,6 +242,43 @@ class NearbyPage extends StatelessWidget
     ),
       )
     );
+  }
+
+  String _getCommunicationInfoText(BuildContext context, CommunicationInfo info) {
+      switch (info.communicationState) {
+          case CommunicationState.connecting:
+              return AppLocalizations.of(context)!.communication_state_connecting;
+          case CommunicationState.requesting:
+              return AppLocalizations.of(context)!.communication_state_requesting;
+          case CommunicationState.sending:
+              return AppLocalizations.of(context)!.communication_state_sending;
+          case CommunicationState.receiving:
+              return AppLocalizations.of(context)!.communication_state_receiving;
+          default:
+              break;
+      }
+
+      switch (info.successState) {
+            case SuccessState.sendedSuccessfully:
+                return AppLocalizations.of(context)!.success_state_sended;
+            case SuccessState.receivedSuccessfully:
+                return AppLocalizations.of(context)!.success_state_received;
+            default:
+                break;
+      }
+
+        switch (info.errorState) {
+            case ErrorState.error:
+                return AppLocalizations.of(context)!.error_state_error;
+            case ErrorState.receiverDeclined:
+                return AppLocalizations.of(context)!.error_state_receiver_declined;
+            case ErrorState.cancelled:
+                return AppLocalizations.of(context)!.error_state_canceled;
+            default:
+                break;
+        }
+
+      return "";
   }
 
   Widget _appBar(BuildContext context) {

@@ -14,20 +14,14 @@ class Device extends ChangeNotifier
     int version;
     String nearbyUuid;
     final communicationInfo = CommunicationInfo();
-    final Map<int, Connection> connections = {};
+    Connection? connection;
 
     Device(this.firstname, this.name, this.type, this.os, this.version, this.nearbyUuid);
-
-    Connection? getConnection(int connectionId)
-    {
-        return connections[connectionId];
-    }
 
     void updateUsername(String username)
     {
         this.firstname = username;
         notifyListeners();
-        print(hasListeners);
     }
 
     Map<String, dynamic> toMap()

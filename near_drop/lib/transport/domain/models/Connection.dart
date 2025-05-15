@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'RTCNetworkStream.dart';
 
@@ -6,15 +5,16 @@ import 'RTCNetworkStream.dart';
 class Connection
 {
     RTCPeerConnection peerConnection;
+    int connectionId;
     RTCDataChannel? dataChannel;
     RTCNetworkStream? networkStream;
 
-    Connection({required this.peerConnection, this.dataChannel, this.networkStream});
+    Connection({required this.peerConnection, required this.connectionId, this.dataChannel, this.networkStream});
 
     /// Schließt die Verbindung und gibt alle Ressourcen frei.
     Future<void> close() async
     {
-        // Hinweis: Oft kommt es hier zu einer PlatformException. Deshalb abfangen.
+        // Hinweis: Oft kommt es beim Scließen zu einer PlatformException. Deshalb abfangen.
         try
         {
             await networkStream?.close(); // Schließt ebenfalls den DataChannel

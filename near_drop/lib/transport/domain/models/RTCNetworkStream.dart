@@ -8,12 +8,8 @@ import 'package:mutex/mutex.dart';
 class RTCNetworkStream
 {
     final RTCDataChannel _dataChannel;
-    final Queue<String> _stringQueue = Queue<String>();
-    final Queue<Uint8List> _binaryQueue = Queue<Uint8List>();
     final StreamController<String> _stringStreamController = StreamController<String>.broadcast();
     final StreamController<Uint8List> _binaryStreamController = StreamController<Uint8List>.broadcast();
-    final _stringStreamMutex = Mutex();
-    final _binaryStreamMutex = Mutex();
 
     RTCNetworkStream(this._dataChannel)
     {
@@ -25,82 +21,44 @@ class RTCNetworkStream
     {
         if (message.isBinary)
         {
-            await _binaryStreamMutex.protect(() async
+            while (!_binaryStreamController.hasListener)
             {
-                if (_binaryStreamController.hasListener)
+                if (_dataChannel.state == RTCDataChannelState.RTCDataChannelClosed)
                 {
-                    _binaryStreamController.add(message.binary);
+                    return;
                 }
-                else
-                {
-                    _binaryQueue.add(message.binary);
-                }
-            });
+
+                await Future.delayed(const Duration(milliseconds: 50));
+            }
+
+            _binaryStreamController.add(message.binary);
         }
         else
         {
-            await _stringStreamMutex.protect(() async
+            while (!_stringStreamController.hasListener)
             {
-                if (_stringStreamController.hasListener)
+                if (_dataChannel.state == RTCDataChannelState.RTCDataChannelClosed)
                 {
-                    _stringStreamController.add(message.text);
+                    return;
                 }
-                else
-                {
-                    _stringQueue.add(message.text);
-                }
-            });
+
+                await Future.delayed(const Duration(milliseconds: 50));
+            }
+
+            _stringStreamController.add(message.text);
         }
     }
 
     /// Liest einen String asynchron vom Stream.
     Future<String> readString() async
     {
-        Completer<String> completer = Completer<String>();
-        StreamSubscription? subscription;
-
-        await _stringStreamMutex.protect(() async
-        {
-            if (_stringQueue.isNotEmpty)
-            {
-                return _stringQueue.removeFirst();
-            }
-
-            subscription = _stringStreamController.stream.listen((text)
-            {
-                completer.complete(text);
-                subscription?.cancel();
-            });
-        });
-
-        return await completer.future;
-
-        //return await _stringStreamController.stream.first;
+        return await _stringStreamController.stream.first;
     }
 
     /// Liest Binärdaten (Uint8List) asynchron vom Stream.
     Future<Uint8List> readBinary() async
     {
-        Completer<Uint8List> completer = Completer<Uint8List>();
-        StreamSubscription? subscription;
-
-        await _binaryStreamMutex.protect(() async
-        {
-            if (_binaryQueue.isNotEmpty)
-            {
-                return _binaryQueue.removeFirst();
-            }
-
-            subscription = _binaryStreamController.stream.listen((data)
-            {
-                completer.complete(data);
-                subscription?.cancel();
-            });
-        });
-
-        return await completer.future;
-
-        //return await _binaryStreamController.stream.first;
+        return await _binaryStreamController.stream.first;
     }
 
     /// Schreibt einen String in den RTCDataChannel.

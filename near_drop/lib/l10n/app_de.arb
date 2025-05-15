@@ -62,5 +62,14 @@
     "mime_type_file": "Datei",
     "mime_type_files": "Dateien",
     "accept_button": "Akzeptieren",
-    "decline_button": "Ablehnen"
+    "decline_button": "Ablehnen",
+    "communication_state_connecting": "Verbinden...",
+    "communication_state_requesting": "Anfragen...",
+    "communication_state_sending": "Senden...",
+    "communication_state_receiving": "Empfangen...",
+    "success_state_sended": "Gesendet!",
+    "success_state_received": "Empfangen!",
+    "error_state_error": "Fehler",
+    "error_state_receiver_declined": "Abgelehnt",
+    "error_state_canceled": "Abgebrochen"
 }
