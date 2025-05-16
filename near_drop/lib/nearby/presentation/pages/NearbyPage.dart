@@ -237,7 +237,7 @@ class NearbyPage extends StatelessWidget
               if (device.communicationInfo.communicationState == CommunicationState.none) {
                   showDialog(context: context, builder: (dialogContext) => _sendDialog(context, device));
               }
-              else {
+              else if (device.communicationInfo.communicationState != CommunicationState.canceling) {
                   device.isCancelTransportDialogOpen = true;
                   await showDialog(context: context, builder: (dialogContext) => _cancelTransportDialog(context, device));
                   device.isCancelTransportDialogOpen = false;

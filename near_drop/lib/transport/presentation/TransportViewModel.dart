@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:kiwi/kiwi.dart';
@@ -13,6 +14,7 @@ class TransportViewModel extends ChangeNotifier
 {
     final _transportController = KiwiContainer().resolve<TransportController>();
     bool _isInitialized = false;
+    static final _cancelTimeout = Duration(seconds: 8);
 
     /// Initialisiert den Signalisierungsprozess.
     void initSignaling()
@@ -41,6 +43,7 @@ class TransportViewModel extends ChangeNotifier
                 break;
             case SendResponse.userCanceled:
                 device.communicationInfo.setErrorState(ErrorState.userCanceled);
+                device.onCanceledCompleted.add(null); // Mitteilen, dass der Transport abgebrochen wurde
                 break;
             default:
                 device.communicationInfo.setErrorState(ErrorState.error);
@@ -62,11 +65,24 @@ class TransportViewModel extends ChangeNotifier
         if (device.communicationInfo.communicationState == CommunicationState.requesting)
         {
             device.communicationInfo.setErrorState(ErrorState.userCanceled);
-            device.connection?.close();
-            device.connection = null;
+            await device.clearConnection();
             return;
         }
 
-        device.communicationInfo.setCanceling();
+        // Im Status "Verbinden" reicht es das Flag zu setzen, da das Verbinden nicht direkt abgebrochen werden sollte.
+        if (device.communicationInfo.communicationState == CommunicationState.connecting)
+        {
+            device.communicationInfo.setCanceling();
+        }
+        // In allen anderen Zuständen wird das Flag gesetzt und ein Timeout eingestellt, sollte das Abbrechen "feststecken"
+        else
+        {
+            device.onCanceledCompleted.stream.first.timeout(_cancelTimeout, onTimeout: () {
+                device.communicationInfo.setErrorState(ErrorState.userCanceled);
+                device.clearConnection();
+            });
+
+            device.communicationInfo.setCanceling();
+        }
     }
 }

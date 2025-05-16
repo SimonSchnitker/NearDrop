@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:near_drop/core/entity/CommunicationInfo.dart';
 import 'package:near_drop/transport/domain/models/Connection.dart';
@@ -7,10 +9,13 @@ import '../enums/OS.dart';
 /// Definiert den Aufbau eines Geräts.
 class Device extends ChangeNotifier
 {
+    // Keys und Boolean-Werte für Dialoge, die zum Gerät gehören, um sie von überall aus schließen zu können.
     final GlobalKey<NavigatorState> sendRequestDialogKey = GlobalKey<NavigatorState>();
     final GlobalKey<NavigatorState> cancelTransportDialogKey = GlobalKey<NavigatorState>();
     bool isSendRequestDialogOpen = false;
     bool isCancelTransportDialogOpen = false;
+
+    StreamController onCanceledCompleted = StreamController.broadcast();
 
     String firstname;
     String name;
@@ -23,6 +28,7 @@ class Device extends ChangeNotifier
 
     Device(this.firstname, this.name, this.type, this.os, this.version, this.nearbyUuid);
 
+    /// Schließt die aktuelle Verbindung, bereinigt alle Ressourcen und setzt die Kommunikationsinformationen zurück.
     Future<void> clearConnection() async
     {
         communicationInfo.reset();
@@ -31,6 +37,7 @@ class Device extends ChangeNotifier
         closeOpenDialogs();
     }
 
+    /// Schließt alle offenen Dialoge, sollten welche geöffnet sein.
     void closeOpenDialogs()
     {
         BuildContext? context = sendRequestDialogKey.currentContext;

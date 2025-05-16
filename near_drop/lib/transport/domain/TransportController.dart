@@ -146,6 +146,7 @@ class TransportController
                 }
                 else if (result == FileReceiveResult.userCanceled)
                 {
+                    device.onCanceledCompleted.add(null); // Mitteilen, dass der Transport abgebrochen wurde
                     device.communicationInfo.setErrorState(ErrorState.userCanceled);
                     await device.clearConnection();
                     await _deleteReceivedFile(receivedFile); // Aktuelle Datei löschen
@@ -378,8 +379,6 @@ class TransportController
         // Prüfen, ob der Benutzer das Abbrechen angefordert hat
         if (device.communicationInfo.cancelationRequested)
         {
-            await connection.close();
-            device.connection = null;
             return SendResponse.userCanceled;
         }
 

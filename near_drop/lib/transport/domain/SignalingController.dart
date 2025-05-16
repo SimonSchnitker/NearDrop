@@ -289,7 +289,7 @@ class SignalingController
             {
                 if (!completer.isCompleted)
                 {
-                    completer.complete(connection);
+                    //completer.complete(connection);
                 }
             }
             else if (state == RTCDataChannelState.RTCDataChannelClosed)
