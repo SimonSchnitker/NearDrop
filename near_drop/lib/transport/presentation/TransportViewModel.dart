@@ -31,21 +31,19 @@ class TransportViewModel extends ChangeNotifier
     {
         SendResponse response = await _transportController.sendFiles(device, files);
 
-        if (response == SendResponse.ok)
+        switch (response)
         {
-            device.communicationInfo.setSuccessState(SuccessState.sendedSuccessfully);
-        }
-        else if (response == SendResponse.userCanceled)
-        {
-            device.communicationInfo.setErrorState(ErrorState.userCanceled);
-        }
-        else if (response == SendResponse.receiverDeclined)
-        {
-            device.communicationInfo.setErrorState(ErrorState.receiverDeclined);
-        }
-        else
-        {
-            device.communicationInfo.setErrorState(ErrorState.error);
+            case SendResponse.ok:
+                device.communicationInfo.setSuccessState(SuccessState.sendedSuccessfully);
+                break;
+            case SendResponse.receiverDeclined:
+                device.communicationInfo.setErrorState(ErrorState.receiverDeclined);
+                break;
+            case SendResponse.userCanceled:
+                device.communicationInfo.setErrorState(ErrorState.userCanceled);
+                break;
+            default:
+                device.communicationInfo.setErrorState(ErrorState.error);
         }
 
         device.clearConnection();

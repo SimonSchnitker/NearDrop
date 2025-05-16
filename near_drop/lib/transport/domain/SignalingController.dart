@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:near_drop/core/entity/Device.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
@@ -13,6 +11,7 @@ class SignalingController
 {
     static const sendRetryCount = 3;
     static const sendRetryDelay = Duration(seconds: 3);
+    static const connectTimeout = Duration(seconds: 15);
     static const dataChannelName = "data";
     static const configuration = {
         "iceServers": [
@@ -245,6 +244,14 @@ class SignalingController
         await device.connection?.close();
 
         Completer<Connection?> completer = Completer<Connection?>();
+
+        // Verbinden wird abgebrochen, wenn die Verbindung nicht innerhalb des Timeouts hergestellt werden konnte
+        Future.delayed(connectTimeout, () {
+            if (!completer.isCompleted)
+            {
+                completer.complete(null);
+            }
+        });
 
         // Als ConnectionId wird die aktuelle Zeit verwendet
         int connectionId = DateTime.now().millisecondsSinceEpoch;
