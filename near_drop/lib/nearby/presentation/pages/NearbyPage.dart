@@ -233,11 +233,15 @@ class NearbyPage extends StatelessWidget
         .paddingSymmetric(horizontal: 12)
         .clickable(
           borderRadius: BorderRadius.circular(44),
-          onTap: () {
-            showDialog(
-                context: context,
-                builder: (dialogContext) => _sendDialog(context, device)
-            );
+          onTap: () async {
+              if (device.communicationInfo.communicationState == CommunicationState.none) {
+                  showDialog(context: context, builder: (dialogContext) => _sendDialog(context, device));
+              }
+              else {
+                  device.isCancelTransportDialogOpen = true;
+                  await showDialog(context: context, builder: (dialogContext) => _cancelTransportDialog(context, device));
+                  device.isCancelTransportDialogOpen = false;
+              }
           }
     ),
       )
@@ -254,6 +258,8 @@ class NearbyPage extends StatelessWidget
               return AppLocalizations.of(context)!.communication_state_sending;
           case CommunicationState.receiving:
               return AppLocalizations.of(context)!.communication_state_receiving;
+            case CommunicationState.canceling:
+                return AppLocalizations.of(context)!.communication_state_canceling;
           default:
               break;
       }
@@ -272,7 +278,7 @@ class NearbyPage extends StatelessWidget
                 return AppLocalizations.of(context)!.error_state_error;
             case ErrorState.receiverDeclined:
                 return AppLocalizations.of(context)!.error_state_receiver_declined;
-            case ErrorState.cancelled:
+            case ErrorState.userCanceled:
                 return AppLocalizations.of(context)!.error_state_canceled;
             default:
                 break;
@@ -417,6 +423,32 @@ class NearbyPage extends StatelessWidget
       );
   }
 
+  Widget _cancelTransportDialog(BuildContext context, Device device) {
+      return AlertDialog(
+        key: device.cancelTransportDialogKey,
+        shadowColor: Theme.of(context).colorScheme.shadow,
+        actionsPadding: EdgeInsets.only(bottom: 16, right: 24, left: 24),
+        title: Text(
+            "Übertragung mit ${device.firstname} beenden?",
+        ),
+        actions: [
+            TextButton(
+                onPressed: () {
+                    Navigator.of(context).pop();
+                },
+                child: Text(AppLocalizations.of(context)!.cancel_button,)
+            ),
+            TextButton(
+                onPressed: () {
+                    Navigator.of(context).pop();
+                    context.read<TransportViewModel>().cancelTransport(device);
+                },
+                child: Text("Beenden")
+            )
+        ],
+      );
+  }
+
   Widget _sendDialog(BuildContext context, Device device) {
       return AlertDialog(shadowColor: Theme.of(context).colorScheme.shadow,
           actionsPadding: EdgeInsets.only(bottom: 16, right: 24),
@@ -430,10 +462,15 @@ class NearbyPage extends StatelessWidget
                 Material(
                     clipBehavior: Clip.hardEdge,
                     borderRadius: BorderRadius.vertical(top: Radius.circular(16), bottom: Radius.circular(4)),
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(context).colorScheme.primaryContainer,
                     child: ListTile(
-                        leading: Icon(Icons.insert_photo_outlined),
-                        title: Text(AppLocalizations.of(context)!.send_dialog_media_label),
+                        leading: Icon(Icons.insert_photo_outlined, color: Theme.of(context).colorScheme.onPrimaryContainer,),
+                        title: Text(
+                            AppLocalizations.of(context)!.send_dialog_media_label,
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                            ),
+                        ),
                         onTap: () async {
                             final List<XFile> medias = await ImagePicker().pickMultipleMedia();
                             if (medias.isNotEmpty) {
@@ -446,10 +483,15 @@ class NearbyPage extends StatelessWidget
                   Material(
                       clipBehavior: Clip.hardEdge,
                       borderRadius: BorderRadius.vertical(top: Radius.circular(4), bottom: Radius.circular(16)),
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color: Theme.of(context).colorScheme.primaryContainer,
                       child: ListTile(
-                          leading: Icon(Icons.file_copy_outlined),
-                          title: Text(AppLocalizations.of(context)!.send_dialog_files_label),
+                          leading: Icon(Icons.file_copy_outlined, color: Theme.of(context).colorScheme.onPrimaryContainer,),
+                          title: Text(
+                              AppLocalizations.of(context)!.send_dialog_files_label,
+                                style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                ),
+                          ),
                           onTap: () {
 
                           },

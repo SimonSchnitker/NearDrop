@@ -7,6 +7,11 @@ import '../enums/OS.dart';
 /// Definiert den Aufbau eines Geräts.
 class Device extends ChangeNotifier
 {
+    final GlobalKey<NavigatorState> sendRequestDialogKey = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> cancelTransportDialogKey = GlobalKey<NavigatorState>();
+    bool isSendRequestDialogOpen = false;
+    bool isCancelTransportDialogOpen = false;
+
     String firstname;
     String name;
     DeviceType type;
@@ -17,6 +22,31 @@ class Device extends ChangeNotifier
     Connection? connection;
 
     Device(this.firstname, this.name, this.type, this.os, this.version, this.nearbyUuid);
+
+    Future<void> clearConnection() async
+    {
+        communicationInfo.reset();
+        await connection?.close();
+        connection = null;
+        closeOpenDialogs();
+    }
+
+    void closeOpenDialogs()
+    {
+        BuildContext? context = sendRequestDialogKey.currentContext;
+        if (isSendRequestDialogOpen && context != null)
+        {
+            Navigator.of(context).pop();
+        }
+        isSendRequestDialogOpen = false;
+
+        context = cancelTransportDialogKey.currentContext;
+        if (isCancelTransportDialogOpen && context != null)
+        {
+            Navigator.of(context).pop();
+        }
+        isCancelTransportDialogOpen = false;
+    }
 
     void updateUsername(String username)
     {

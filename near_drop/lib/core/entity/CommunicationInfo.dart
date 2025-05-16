@@ -10,10 +10,12 @@ class CommunicationInfo extends ChangeNotifier
     SuccessState successState = SuccessState.none;
     ErrorState errorState = ErrorState.none;
     double? progress = 0.0;
+    bool cancelationRequested = false;
 
     /// Setzt den Status auf "Standardzustand".
     void reset()
     {
+        cancelationRequested = false;
         this.communicationState = CommunicationState.none;
         this.progress = 0.0;
         notifyListeners();
@@ -52,16 +54,18 @@ class CommunicationInfo extends ChangeNotifier
     }
 
     /// Setzt den Status auf "Abbrechen".
-    void setCancelling()
+    void setCanceling()
     {
-        this.communicationState = CommunicationState.cancelling;
-        this.progress = 0.0;
+        this.cancelationRequested = true;
+        this.communicationState = CommunicationState.canceling;
+        this.progress = null;
         notifyListeners();
     }
 
     /// Setzt einen Erfolg-Status.
     Future<void> setSuccessState(SuccessState successState) async
     {
+        this.cancelationRequested = false;
         this.communicationState = CommunicationState.none;
         this.progress = 0.0;
         this.successState = successState;
@@ -74,6 +78,9 @@ class CommunicationInfo extends ChangeNotifier
     /// Setzt einen Fehler-Status.
     Future<void> setErrorState(ErrorState errorState) async
     {
+        print("ErrorState wird gesetzt: $errorState");
+
+        this.cancelationRequested = false;
         this.communicationState = CommunicationState.none;
         this.progress = 0.0;
         this.errorState = errorState;

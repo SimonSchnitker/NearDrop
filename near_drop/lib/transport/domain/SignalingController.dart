@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:near_drop/core/entity/Device.dart';
@@ -55,8 +56,12 @@ class SignalingController
             return;
         }
 
-        // Aktuelle Verbindung zum Gerät schließen, falls vorhanden
-        await device.connection?.close();
+        // Wenn bereits eine Verbindung besteht, wird das Angebot ignoriert
+        if (device.connection != null)
+        {
+            print("Gerät ist bereits verbunden: ${offer["sender"]}");
+            return;
+        }
 
         // Angebot auslesen und PeerConnection-Instanz erstellen
         int connectionId = offer["connectionId"];
@@ -71,9 +76,13 @@ class SignalingController
         peerConnection.onConnectionState = (state) async {
             print("Verbindungsstatus zu ${device.firstname} (ConnectionId: $connectionId): $state");
 
-            if (state == RTCPeerConnectionState.RTCPeerConnectionStateDisconnected || state == RTCPeerConnectionState.RTCPeerConnectionStateFailed)
+            if (state == RTCPeerConnectionState.RTCPeerConnectionStateClosed || state == RTCPeerConnectionState.RTCPeerConnectionStateFailed)
             {
-                //await connection.close();
+                // Wenn die aktuelle Verbindung geschlossen wurde, die Kommunikationsdaten zurücksetzen
+                if (device.connection?.connectionId == connectionId)
+                {
+                    await device.clearConnection();
+                }
             }
         };
 
@@ -113,10 +122,11 @@ class SignalingController
                 }
                 else if (state == RTCDataChannelState.RTCDataChannelClosed)
                 {
-                    // Wenn der Datenkanal geschlossen ist und die Verbindung die aktuelle ist, UI aktualisieren
+                    // Schonmal die UI zurücksetzen und Dialoge schließen, da der Datenkanal meist deutlich eher geschlossen wird als die PeerConnection
                     if (device.connection?.connectionId == connectionId)
                     {
                         device.communicationInfo.reset();
+                        device.closeOpenDialogs();
                     }
                 }
             };
@@ -253,9 +263,13 @@ class SignalingController
         peerConnection.onConnectionState = (state) async {
             print("Verbindungsstatus zu ${device.firstname} (ConnectionId: $connectionId): $state");
 
-            if (state == RTCPeerConnectionState.RTCPeerConnectionStateDisconnected || state == RTCPeerConnectionState.RTCPeerConnectionStateFailed)
+            if (state == RTCPeerConnectionState.RTCPeerConnectionStateClosed || state == RTCPeerConnectionState.RTCPeerConnectionStateFailed)
             {
-                //await connection.close();
+                // Wenn die aktuelle Verbindung geschlossen wurde, die Kommunikationsdaten zurücksetzen
+                if (device.connection?.connectionId == connectionId)
+                {
+                    await device.clearConnection();
+                }
             }
         };
 
@@ -273,10 +287,11 @@ class SignalingController
             }
             else if (state == RTCDataChannelState.RTCDataChannelClosed)
             {
-                // Wenn der Datenkanal geschlossen ist und die Verbindung die aktuelle ist, UI aktualisieren
+                // Schonmal die UI zurücksetzen und Dialoge schließen, da der Datenkanal meist deutlich eher geschlossen wird als die PeerConnection
                 if (device.connection?.connectionId == connectionId)
                 {
                     device.communicationInfo.reset();
+                    device.closeOpenDialogs();
                 }
             }
         };

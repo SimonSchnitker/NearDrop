@@ -8,4 +8,5 @@ enum SendResponse
     fileAccessError,
     connectionError,
     timeout,
+    userCanceled,
 }

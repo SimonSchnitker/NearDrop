@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:media_scanner/media_scanner.dart';
 import 'package:mime/mime.dart';
 import 'package:near_drop/core/enums/ErrorState.dart';
 import 'package:near_drop/core/enums/SuccessState.dart';
@@ -18,6 +20,7 @@ import 'package:near_drop/transport/domain/models/Connection.dart';
 import 'package:near_drop/transport/domain/models/Progress.dart';
 import 'package:near_drop/transport/data/dto/SendRequestDTO.dart';
 import 'package:near_drop/transport/data/dto/SendRequestFilesDTO.dart';
+import 'package:near_drop/transport/domain/models/ReceivedFile.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../core/entity/Device.dart';
@@ -28,7 +31,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class TransportController
 {
     static const String FOLDER_NAME = "Near Drop";
-    Directory? _downloadsDirectory;
+    Directory? _targetDirectory;
 
     final SignalingController _signalingController;
     final TransportGateway _transportGateway;
@@ -38,8 +41,8 @@ class TransportController
     /// Startet den Signalisierungsprozess, wartet auf eingehende Verbindungen und initialisiert grundlegende Einstellungen.
     Future<void> init() async
     {
-        _downloadsDirectory = await _getDownloadsDirectory();
-        if (_downloadsDirectory == null)
+        _targetDirectory = await _getTargetDirectory();
+        if (_targetDirectory == null)
         {
             print("Zugriff auf den Download-Ordner nicht möglich.");
             return;
@@ -62,16 +65,14 @@ class TransportController
         on Exception catch (e)
         {
             print("Fehler beim Empfangen der Sendeanfrage: $e");
-            await args.connection.close();
-            args.device.connection = null;
+            await args.device.clearConnection();
             return;
         }
 
         if (sendRequest == null)
         {
             print("Ungültige Sendeanfrage empfangen.");
-            await args.connection.close();
-            args.device.connection = null;
+            await args.device.clearConnection();
             return;
         }
 
@@ -82,8 +83,7 @@ class TransportController
         }
         else
         {
-            await args.connection.close();
-            args.device.connection = null;
+            await args.device.clearConnection();
         }
     }
 
@@ -94,6 +94,12 @@ class TransportController
         print("Sendeanfrage-Dialog wird angezeigt");
         SendRequestAnswer answer = await _showSendRequestDialog(device, sendRequest.filesCount, sendRequest.totalSize, sendRequest.mimeTypeGroup);
 
+        // Wenn der Datenkanal mittlerweile geschlossen wurde, beenden
+        if (connection.dataChannel?.state != RTCDataChannelState.RTCDataChannelOpen)
+        {
+            return;
+        }
+
         // Antwort senden
         try
         {
@@ -103,55 +109,110 @@ class TransportController
         {
             print("Fehler beim Senden der Antwort: $e");
             device.communicationInfo.setErrorState(ErrorState.error);
-            await connection.close();
-            device.connection = null;
+            await device.clearConnection();
             return;
         }
 
         // Wenn der Benutzer die Anfrage nicht akzeptiert hat, Verbindung schließen
         if (answer != SendRequestAnswer.accepted)
         {
-            await connection.close();
-            device.connection = null;
+            await device.clearConnection();
             return;
         }
 
         // Dateien empfangen
         device.communicationInfo.setReceiving(0);
         Progress progress = Progress(sendRequest.totalSize);
+        List<ReceivedFile> receivedFiles = [];
         for (int i = 0; i < sendRequest.filesCount; i++)
         {
+            final receivedFile = ReceivedFile(); // Hier werden die Dateiinformationen der Datei hineingeschrieben
             try
             {
-                FileReceiveResult result = await _transportGateway.receiveFile(device, connection.networkStream!, progress, _downloadsDirectory!);
+                FileReceiveResult result = await _transportGateway.receiveFile(device, connection.networkStream!, progress, _targetDirectory!, receivedFile);
 
-                if (result == FileReceiveResult.error)
+                if (result == FileReceiveResult.ok)
+                {
+                    print("Datei empfangen: ${receivedFile.name}");
+                    receivedFiles.add(receivedFile);
+
+                    // Wenn Datei ein Foto oder Video ist, MediaScanner unter Android anstoßen, um die Datei in der Galerie anzuzeigen
+                    if (Platform.isAndroid && (receivedFile.mimeType.startsWith("image/") || receivedFile.mimeType.startsWith("video/")))
+                    {
+                        await MediaScanner.loadMedia(path: receivedFile.path);
+                    }
+
+                    continue;
+                }
+                else if (result == FileReceiveResult.userCanceled)
+                {
+                    device.communicationInfo.setErrorState(ErrorState.userCanceled);
+                    await device.clearConnection();
+                    await _deleteReceivedFile(receivedFile); // Aktuelle Datei löschen
+                    await _deleteAllReceivedFiles(receivedFiles); // Alle vorherigen Dateien löschen
+                    return;
+                }
+                else
                 {
                     print("Fehler beim Empfangen der Datei.");
-                    device.communicationInfo.setErrorState(ErrorState.error);
-                    await connection.close();
-                    device.connection = null;
-                    return;
+                    await _deleteReceivedFile(receivedFile);
+
+                    // TODO: Dialog anzeigen, dass die Datei nicht empfangen werden konnte
                 }
             }
             catch (e)
             {
-                print("Fehler beim Empfangen der Datei: $e");
-                device.communicationInfo.setErrorState(ErrorState.error);
-                await connection.close();
-                device.connection = null;
-                return;
+                print("Fehler beim Empfangen der Datei.");
+                await _deleteReceivedFile(receivedFile);
+
+                // TODO: Dialog anzeigen, dass die Datei nicht empfangen werden konnte
             }
         }
 
         // Status auf "Erfolg" setzen und Verbindung schließen
         device.communicationInfo.setSuccessState(SuccessState.receivedSuccessfully);
-        await connection.close();
-        device.connection = null;
+        await device.clearConnection();
+    }
+
+    /// Löscht eine empfangene Datei.
+    /// Dies ist notwendig, falls es beim Empfang der Datei zu einem Fehler kommt.
+    Future<void> _deleteReceivedFile(ReceivedFile file) async
+    {
+        try
+        {
+            // Vorsichthalbar die Datei schließen, falls sie noch geöffnet ist
+            if (!file.fullyReceived)
+            {
+                await file.raf?.close();
+            }
+        }
+        on Exception catch (e)
+        {
+            print("Fehler beim Schließen der Datei: $e");
+        }
+
+        try
+        {
+            await File(file.path).delete();
+        }
+        catch (e)
+        {
+            print("Fehler beim Löschen der Datei: $e");
+        }
+    }
+
+    /// Löscht empfangene Dateien.
+    /// Dies ist notwendig, falls es beim Empfangen zu einem Fehler kommt.
+    Future<void> _deleteAllReceivedFiles(List<ReceivedFile> files) async
+    {
+        for (ReceivedFile file in files)
+        {
+            await _deleteReceivedFile(file);
+        }
     }
 
     /// Gibt den Ordner zurück, in den empfangene Dateien gespeichert werden soll.
-    Future<Directory?> _getDownloadsDirectory() async
+    Future<Directory?> _getTargetDirectory() async
     {
         Directory? targetDirectory;
 
@@ -189,7 +250,6 @@ class TransportController
         }
 
         BuildContext context = NearbyPage.scaffoldKey.currentContext!;
-        Completer<SendRequestAnswer> completer = Completer<SendRequestAnswer>();
         String mimeTypeString = "";
 
         switch (mimeTypeGroup)
@@ -216,8 +276,11 @@ class TransportController
                 mimeTypeString = AppLocalizations.of(context)!.mime_type_files;
         }
 
-        showDialog(barrierDismissible: false, context: context, builder: (dialogContext) =>
+        SendRequestAnswer answer = SendRequestAnswer.declined;
+        device.isSendRequestDialogOpen = true;
+        await showDialog(barrierDismissible: false, context: context, builder: (dialogContext) =>
             AlertDialog(
+                key: device.sendRequestDialogKey,
                 actionsPadding: EdgeInsets.only(left: 24, right: 24, bottom: 16),
                 title: Text(
                     AppLocalizations.of(context)!.send_request_dialog_title,
@@ -226,18 +289,19 @@ class TransportController
                 content: Text(AppLocalizations.of(context)!.send_request_dialog_content(device.firstname, filesCount, mimeTypeString)),
                 actions: [
                     TextButton(onPressed: () {
-                        completer.complete(SendRequestAnswer.declined);
+                        answer = SendRequestAnswer.declined;
                         Navigator.pop(dialogContext);
                     }, child: Text(AppLocalizations.of(context)!.decline_button)),
                     TextButton(onPressed: () {
-                        completer.complete(SendRequestAnswer.accepted);
+                        answer = SendRequestAnswer.accepted;
                         Navigator.pop(dialogContext);
                     }, child: Text(AppLocalizations.of(context)!.accept_button)),
                 ],
             )
         );
 
-        return await completer.future;
+        device.isSendRequestDialogOpen = false;
+        return answer;
     }
 
     /// Bestimmt die Gruppe der MIME-Typen basierend auf den übergebenen Dateien.
@@ -311,6 +375,14 @@ class TransportController
             return SendResponse.connectionError;
         }
 
+        // Prüfen, ob der Benutzer das Abbrechen angefordert hat
+        if (device.communicationInfo.cancelationRequested)
+        {
+            await connection.close();
+            device.connection = null;
+            return SendResponse.userCanceled;
+        }
+
         // Sendeanfrage senden
         device.communicationInfo.setRequesting();
         SendRequestAnswer answer;
@@ -369,6 +441,11 @@ class TransportController
                     print("Fehler beim Überspringen der Datei.");
                     return SendResponse.receiverError;
                 }
+            }
+            else if (sendResult == FileSendResult.userCanceled)
+            {
+                print("Benutzer hat den Transport abgebrochen.");
+                return SendResponse.userCanceled;
             }
             else if (sendResult == FileSendResult.error)
             {

@@ -67,6 +67,7 @@
   "communication_state_requesting": "Requesting...",
   "communication_state_sending": "Sending...",
   "communication_state_receiving": "Receiving...",
+  "communication_state_canceling": "Canceling...",
   "success_state_sended": "Sent!",
   "success_state_received": "Received!",
   "error_state_error": "Error",

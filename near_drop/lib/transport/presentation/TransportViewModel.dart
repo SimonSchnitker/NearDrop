@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:kiwi/kiwi.dart';
+import 'package:near_drop/core/enums/CommunicationState.dart';
 import 'package:near_drop/core/enums/ErrorState.dart';
 import 'package:near_drop/core/enums/SuccessState.dart';
 import 'package:near_drop/transport/domain/enums/SendResponse.dart';
@@ -34,6 +35,10 @@ class TransportViewModel extends ChangeNotifier
         {
             device.communicationInfo.setSuccessState(SuccessState.sendedSuccessfully);
         }
+        else if (response == SendResponse.userCanceled)
+        {
+            device.communicationInfo.setErrorState(ErrorState.userCanceled);
+        }
         else if (response == SendResponse.receiverDeclined)
         {
             device.communicationInfo.setErrorState(ErrorState.receiverDeclined);
@@ -43,9 +48,27 @@ class TransportViewModel extends ChangeNotifier
             device.communicationInfo.setErrorState(ErrorState.error);
         }
 
-        device.communicationInfo.reset();
-        device.connection?.close();
-        device.connection = null;
+        device.clearConnection();
         return response;
+    }
+
+    /// Bricht die Übertragung ab.
+    Future<void> cancelTransport(Device device) async
+    {
+        if (device.connection == null)
+        {
+            return;
+        }
+
+        // Wenn der Status in "Anfragen" ist, wird die sofort abgebrochen, da kein Prozess intern nach dem cacelingRequested-Flag lauscht.
+        if (device.communicationInfo.communicationState == CommunicationState.requesting)
+        {
+            device.communicationInfo.setErrorState(ErrorState.userCanceled);
+            device.connection?.close();
+            device.connection = null;
+            return;
+        }
+
+        device.communicationInfo.setCanceling();
     }
 }

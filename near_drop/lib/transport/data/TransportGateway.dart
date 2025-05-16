@@ -13,6 +13,7 @@ import 'package:near_drop/transport/domain/enums/TransportFlag.dart';
 import 'package:near_drop/transport/domain/models/RTCNetworkStream.dart';
 import 'package:near_drop/transport/domain/models/Progress.dart';
 import 'package:near_drop/transport/data/dto/SendRequestDTO.dart';
+import 'package:near_drop/transport/domain/models/ReceivedFile.dart';
 import 'package:path/path.dart';
 
 import 'dto/SendRequestFilesDTO.dart';
@@ -23,7 +24,7 @@ class TransportGateway
     final int CHUNK_SIZE = 65536;
     final String CHUNK_FLAG = TransportFlag.chunk.name.toUpperCase();
     final String ACK_FLAG = TransportFlag.ack.name.toUpperCase();
-    final String SKIP_FLAG = "SKIP";
+    final String CANCEL_FLAG = TransportFlag.cancel.name.toUpperCase();
 
     /// Schreibt eine Sendeanfrage an den Stream und wartet auf eine Antwort.
     Future<SendRequestAnswer> request(RTCNetworkStream stream, int filesCount, int totalSize, MimeTypeGroup mimeTypeGroup) async
@@ -118,15 +119,35 @@ class TransportGateway
             final chunk = await raf.read(CHUNK_SIZE);
             bytesRead += chunk.length;
 
+            // Prüfen, ob der Benutzer das Abbrechen angefordert hat
+            if (device.communicationInfo.cancelationRequested)
+            {
+                print("Dateiübertragung wird abgebrochen.");
+                device.communicationInfo.setCanceling();
+                await raf.close();
+                await stream.writeString(CANCEL_FLAG);
+                return FileSendResult.userCanceled;
+            }
+
+            // CHUNK_FLAG an den Stream senden
+            await stream.writeString(CHUNK_FLAG);
+
             // Chunk an den Stream senden
             await stream.writeBinary(chunk);
 
-            // Warten auf Bestätigung
+            // Warten auf Antwort
             String response = await stream.readString();
 
-            if (response != ACK_FLAG)
+            // Prüfen, ob der Empfänger das Senden abbrechen möchte
+            if (response == CANCEL_FLAG)
             {
-                print("Fehler beim Senden der Datei: $response");
+                print("Dateiübertragung wird abgebrochen.");
+                await raf.close();
+                return FileSendResult.userCanceled;
+            }
+            else if (response != ACK_FLAG)
+            {
+                print("Unerwartetes Flag empfangen: $response");
                 await raf.close();
                 return FileSendResult.error;
             }
@@ -141,7 +162,7 @@ class TransportGateway
     }
 
     /// Empfängt eine Datei über den Stream.
-    Future<FileReceiveResult> receiveFile(Device device, RTCNetworkStream stream, Progress progress, Directory targetDirectory) async
+    Future<FileReceiveResult> receiveFile(Device device, RTCNetworkStream stream, Progress progress, Directory targetDirectory, ReceivedFile receivedFile) async
     {
         // Payload empfangen
         String payload = await stream.readString();
@@ -193,14 +214,46 @@ class TransportGateway
             return FileReceiveResult.fileWriteError;
         }
 
+        // Dateiinformationen in das ReceivedFile-Objekt schreiben
+        receivedFile.name = filename;
+        receivedFile.path = file.path;
+        receivedFile.size = fileLength;
+        receivedFile.mimeType = mimeType;
+        receivedFile.raf = raf;
+
         int bytesReceived = 0;
         while (bytesReceived < fileLength)
         {
+            String flag = await stream.readString();
+
+            // Prüfen, ob der Sender das Senden abbrechen möchte
+            if (flag == CANCEL_FLAG)
+            {
+                print("Dateiübertragung wird abgebrochen.");
+                await raf.close();
+                return FileReceiveResult.userCanceled;
+            }
+            else if (flag != CHUNK_FLAG)
+            {
+                print("Unbekanntes Flag: $flag");
+                await raf.close();
+                return FileReceiveResult.error;
+            }
+
             final chunk = await stream.readBinary();
             bytesReceived += chunk.length;
 
             // Chunk in die Datei schreiben
             await raf.writeFrom(chunk);
+
+            // Prüfen, ob der Benutzer das Abbrechen angefordert hat
+            if (device.communicationInfo.cancelationRequested)
+            {
+                print("Dateiübertragung wird abgebrochen.");
+                await raf.close();
+                await stream.writeString(CANCEL_FLAG);
+                return FileReceiveResult.userCanceled;
+            }
 
             // Bestätigung senden
             await stream.writeString(ACK_FLAG);
@@ -210,13 +263,8 @@ class TransportGateway
             device.communicationInfo.setReceiving(progress.value);
         }
 
-        // Wenn Datei ein Foto oder Video ist, MediaScanner unter Android anstoßen, um die Datei in der Galerie anzuzeigen
-        if (Platform.isAndroid && (mimeType.startsWith("image/") || mimeType.startsWith("video/")))
-        {
-            await MediaScanner.loadMedia(path: file.path);
-        }
-
         await raf.close();
+        receivedFile.fullyReceived = true; // Flag setzen, dass die Datei vollständig empfangen wurde
         return FileReceiveResult.ok;
     }
 
