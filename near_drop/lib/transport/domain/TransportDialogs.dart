@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:near_drop/tools/FileSizeHelper.dart';
+import 'package:near_drop/transport/domain/TransportController.dart';
 import 'package:open_app_file/open_app_file.dart';
 import '../../core/entity/Device.dart';
 import '../../nearby/presentation/pages/NearbyPage.dart';
@@ -9,6 +11,7 @@ import 'enums/SendRequestAnswer.dart';
 import 'models/ReceivedFile.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+/// Gibt den MIME-Typ-String basierend auf der Gruppe und der Anzahl der Dateien zurück.
 String getMimeTypeString(BuildContext context, MimeTypeGroup mimeTypeGroup, int filesCount)
 {
     switch (mimeTypeGroup)
@@ -45,6 +48,15 @@ Future<SendRequestAnswer> showSendRequestDialog(Device device, int filesCount, i
 
     BuildContext context = NearbyPage.scaffoldKey.currentContext!;
     String mimeTypeString = getMimeTypeString(context, mimeTypeGroup, filesCount);
+    String dialogContentText = AppLocalizations.of(context)!.send_request_dialog_content(device.firstname, filesCount, mimeTypeString);
+
+    // Wenn das Gerät keine WLAN- oder Ethernet-Verbindung hat und die Gesamtgröße einen bestimmten Wert übersteigt, Datenvolumen-Warnung anzeigen
+    List<ConnectivityResult> connectivity = await Connectivity().checkConnectivity();
+    if (!connectivity.contains(ConnectivityResult.wifi) && !connectivity.contains(ConnectivityResult.ethernet) && totalSize >= TransportController.MIN_BYTES_FOR_DATA_VOLUME_WARNING)
+    {
+        String sizeString = getFileSizeString(totalSize);
+        dialogContentText += "\n${AppLocalizations.of(context)!.data_volume_warning_dialog_content(sizeString)}";
+    };
 
     SendRequestAnswer answer = SendRequestAnswer.declined;
     device.isSendRequestDialogOpen = true;
@@ -56,7 +68,7 @@ Future<SendRequestAnswer> showSendRequestDialog(Device device, int filesCount, i
                 AppLocalizations.of(context)!.send_request_dialog_title,
                 style: Theme.of(dialogContext).textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.w500),
             ),
-            content: Text(AppLocalizations.of(context)!.send_request_dialog_content(device.firstname, filesCount, mimeTypeString)),
+            content: Text(dialogContentText),
             actions: [
                 TextButton(onPressed: () {
                     answer = SendRequestAnswer.declined;
@@ -74,6 +86,44 @@ Future<SendRequestAnswer> showSendRequestDialog(Device device, int filesCount, i
     return answer;
 }
 
+/// Zeigt einen Warnhinweis an, wenn die Gesamtgröße der Dateien einen bestimmten Wert überschreitet.
+Future<bool> showVolumeDataWarningDialog(int totalSize) async
+{
+    BuildContext? context = NearbyPage.scaffoldKey.currentContext;
+    if (context == null)
+    {
+        print("Fehler: ScaffoldContext ist null.");
+        return false;
+    }
+
+    String sizeString = getFileSizeString(totalSize);
+    bool result = false;
+    await showDialog(
+        context: context,
+        builder: (dialogContext) =>
+            AlertDialog(
+                title: Text(AppLocalizations.of(context)!.data_volume_warning_dialog_title),
+                content: Text(AppLocalizations.of(context)!.data_volume_warning_dialog_content(sizeString)),
+                actions: [
+                    TextButton(onPressed: () {
+                        result = false;
+                        Navigator.pop(dialogContext);
+                    }, child: Text(AppLocalizations.of(context)!.cancel_button)),
+                    TextButton(
+                        onPressed: () {
+                            result = true;
+                            Navigator.pop(dialogContext);
+                        },
+                        child: Text(AppLocalizations.of(context)!.data_volume_warning_dialog_accept_button),
+                    ),
+                ],
+            )
+    );
+
+    return result;
+}
+
+/// Zeigt einen Dialog an, um eine Vorschau der empfangenen Dateien anzuzeigen.
 Future<void> showImagePreviewDialog({
     required BuildContext context,
     required List<ReceivedFile> allFiles, // Umbenannt von files zu allFiles für Klarheit

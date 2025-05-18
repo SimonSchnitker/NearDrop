@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
@@ -32,6 +33,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class TransportController
 {
     static const String FOLDER_NAME = "Near Drop";
+    static const int MIN_BYTES_FOR_DATA_VOLUME_WARNING = 20000000; // 20 MB
     Directory? _targetDirectory;
 
     final SignalingController _signalingController;
@@ -301,6 +303,17 @@ class TransportController
         {
             print("Zugriff auf Datei nicht möglich: $e");
             return SendResponse.fileAccessError;
+        }
+
+        // Wenn das Gerät keine WLAN- oder Ethernet-Verbindung hat und die Gesamtgröße einen bestimmten Wert übersteigt, Datenvolumen-Warnung anzeigen
+        List<ConnectivityResult> connectivity = await Connectivity().checkConnectivity();
+        if (!connectivity.contains(ConnectivityResult.wifi) && !connectivity.contains(ConnectivityResult.ethernet) && totalSize >= MIN_BYTES_FOR_DATA_VOLUME_WARNING)
+        {
+            bool send = await showVolumeDataWarningDialog(totalSize);
+            if (!send)
+            {
+                return SendResponse.userCanceled;
+            }
         }
 
         // Verbindung zum Gerät herstellen

@@ -96,5 +96,15 @@
         "type": "int"
       }
     }
-  }
+  },
+  "data_volume_warning_dialog_title": "Send?",
+  "data_volume_warning_dialog_content": "This occurrence needs minimum {sizeText} of your data volume.",
+  "@data_volume_warning_dialog_content": {
+    "placeholders": {
+      "sizeText": {
+        "type": "String"
+      }
+    }
+  },
+  "data_volume_warning_dialog_accept_button": "Send"
 }
