@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:balloon_widget/balloon_widget.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:near_drop/core/entity/CommunicationInfo.dart';
@@ -23,6 +24,69 @@ class NearbyPage extends StatelessWidget
 {
     // Key, um Dialoge von überall anzuzeigen
     static final GlobalKey<NavigatorState> scaffoldKey = GlobalKey<NavigatorState>();
+
+    Widget _imageGallery(BuildContext context) {
+        return SingleChildScrollView(
+            child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    mainAxisExtent: 100
+                ),
+                itemCount: 6,
+                itemBuilder: (context, index) {
+                    return Container(
+                        width: 100,
+                        height: 100,
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                        child: Center(
+                            child: Text(
+                                "Bild ${index + 1}",
+                                style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                ),
+                            ),
+                        ),
+                    );
+                }
+            )
+        );
+
+        return Wrap(spacing: 12,runSpacing: 12,crossAxisAlignment: WrapCrossAlignment.center,alignment: WrapAlignment.spaceEvenly,
+            children: [
+                for (int i = 0; i < 6; i++)
+                    Container(
+                        width: 100,
+                        height: 100,
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                        child: Center(
+                            child: Text(
+                                "Bild ${i + 1}",
+                                style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                ),
+                            ),
+                        ),
+                    )
+            ],
+        );
+    }
+
+    Widget _receivedFilesDialogTest(BuildContext context) {
+        return AlertDialog(
+            title: Text("Test"),
+            content: _imageGallery(context),
+            actions: [
+                TextButton(
+                    onPressed: () {
+                        Navigator.of(context).pop();
+                    },
+                    child: Text("Schließen")
+                )
+            ],
+        );
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -62,27 +126,7 @@ class NearbyPage extends StatelessWidget
                 SliverToBoxAdapter(
                   child: SafeArea(
                     top: false,
-                    child: SizedBox(
-                        child: Column(
-                            children: [
-                                FilledButton(onPressed: () {
-                                    context.read<NearbyViewModel>().toggleDeviceNotFoundBalloonVisible();
-                                }, child: Text("Balloon widget")),
-                                FilledButton(onPressed: () {
-                                    context.read<NearbyViewModel>().startBleScan();
-                                }, child: Text("BLE scan")),
-                                FilledButton(onPressed: () {
-                                    context.read<NearbyViewModel>().startBleAdvertiser();
-                                }, child: Text("BLE advertise")),
-                                FilledButton(onPressed: () {
-                                    context.read<NearbyViewModel>().stopBleScan();
-                                }, child: Text("Stop BLE scan")),
-                                FilledButton(onPressed: () {
-                                    context.read<NearbyViewModel>().stopBleAdvertiser();
-                                }, child: Text("Stop BLE advertise")),
-                            ],
-                        ),
-                    )
+                    child: SizedBox()
                   ),
                 )
               ],
@@ -235,7 +279,16 @@ class NearbyPage extends StatelessWidget
           borderRadius: BorderRadius.circular(44),
           onTap: () async {
               if (device.communicationInfo.communicationState == CommunicationState.none) {
-                  showDialog(context: context, builder: (dialogContext) => _sendDialog(context, device));
+                  // Auf Desktops wird sofort der File-Picker geöffnet
+                  if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+                      FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: true);
+                      if (result != null) {
+                          List<File> files = result.paths.map((path) => File(path!)).toList();
+                          await _handleSendFiles(context, device, files);
+                      }
+                  } else {
+                      showDialog(context: context, builder: (dialogContext) => _sendDialog(context, device));
+                  }
               }
               else if (device.communicationInfo.communicationState != CommunicationState.canceling) {
                   device.isCancelTransportDialogOpen = true;
@@ -298,7 +351,7 @@ class NearbyPage extends StatelessWidget
 
           }, icon: Icon(Icons.help_outline)),
         IconButton(onPressed: () {
-
+            showDialog(context: context, builder: (dialogContext) => _receivedFilesDialogTest(dialogContext));
       }, icon: Icon(Icons.person_outline), tooltip: AppLocalizations.of(context)!.nearby_page_account_icon_tooltip)
       ],
     );
@@ -474,6 +527,7 @@ class NearbyPage extends StatelessWidget
                         onTap: () async {
                             final List<XFile> medias = await ImagePicker().pickMultipleMedia();
                             if (medias.isNotEmpty) {
+                                Navigator.of(context).pop();
                                 List<File> files = medias.map((e) => File(e.path)).toList();
                                 await _handleSendFiles(context, device, files);
                             }
@@ -492,8 +546,13 @@ class NearbyPage extends StatelessWidget
                                     color: Theme.of(context).colorScheme.onPrimaryContainer,
                                 ),
                           ),
-                          onTap: () {
-
+                          onTap: () async {
+                              FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: true);
+                              if (result != null) {
+                                  Navigator.of(context).pop();
+                                  List<File> files = result.paths.map((path) => File(path!)).toList();
+                                  await _handleSendFiles(context, device, files);
+                              }
                           },
                       ),
                   )
@@ -516,7 +575,6 @@ class NearbyPage extends StatelessWidget
   }
 
   Future<void> _handleSendFiles(BuildContext context, Device device, List<File> files) async {
-      Navigator.of(context).pop();
       await context.read<TransportViewModel>().sendFiles(device, files);
   }
 }

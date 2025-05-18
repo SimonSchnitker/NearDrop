@@ -11,6 +11,7 @@ import 'package:near_drop/core/enums/SuccessState.dart';
 import 'package:near_drop/nearby/presentation/pages/NearbyPage.dart';
 import 'package:near_drop/transport/data/TransportGateway.dart';
 import 'package:near_drop/transport/domain/SignalingController.dart';
+import 'package:near_drop/transport/domain/TransportDialogs.dart';
 import 'package:near_drop/transport/domain/enums/FileReceiveResult.dart';
 import 'package:near_drop/transport/domain/enums/FileSendResult.dart';
 import 'package:near_drop/transport/domain/enums/MimeTypeGroup.dart';
@@ -92,7 +93,7 @@ class TransportController
     {
         // Dem Benutzer die Anfrage anzeigen
         print("Sendeanfrage-Dialog wird angezeigt");
-        SendRequestAnswer answer = await _showSendRequestDialog(device, sendRequest.filesCount, sendRequest.totalSize, sendRequest.mimeTypeGroup);
+        SendRequestAnswer answer = await showSendRequestDialog(device, sendRequest.filesCount, sendRequest.totalSize, sendRequest.mimeTypeGroup);
 
         // Wenn der Datenkanal mittlerweile geschlossen wurde, beenden
         if (connection.dataChannel?.state != RTCDataChannelState.RTCDataChannelOpen)
@@ -170,9 +171,15 @@ class TransportController
             }
         }
 
-        // Status auf "Erfolg" setzen und Verbindung schließen
-        device.communicationInfo.setSuccessState(SuccessState.receivedSuccessfully);
+        // Verbindung schließen
         await device.clearConnection();
+
+        // Empfangene Dateien auf der UI anzeigen
+        //await showImagePreviewDialog(context: NearbyPage.scaffoldKey.currentContext!, files: receivedFiles, device: device);
+        await showImagePreviewDialog(context: NearbyPage.scaffoldKey.currentContext!, allFiles: receivedFiles, device: device, targetDirectory: _targetDirectory, mimeTypeGroup: sendRequest.mimeTypeGroup);
+
+        // Status auf "Erfolg" setzen, nachdem der Dialog geschlossen wurde
+        device.communicationInfo.setSuccessState(SuccessState.receivedSuccessfully);
     }
 
     /// Löscht eine empfangene Datei.
@@ -241,69 +248,7 @@ class TransportController
         return targetDirectory;
     }
 
-    /// Zeigt ein Dialogfeld an, um die Sendeanfrage des Geräts zu akzeptieren oder abzulehnen.
-    Future<SendRequestAnswer> _showSendRequestDialog(Device device, int filesCount, int totalSize, MimeTypeGroup mimeTypeGroup) async
-    {
-        if (NearbyPage.scaffoldKey.currentContext == null)
-        {
-            print("Fehler: ScaffoldContext ist null.");
-            return SendRequestAnswer.error;
-        }
 
-        BuildContext context = NearbyPage.scaffoldKey.currentContext!;
-        String mimeTypeString = "";
-
-        switch (mimeTypeGroup)
-        {
-            case MimeTypeGroup.images:
-                mimeTypeString = filesCount == 1
-                    ? AppLocalizations.of(context)!.mime_type_image
-                    : AppLocalizations.of(context)!.mime_type_images;
-                break;
-            case MimeTypeGroup.videos:
-                mimeTypeString = filesCount == 1
-                    ? AppLocalizations.of(context)!.mime_type_video
-                    : AppLocalizations.of(context)!.mime_type_videos;
-                break;
-            case MimeTypeGroup.audios:
-                mimeTypeString = filesCount == 1
-                    ? AppLocalizations.of(context)!.mime_type_audio
-                    : AppLocalizations.of(context)!.mime_type_audios;
-                break;
-            case MimeTypeGroup.media:
-                mimeTypeString = AppLocalizations.of(context)!.mime_type_media;
-                break;
-            default:
-                mimeTypeString = AppLocalizations.of(context)!.mime_type_files;
-        }
-
-        SendRequestAnswer answer = SendRequestAnswer.declined;
-        device.isSendRequestDialogOpen = true;
-        await showDialog(barrierDismissible: false, context: context, builder: (dialogContext) =>
-            AlertDialog(
-                key: device.sendRequestDialogKey,
-                actionsPadding: EdgeInsets.only(left: 24, right: 24, bottom: 16),
-                title: Text(
-                    AppLocalizations.of(context)!.send_request_dialog_title,
-                    style: Theme.of(dialogContext).textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.w500),
-                ),
-                content: Text(AppLocalizations.of(context)!.send_request_dialog_content(device.firstname, filesCount, mimeTypeString)),
-                actions: [
-                    TextButton(onPressed: () {
-                        answer = SendRequestAnswer.declined;
-                        Navigator.pop(dialogContext);
-                    }, child: Text(AppLocalizations.of(context)!.decline_button)),
-                    TextButton(onPressed: () {
-                        answer = SendRequestAnswer.accepted;
-                        Navigator.pop(dialogContext);
-                    }, child: Text(AppLocalizations.of(context)!.accept_button)),
-                ],
-            )
-        );
-
-        device.isSendRequestDialogOpen = false;
-        return answer;
-    }
 
     /// Bestimmt die Gruppe der MIME-Typen basierend auf den übergebenen Dateien.
     MimeTypeGroup _getMimeTypeGroup(List<File> files)
@@ -364,6 +309,12 @@ class TransportController
         {
              connection = await _signalingController.connect(device);
 
+             // Prüfen, ob der Benutzer das Abbrechen angefordert hat
+             if (device.communicationInfo.cancelationRequested)
+             {
+                 return SendResponse.userCanceled;
+             }
+
             if (connection == null)
             {
                 print("Verbindung zu ${device.firstname} fehlgeschlagen.");
@@ -373,13 +324,14 @@ class TransportController
         on Exception catch (e)
         {
             print("Verbindung zu ${device.firstname} fehlgeschlagen: $e");
-            return SendResponse.connectionError;
-        }
 
-        // Prüfen, ob der Benutzer das Abbrechen angefordert hat
-        if (device.communicationInfo.cancelationRequested)
-        {
-            return SendResponse.userCanceled;
+            // Prüfen, ob der Benutzer das Abbrechen angefordert hat
+            if (device.communicationInfo.cancelationRequested)
+            {
+                return SendResponse.userCanceled;
+            }
+
+            return SendResponse.connectionError;
         }
 
         // Sendeanfrage senden

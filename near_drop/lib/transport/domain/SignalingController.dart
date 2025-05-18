@@ -55,12 +55,8 @@ class SignalingController
             return;
         }
 
-        // Wenn bereits eine Verbindung besteht, wird das Angebot ignoriert
-        if (device.connection != null)
-        {
-            print("Gerät ist bereits verbunden: ${offer["sender"]}");
-            return;
-        }
+        // Aktuelle Verbindung zum Gerät schließen, falls vorhanden
+        await device.connection?.close();
 
         // Angebot auslesen und PeerConnection-Instanz erstellen
         int connectionId = offer["connectionId"];
@@ -289,7 +285,7 @@ class SignalingController
             {
                 if (!completer.isCompleted)
                 {
-                    //completer.complete(connection);
+                    completer.complete(connection);
                 }
             }
             else if (state == RTCDataChannelState.RTCDataChannelClosed)

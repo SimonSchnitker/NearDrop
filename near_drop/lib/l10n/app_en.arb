@@ -72,5 +72,29 @@
   "success_state_received": "Received!",
   "error_state_error": "Error",
   "error_state_receiver_declined": "Declined",
-  "error_state_canceled": "Aborted"
+  "error_state_canceled": "Aborted",
+  "dialog_close_button": "Close",
+  "received_files_dialog_show_files_button": "Show",
+  "received_files_dialog_title": "{filesCount} {mimeType} received from {firstname}",
+  "@received_files_dialog_title": {
+    "placeholders": {
+      "filesCount": {
+        "type": "int"
+      },
+      "mimeType": {
+        "type": "String"
+      },
+      "firstname": {
+        "type": "String"
+      }
+    }
+  },
+  "received_files_dialog_more_files_text": "+ {filesCount} more file(s)",
+  "@received_files_dialog_more_files_text": {
+    "placeholders": {
+      "filesCount": {
+        "type": "int"
+      }
+    }
+  }
 }

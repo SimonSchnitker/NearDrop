@@ -72,5 +72,29 @@
     "success_state_received": "Empfangen!",
     "error_state_error": "Fehler",
     "error_state_receiver_declined": "Abgelehnt",
-    "error_state_canceled": "Abgebrochen"
+    "error_state_canceled": "Abgebrochen",
+    "dialog_close_button": "Schließen",
+    "received_files_dialog_show_files_button": "Anzeigen",
+    "received_files_dialog_title": "{filesCount} {mimeType} von {firstname} empfangen",
+    "@received_files_dialog_title": {
+      "placeholders": {
+        "filesCount": {
+          "type": "int"
+        },
+        "mimeType": {
+          "type": "String"
+        },
+        "firstname": {
+          "type": "String"
+        }
+      }
+    },
+    "received_files_dialog_more_files_text": "+ {filesCount} weitere Datei(en)",
+    "@received_files_dialog_more_files_text": {
+      "placeholders": {
+        "filesCount": {
+          "type": "int"
+        }
+      }
+    }
 }
