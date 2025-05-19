@@ -114,5 +114,7 @@
   "qr_code_error_no_permission": "Grant camera permission in settings.",
   "qr_code_error_invalid": "Invalid QR code",
   "qr_code_error_device_already_added": "Device already found",
-  "qr_code_error_device_request": "Device could not be contacted. Check your internet connection."
+  "qr_code_error_device_request": "Device could not be contacted. Check your internet connection.",
+  "no_internet_connection_info_bar_title": "No internet connection",
+  "no_internet_connection_info_bar_subtitle": "Connect to a network to send and receive files."
 }

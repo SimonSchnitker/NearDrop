@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus_windows/flutter_blue_plus_windows.dart';
@@ -16,6 +17,7 @@ class NearbyViewModel extends ChangeNotifier
     final NearbyController _nearbyController = KiwiContainer().resolve<NearbyController>();
 
     final List<Device> nearbyDevices = [];
+    bool isConnectedWithNetwork = true;
     bool isBluetoothSupported = true;
     bool isBluetoothEnabled = true;
     bool hasBluetoothPermissions = true;
@@ -55,6 +57,7 @@ class NearbyViewModel extends ChangeNotifier
             notifyListeners();
         });
 
+        _listenNetworkStateChanges();
         _checkBluetoothSupport();
         if (isBluetoothSupported)
         {
@@ -68,6 +71,23 @@ class NearbyViewModel extends ChangeNotifier
     {
         isDeviceNotFoundBalloonVisible = !isDeviceNotFoundBalloonVisible;
         notifyListeners();
+    }
+
+    /// Startet das Lauschen auf Netzwerkstatusänderungen.
+    Future<void> _listenNetworkStateChanges() async
+    {
+        Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
+            if (result.contains(ConnectivityResult.wifi) || result.contains(ConnectivityResult.mobile) || result.contains(ConnectivityResult.ethernet))
+            {
+                isConnectedWithNetwork = true;
+            }
+            else
+            {
+                isConnectedWithNetwork = false;
+            }
+
+            notifyListeners();
+        });
     }
 
     /// Prüft, ob das Gerät Bluetooth unterstützt.

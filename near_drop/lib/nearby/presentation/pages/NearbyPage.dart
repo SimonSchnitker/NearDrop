@@ -26,69 +26,6 @@ class NearbyPage extends StatelessWidget
     // Key, um Dialoge von überall anzuzeigen
     static final GlobalKey<NavigatorState> scaffoldKey = GlobalKey<NavigatorState>();
 
-    Widget _imageGallery(BuildContext context) {
-        return SingleChildScrollView(
-            child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    mainAxisExtent: 100
-                ),
-                itemCount: 6,
-                itemBuilder: (context, index) {
-                    return Container(
-                        width: 100,
-                        height: 100,
-                        color: Theme.of(context).colorScheme.primaryContainer,
-                        child: Center(
-                            child: Text(
-                                "Bild ${index + 1}",
-                                style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                ),
-                            ),
-                        ),
-                    );
-                }
-            )
-        );
-
-        return Wrap(spacing: 12,runSpacing: 12,crossAxisAlignment: WrapCrossAlignment.center,alignment: WrapAlignment.spaceEvenly,
-            children: [
-                for (int i = 0; i < 6; i++)
-                    Container(
-                        width: 100,
-                        height: 100,
-                        color: Theme.of(context).colorScheme.primaryContainer,
-                        child: Center(
-                            child: Text(
-                                "Bild ${i + 1}",
-                                style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                ),
-                            ),
-                        ),
-                    )
-            ],
-        );
-    }
-
-    Widget _receivedFilesDialogTest(BuildContext context) {
-        return AlertDialog(
-            title: Text("Test"),
-            content: _imageGallery(context),
-            actions: [
-                TextButton(
-                    onPressed: () {
-                        Navigator.of(context).pop();
-                    },
-                    child: Text("Schließen")
-                )
-            ],
-        );
-    }
-
   @override
   Widget build(BuildContext context) {
       final transportViewModel = TransportViewModel();
@@ -137,6 +74,12 @@ class NearbyPage extends StatelessWidget
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                     //_infoBar(context, "Bluetooth deaktiviert", "Aktiviere Bluetooth, um Geräte in der Nähe zu finden", Icons.bluetooth_disabled),
+                    _infoBar(
+                        context,
+                        AppLocalizations.of(context)!.no_internet_connection_info_bar_title,
+                        AppLocalizations.of(context)!.no_internet_connection_info_bar_subtitle,
+                        Icons.wifi_off_outlined
+                    ).visible(!context.watch<NearbyViewModel>().isConnectedWithNetwork),
                     _bottomBar(context)
                 ],
             )
@@ -296,6 +239,10 @@ class NearbyPage extends StatelessWidget
           borderRadius: BorderRadius.circular(44),
           onTap: () async {
               if (device.communicationInfo.communicationState == CommunicationState.none) {
+                  if (!context.read<NearbyViewModel>().isConnectedWithNetwork) {
+                      return;
+                  }
+
                   // Auf Desktops wird sofort der File-Picker geöffnet
                   if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
                       FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: true);
@@ -368,7 +315,7 @@ class NearbyPage extends StatelessWidget
 
           }, icon: Icon(Icons.help_outline)),
         IconButton(onPressed: () {
-            showDialog(context: context, builder: (dialogContext) => _receivedFilesDialogTest(dialogContext));
+
       }, icon: Icon(Icons.person_outline), tooltip: AppLocalizations.of(context)!.nearby_page_account_icon_tooltip)
       ],
     );
