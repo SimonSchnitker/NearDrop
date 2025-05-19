@@ -49,11 +49,11 @@ class NearbyController
         }
 
         // Ansonten fordern wir die Gerätedaten an.
-        await _requestDeviceData(nearbyUuid);
+        await requestDeviceData(nearbyUuid);
     }
 
     /// Fordert die Gerätedaten eines anderen Geräts an und speichert den Zeitpunkt der Anfrage.
-    Future<void> _requestDeviceData(String nearbyUuid) async
+    Future<void> requestDeviceData(String nearbyUuid) async
     {
         _requestingDevices[nearbyUuid] = DateTime.now();
         await _nearbyGateway.sendDeviceDataRequest(nearbyUuid);
@@ -77,7 +77,7 @@ class NearbyController
         }
 
         // Ansonsten fordern wir die Gerätedaten an.
-        await _requestDeviceData(nearbyUuid);
+        await requestDeviceData(nearbyUuid);
     }
 
     /// Startet die BLE-Scanner- und Werbeträgerdienste.

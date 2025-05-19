@@ -106,5 +106,13 @@
         }
       }
     },
-    "data_volume_warning_dialog_accept_button": "Senden"
+    "data_volume_warning_dialog_accept_button": "Senden",
+    "manually_connecting_sheet_title": "Manuell verbinden",
+    "manually_connecting_sheet_scan_button": "Scannen",
+    "qr_code_text": "Bitte die andere Person, diesen QR-Code mit ihrem Gerät zu scannen.",
+    "scan_qr_code": "Scanne den QR-Code eines anderen Gerätes.",
+    "qr_code_error_no_permission": "Erteile die Kamera-Berechtigung in den Einstellungen",
+    "qr_code_error_invalid": "Ungültiger QR-Code",
+    "qr_code_error_device_already_added": "Gerät bereits gefunden",
+    "qr_code_error_device_request": "Gerät konnte nicht kontaktiert werden. Prüfe deine Internetverbindung."
 }

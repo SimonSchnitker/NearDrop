@@ -9,6 +9,7 @@ import 'package:near_drop/core/entity/CommunicationInfo.dart';
 import 'package:near_drop/core/enums/DeviceType.dart';
 import 'package:near_drop/core/enums/SuccessState.dart';
 import 'package:near_drop/nearby/presentation/viewmodel/NearbyViewModel.dart';
+import 'package:near_drop/nearby/presentation/widgets/ManuallyConnectingBottomSheet.dart';
 import 'package:near_drop/tools/ui/FlexibleAppBar.dart';
 import 'package:near_drop/tools/ui/WidgetModifier.dart';
 import 'package:near_drop/transport/presentation/TransportViewModel.dart';
@@ -430,7 +431,16 @@ class NearbyPage extends StatelessWidget
           .clickable(
             borderRadius: BorderRadius.circular(28),
             onTap: () {
-
+                showModalBottomSheet(
+                    context: context,
+                    builder: (context) => manuallyConnectingView(context),
+                    isScrollControlled: true,
+                    showDragHandle: true,
+                    sheetAnimationStyle: AnimationStyle(
+                        duration: Duration(milliseconds: 380),
+                        reverseDuration: Duration(milliseconds: 250),
+                    ),
+                );
             }
           ),
         )

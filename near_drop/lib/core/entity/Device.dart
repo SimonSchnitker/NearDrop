@@ -43,14 +43,14 @@ class Device extends ChangeNotifier
         BuildContext? context = sendRequestDialogKey.currentContext;
         if (isSendRequestDialogOpen && context != null)
         {
-            Navigator.of(context).pop();
+            Navigator.of(context).maybePop();
         }
         isSendRequestDialogOpen = false;
 
         context = cancelTransportDialogKey.currentContext;
         if (isCancelTransportDialogOpen && context != null)
         {
-            Navigator.of(context).pop();
+            Navigator.of(context).maybePop();
         }
         isCancelTransportDialogOpen = false;
     }

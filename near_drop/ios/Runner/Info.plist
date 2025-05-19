@@ -50,5 +50,9 @@
     <string>Bluetooth LE is used for scanning devices nearby.</string>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>Photo Library is used to select media files.</string>
+    <key>io.flutter.embedded_views_preview</key>
+    <true/>
+    <key>NSCameraUsageDescription</key>
+    <string>This app needs camera access to scan QR codes.</string>
 </dict>
 </plist>

@@ -106,5 +106,13 @@
       }
     }
   },
-  "data_volume_warning_dialog_accept_button": "Send"
+  "data_volume_warning_dialog_accept_button": "Send",
+  "manually_connecting_sheet_title": "Manually connect",
+  "manually_connecting_sheet_scan_button": "Scan",
+  "qr_code_text": "Tell an other person to scan this QR code with their device.",
+  "scan_qr_code": "Scan the QR code of another device.",
+  "qr_code_error_no_permission": "Grant camera permission in settings.",
+  "qr_code_error_invalid": "Invalid QR code",
+  "qr_code_error_device_already_added": "Device already found",
+  "qr_code_error_device_request": "Device could not be contacted. Check your internet connection."
 }
