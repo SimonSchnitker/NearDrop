@@ -165,6 +165,22 @@ class NearbyPage extends StatelessWidget
     );
   }
 
+  /// Gibt je nach Gerätetyp ein passendes Icon zurück.
+  IconData _getDeviceIcon(DeviceType type) {
+      switch (type) {
+          case DeviceType.phone:
+              return Icons.phone_iphone_outlined;
+          case DeviceType.tablet:
+              return Icons.tablet_mac_outlined;
+          case DeviceType.laptop:
+              return Icons.laptop_mac_outlined;
+          case DeviceType.pc:
+              return Icons.monitor;
+          default:
+              return Icons.device_unknown_outlined;
+      }
+  }
+
   Widget _deviceItem(BuildContext context, Device device) {
     return ChangeNotifierProvider(
         create: (context) => device,
@@ -183,7 +199,7 @@ class NearbyPage extends StatelessWidget
                             radius: 32,
                             backgroundColor: Theme.of(context).colorScheme.surface,
                             child: Icon(
-                                Icons.phone_iphone_outlined,
+                                _getDeviceIcon(device.type),
                                 size: 28,
                             ),
                         ),
