@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:ble_peripheral/ble_peripheral.dart';
 import 'package:near_drop/Runtime.dart';
 
@@ -5,6 +6,7 @@ import 'package:near_drop/Runtime.dart';
 class BleAdvertiser
 {
     bool _isInitialized = false;
+    final StreamController<bool> onAdvertisingStatusChanged = StreamController.broadcast();
 
     /// Initialisiert den BLE-Werbeträger.
     Future<void> _initialize() async
@@ -13,6 +15,7 @@ class BleAdvertiser
 
         BlePeripheral.setAdvertisingStatusUpdateCallback((bool advertising, String? error) {
             print("BleAdvertiser status changed. AdvertisingStatus: $advertising, Error: $error");
+            onAdvertisingStatusChanged.add(advertising);
         });
 
         _isInitialized = true;

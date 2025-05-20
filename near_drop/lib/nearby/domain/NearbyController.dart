@@ -1,15 +1,19 @@
-import 'package:mutex/mutex.dart';
+import 'dart:async';
 import 'package:near_drop/nearby/data/NearbyGateway.dart';
 import 'package:near_drop/nearby/data/scan/ble/BleAdvertiser.dart';
 import 'package:near_drop/nearby/data/scan/ble/BleScanner.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
 import '../../core/entity/Device.dart';
 
+/// Steuert das Suchen nach Geräten in der Nähe und den Austausch von Gerätedaten.
 class NearbyController
 {
     final BleScanner _bleScanner;
     final BleAdvertiser _bleAdvertiser;
     final NearbyGateway _nearbyGateway;
+
+    final StreamController<bool> onBleAdvertiserStatusChanged = StreamController.broadcast();
+    final StreamController<bool> onBleScannerStatusChanged = StreamController.broadcast();
 
     final Duration waitingForDeviceDataTimeout = Duration(seconds: 5);
     final Map<String, DateTime> _requestingDevices = {};
@@ -19,6 +23,14 @@ class NearbyController
         _bleScanner.onDeviceSpotted.stream.listen(onBleDeviceSpotted);
         _nearbyGateway.onDeviceDataReceived.stream.listen(onDeviceDataReceived);
         _nearbyGateway.onDeviceRequestReceived.stream.listen(onDeviceRequestReceived);
+
+        // Events vom BleAdvertiser und BleScanner zum ViewModel weiterleiten
+        _bleAdvertiser.onAdvertisingStatusChanged.stream.listen((status) {
+            onBleAdvertiserStatusChanged.add(status);
+        });
+        _bleScanner.onScanningStatusChanged.stream.listen((status) {
+            onBleScannerStatusChanged.add(status);
+        });
     }
 
     /// Überprüft, ob auf die Gerätedaten eines Geräts gewartet wird.

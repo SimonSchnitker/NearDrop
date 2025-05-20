@@ -21,6 +21,8 @@ class NearbyViewModel extends ChangeNotifier
     bool isBluetoothSupported = true;
     bool isBluetoothEnabled = true;
     bool hasBluetoothPermissions = true;
+    bool isBleScannerRunning = true;
+    bool isBleAdvertiserRunning = true;
 
     bool isDeviceNotFoundBalloonVisible = false;
     final Duration deviceNotFoundBalloonDelay = const Duration(seconds: 8);
@@ -39,6 +41,16 @@ class NearbyViewModel extends ChangeNotifier
                 ""
             ));
         }
+
+        // Auf Änderungen des Bluetooth-Status lauschen
+        _nearbyController.onBleAdvertiserStatusChanged.stream.listen((isAdverstising) {
+            isBleAdvertiserRunning = isAdverstising;
+            notifyListeners();
+        });
+        _nearbyController.onBleScannerStatusChanged.stream.listen((isScanning) {
+            isBleScannerRunning = isScanning;
+            notifyListeners();
+        });
 
         NearbyDevicesContainer.onAdded.stream.listen((device) {
             nearbyDevices.add(device);

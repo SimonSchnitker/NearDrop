@@ -8,12 +8,14 @@ class BleScanner
 {
     bool _isInitialized = false;
     final StreamController<String> onDeviceSpotted = StreamController<String>.broadcast();
+    final StreamController<bool> onScanningStatusChanged = StreamController<bool>.broadcast();
 
     /// Initialisiert den Scanner.
     Future<void> _initialize() async
     {
         FlutterBluePlus.isScanning.listen((isScanning) {
             print("BleScanner isScanning: $isScanning");
+            onScanningStatusChanged.add(isScanning);
         });
 
         FlutterBluePlus.scanResults.listen((results) {

@@ -80,6 +80,12 @@ class NearbyPage extends StatelessWidget
                         AppLocalizations.of(context)!.no_internet_connection_info_bar_subtitle,
                         Icons.wifi_off_outlined
                     ).visible(!context.watch<NearbyViewModel>().isConnectedWithNetwork),
+                    _infoBar(
+                        context,
+                        "Bluetooth-Probleme",
+                        "Einige Bluetooth-Prozesse konnten nicht gestartet werden. Schaue in der Hilfe nach für Problemlösungen.",
+                        Icons.bluetooth_disabled
+                    ).visible(!context.watch<NearbyViewModel>().isBleAdvertiserRunning || !context.watch<NearbyViewModel>().isBleScannerRunning),
                     _bottomBar(context)
                 ],
             )
