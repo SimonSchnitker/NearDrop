@@ -10,6 +10,7 @@ import 'package:near_drop/core/enums/DeviceType.dart';
 import 'package:near_drop/core/enums/SuccessState.dart';
 import 'package:near_drop/nearby/presentation/viewmodel/NearbyViewModel.dart';
 import 'package:near_drop/nearby/presentation/widgets/ManuallyConnectingBottomSheet.dart';
+import 'package:near_drop/nearby/presentation/widgets/PlusingCircleLoader.dart';
 import 'package:near_drop/tools/ui/FlexibleAppBar.dart';
 import 'package:near_drop/tools/ui/WidgetModifier.dart';
 import 'package:near_drop/transport/presentation/TransportViewModel.dart';
@@ -62,14 +63,10 @@ class NearbyPage extends StatelessWidget
                     padding: EdgeInsets.only(left: 16, right: 16, bottom: 88),
                     sliver: _nearbyDevicesGrid(context, context.watch<NearbyViewModel>().nearbyDevices)
                 ),
-                SliverToBoxAdapter(
-                  child: SafeArea(
-                    top: false,
-                    child: SizedBox()
-                  ),
-                )
               ],
             ),
+          // Ladeanimation
+          _scanningAnimation(context),
             Column(
                 spacing: 8,
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -86,7 +83,7 @@ class NearbyPage extends StatelessWidget
                         "Bluetooth-Probleme",
                         "Einige Bluetooth-Prozesse konnten nicht gestartet werden. Schaue in der Hilfe nach für Problemlösungen.",
                         Icons.bluetooth_disabled
-                    ).visible(!context.watch<NearbyViewModel>().isBleAdvertiserRunning || !context.watch<NearbyViewModel>().isBleScannerRunning),
+                    ).visible(false),
                     _bottomBar(context)
                 ],
             )
@@ -96,6 +93,25 @@ class NearbyPage extends StatelessWidget
         ),
       ),
     );
+  }
+
+  Widget _scanningAnimation(BuildContext context) {
+      return AnimatedOpacity(
+        duration: Duration(milliseconds: 600),
+        opacity: context.watch<NearbyViewModel>().nearbyDevices.isEmpty ? 1 : 0,
+        child: Stack(
+            alignment: Alignment.center,
+            children: [
+                PulsingCirclesLoader()
+                    .opacity(0.2),
+                Icon(
+                    Icons.sensors_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: Platform.isAndroid || Platform.isIOS ? 48 : 40,
+                )
+            ],
+        ).align(Alignment.center).paddingOnly(left: 32, right: 32, top: 110),
+      );
   }
 
   Widget _drawerAppInfo(BuildContext context) {

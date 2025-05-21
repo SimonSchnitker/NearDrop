@@ -29,8 +29,7 @@ class NearbyViewModel extends ChangeNotifier
 
     NearbyViewModel()
     {
-        // Testdaten
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < 0; i++)
         {
             nearbyDevices.add(Device(
                 "Simon",
