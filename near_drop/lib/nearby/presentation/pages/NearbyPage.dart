@@ -42,6 +42,7 @@ class NearbyPage extends StatelessWidget
       ],
       builder: (context, child) => Scaffold(
           key: scaffoldKey,
+        drawer: _drawerAppInfo(context),
         body: Stack(
           children: [
             CustomScrollView(
@@ -95,6 +96,81 @@ class NearbyPage extends StatelessWidget
         ),
       ),
     );
+  }
+
+  Widget _drawerAppInfo(BuildContext context) {
+      return Drawer(
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    Text(
+                        AppLocalizations.of(context)!.app_info_title,
+                        style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.w500)
+                    ),
+                    Spacer(),
+                    IconButton(
+                        onPressed: () {
+                            Navigator.of(context).pop();
+                        },
+                        icon: Icon(Icons.close),
+                        tooltip: AppLocalizations.of(context)!.drawer_close,
+                    )
+                  ],
+                ),
+                SizedBox(height: 16),
+                Material(
+                    color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    borderRadius: BorderRadius.all(Radius.circular(24)),
+                    clipBehavior: Clip.hardEdge,
+                    child: Column(
+                        children: [
+                            ListTile(
+
+                                title: Text(AppLocalizations.of(context)!.imprint_title, style: TextStyle(color: Theme.of(context).colorScheme.onSurface),),
+                                leading: Icon(Icons.info_outline),
+                                iconColor: Theme.of(context).colorScheme.onSurface,
+                                onTap: () {
+
+                                },
+                            ),
+                            ListTile(
+                                title: Text(AppLocalizations.of(context)!.data_privacy_title, style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+                                leading: Icon(Icons.shield_outlined),
+                                iconColor: Theme.of(context).colorScheme.onSurface,
+                                onTap: () {
+
+                                },
+                            ),
+                            ListTile(
+                                title: Text(AppLocalizations.of(context)!.licenses_title, style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+                                leading: Icon(Icons.verified_user_outlined),
+                                iconColor: Theme.of(context).colorScheme.onSurface,
+                                onTap: () {
+                                    showLicensePage(context: context);
+                                },
+                            )
+                        ],
+                    ),
+                ),
+                Spacer(),
+                Material(
+                    color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    borderRadius: BorderRadius.all(Radius.circular(24)),
+                    child: ListTile(
+                        title: Text(AppLocalizations.of(context)!.version_title, style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+                        subtitle: Text(Runtime.getVersionString()),
+                        iconColor: Theme.of(context).colorScheme.onSurface,
+                        leading: Icon(Icons.install_mobile_outlined),
+                    ),
+                )
+            ],
+        )
+            .safeArea()
+            .paddingOnly(left: 16, right: 16, bottom: 16),
+      );
   }
 
   Widget _nearbyDevicesGrid(BuildContext context, List<Device> devices) {
@@ -313,9 +389,14 @@ class NearbyPage extends StatelessWidget
   Widget _appBar(BuildContext context) {
     return FlexibleAppBar(
       title: AppLocalizations.of(context)!.app_name,
-      leading: IconButton(onPressed: () {
-
-      }, icon: Icon(Icons.menu), tooltip: AppLocalizations.of(context)!.nearby_page_menu_icon_tooltip),
+      leading: Builder(builder: (context) {
+        return IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () {
+            Scaffold.of(context).openDrawer();
+          },
+        );
+      }),
       actions: [
           IconButton(onPressed: () {
 
