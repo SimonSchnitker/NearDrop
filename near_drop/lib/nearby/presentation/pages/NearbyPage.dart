@@ -29,7 +29,7 @@ class NearbyPage extends StatelessWidget
   @override
   Widget build(BuildContext context) {
       final transportViewModel = TransportViewModel();
-      transportViewModel.initSignaling();
+      transportViewModel.init();
 
     return MultiProvider(
       providers: [
@@ -128,7 +128,6 @@ class NearbyPage extends StatelessWidget
                     child: Column(
                         children: [
                             ListTile(
-
                                 title: Text(AppLocalizations.of(context)!.imprint_title, style: TextStyle(color: Theme.of(context).colorScheme.onSurface),),
                                 leading: Icon(Icons.info_outline),
                                 iconColor: Theme.of(context).colorScheme.onSurface,

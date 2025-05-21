@@ -15,16 +15,18 @@ class TransportViewModel extends ChangeNotifier
     final _transportController = KiwiContainer().resolve<TransportController>();
     bool _isInitialized = false;
     static final _cancelTimeout = Duration(seconds: 8);
+    bool _isTargetDirectoryInitialized = false;
 
-    /// Initialisiert den Signalisierungsprozess.
-    void initSignaling()
+    /// Initialisiert grundlegende Einstellungen und Prozesse.
+    Future<void> init() async
     {
         if (_isInitialized)
         {
             return;
         }
 
-        _transportController.init();
+        _isTargetDirectoryInitialized = await _transportController.initTargetDirectory();
+        _transportController.startSignaling();
         _isInitialized = true;
     }
 

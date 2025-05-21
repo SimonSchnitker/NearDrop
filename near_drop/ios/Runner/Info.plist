@@ -48,11 +48,23 @@
 
 	<key>NSBluetoothAlwaysUsageDescription</key>
     <string>Bluetooth LE is used for scanning devices nearby.</string>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>Photo Library is used to select media files.</string>
-    <key>io.flutter.embedded_views_preview</key>
-    <true/>
     <key>NSCameraUsageDescription</key>
     <string>This app needs camera access to scan QR codes.</string>
+
+    <!-- This is needed to add a folder in the app's documents directory. -->
+    <key>UIFileSharingEnabled</key>
+    <true/>
+    <key>LSSupportsOpeningDocumentsInPlace</key>
+    <true/>
+
+    <!-- gal: Required -->
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>We need add only access to save medias.</string>
+
+    <!-- gal: Required for ios < 14 or saving to album -->
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>We need access to save and select medias.</string>
+    <key>io.flutter.embedded_views_preview</key>
+    <true/>
 </dict>
 </plist>

@@ -5,6 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:gal/gal.dart';
 import 'package:media_scanner/media_scanner.dart';
 import 'package:mime/mime.dart';
 import 'package:near_drop/core/enums/ErrorState.dart';
@@ -41,15 +42,31 @@ class TransportController
 
     TransportController(this._signalingController, this._transportGateway);
 
-    /// Startet den Signalisierungsprozess, wartet auf eingehende Verbindungen und initialisiert grundlegende Einstellungen.
-    Future<void> init() async
+    /// Initialisiert den Zielordner, in den empfangene Dateien gespeichert werden sollen.
+    Future<bool> initTargetDirectory() async
     {
-        _targetDirectory = await _getTargetDirectory();
+        try
+        {
+            _targetDirectory = await _getTargetDirectory();
+        }
+        catch (e)
+        {
+            print("Fehler beim Erstellen des Zielordners: $e");
+            return false;
+        }
+
         if (_targetDirectory == null)
         {
-            print("Zugriff auf den Download-Ordner nicht möglich.");
-            return;
+            print("Zielordner konnte nicht ermittelt werden.");
+            return false;
         }
+
+        return true;
+    }
+
+    /// Startet den Signalisierungsprozess und wartet auf eingehende Verbindungen.
+    void startSignaling()
+    {
 
         _signalingController.onConnectionCreated.stream.listen(_onConnectionCreated);
         _signalingController.startListening();
@@ -130,41 +147,48 @@ class TransportController
         for (int i = 0; i < sendRequest.filesCount; i++)
         {
             final receivedFile = ReceivedFile(); // Hier werden die Dateiinformationen der Datei hineingeschrieben
+            FileReceiveResult result;
             try
             {
-                FileReceiveResult result = await _transportGateway.receiveFile(device, connection.networkStream!, progress, _targetDirectory!, receivedFile);
-
-                if (result == FileReceiveResult.ok)
-                {
-                    print("Datei empfangen: ${receivedFile.name}");
-                    receivedFiles.add(receivedFile);
-
-                    // Wenn Datei ein Foto oder Video ist, MediaScanner unter Android anstoßen, um die Datei in der Galerie anzuzeigen
-                    if (Platform.isAndroid && (receivedFile.mimeType.startsWith("image/") || receivedFile.mimeType.startsWith("video/")))
-                    {
-                        await MediaScanner.loadMedia(path: receivedFile.path);
-                    }
-
-                    continue;
-                }
-                else if (result == FileReceiveResult.userCanceled)
-                {
-                    device.onCanceledCompleted.add(null); // Mitteilen, dass der Transport abgebrochen wurde
-                    device.communicationInfo.setErrorState(ErrorState.userCanceled);
-                    await device.clearConnection();
-                    await _deleteReceivedFile(receivedFile); // Aktuelle Datei löschen
-                    await _deleteAllReceivedFiles(receivedFiles); // Alle vorherigen Dateien löschen
-                    return;
-                }
-                else
-                {
-                    print("Fehler beim Empfangen der Datei.");
-                    await _deleteReceivedFile(receivedFile);
-
-                    // TODO: Dialog anzeigen, dass die Datei nicht empfangen werden konnte
-                }
+                result = await _transportGateway.receiveFile(device, connection.networkStream!, progress, _targetDirectory!, receivedFile);
             }
             catch (e)
+            {
+                print("Fehler beim Empfangen der Datei.");
+                await _deleteReceivedFile(receivedFile);
+
+                // TODO: Dialog anzeigen, dass die Datei nicht empfangen werden konnte
+                continue;
+            }
+
+            if (result == FileReceiveResult.ok)
+            {
+                print("Datei empfangen: ${receivedFile.name}");
+                receivedFiles.add(receivedFile);
+
+                // Wenn die Datei ein Bild oder Video ist, soll es in der Galerie angezeigt werden
+                if (receivedFile.mimeType.startsWith("image/") || receivedFile.mimeType.startsWith("video/"))
+                {
+                    try
+                    {
+                        await _putMediaToGallery(receivedFile);
+                    }
+                    catch (e)
+                    {
+                        print("Fehler beim Speichern der Datei in der Galerie: $e");
+                    }
+                }
+            }
+            else if (result == FileReceiveResult.userCanceled)
+            {
+                device.onCanceledCompleted.add(null); // Mitteilen, dass der Transport abgebrochen wurde
+                device.communicationInfo.setErrorState(ErrorState.userCanceled);
+                await device.clearConnection();
+                await _deleteReceivedFile(receivedFile); // Aktuelle Datei löschen
+                await _deleteAllReceivedFiles(receivedFiles); // Alle vorherigen Dateien löschen
+                return;
+            }
+            else
             {
                 print("Fehler beim Empfangen der Datei.");
                 await _deleteReceivedFile(receivedFile);
@@ -173,15 +197,34 @@ class TransportController
             }
         }
 
-        // Verbindung schließen
-        await device.clearConnection();
+        device.communicationInfo.setSuccessState(SuccessState.receivedSuccessfully);
+        device.clearConnection();
 
         // Empfangene Dateien auf der UI anzeigen
-        //await showImagePreviewDialog(context: NearbyPage.scaffoldKey.currentContext!, files: receivedFiles, device: device);
         await showImagePreviewDialog(context: NearbyPage.scaffoldKey.currentContext!, allFiles: receivedFiles, device: device, targetDirectory: _targetDirectory, mimeTypeGroup: sendRequest.mimeTypeGroup);
+    }
 
-        // Status auf "Erfolg" setzen, nachdem der Dialog geschlossen wurde
-        device.communicationInfo.setSuccessState(SuccessState.receivedSuccessfully);
+    /// Kümmert sich darum, dass eine Mediendatei unter Android und iOS in der Gallerie auftaucht.
+    Future<void> _putMediaToGallery(ReceivedFile file) async
+    {
+        if (Platform.isAndroid)
+        {
+            await MediaScanner.loadMedia(path: file.path);
+        }
+        else if (Platform.isIOS)
+        {
+            if (await Gal.requestAccess(toAlbum: true))
+            {
+                if (file.mimeType.startsWith("image/"))
+                {
+                    await Gal.putImage(file.path, album: FOLDER_NAME);
+                }
+                else if (file.mimeType.startsWith("video/"))
+                {
+                    await Gal.putVideo(file.path, album: FOLDER_NAME);
+                }
+            }
+        }
     }
 
     /// Löscht eine empfangene Datei.
@@ -230,11 +273,15 @@ class TransportController
         {
             targetDirectory = await getDownloadsDirectory();
         }
-        else if (Platform.isAndroid || Platform.isIOS)
+        else if (Platform.isAndroid)
         {
             // Öffentlicher Download-Ordner
             String path = await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
             targetDirectory = Directory(join(path, FOLDER_NAME));
+        }
+        else if (Platform.isIOS)
+        {
+            return getApplicationDocumentsDirectory();
         }
 
         if (targetDirectory == null)
