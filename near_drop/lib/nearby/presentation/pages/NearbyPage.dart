@@ -71,28 +71,51 @@ class NearbyPage extends StatelessWidget
                 spacing: 8,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                    //_infoBar(context, "Bluetooth deaktiviert", "Aktiviere Bluetooth, um Geräte in der Nähe zu finden", Icons.bluetooth_disabled),
-                    _infoBar(
-                        context,
-                        AppLocalizations.of(context)!.no_internet_connection_info_bar_title,
-                        AppLocalizations.of(context)!.no_internet_connection_info_bar_subtitle,
-                        Icons.wifi_off_outlined
-                    ).visible(!context.watch<NearbyViewModel>().isConnectedWithNetwork),
-                    _infoBar(
-                        context,
-                        "Bluetooth-Probleme",
-                        "Einige Bluetooth-Prozesse konnten nicht gestartet werden. Schaue in der Hilfe nach für Problemlösungen.",
-                        Icons.bluetooth_disabled
-                    ).visible(false),
-                    _bottomBar(context)
+                    _infoArea(context),
+                    _bottomBar(context),
                 ],
             )
             .safeArea()
-            .paddingAll(16)
+            .paddingAll(16),
           ],
         ),
       ),
     );
+  }
+
+  Widget _infoArea(BuildContext context) {
+      return AnimatedOpacity(
+        duration: Duration(milliseconds: context.watch<NearbyViewModel>().isInfoAreaVisible ? 400 : 200),
+        curve: context.watch<NearbyViewModel>().isInfoAreaVisible ? Curves.linearToEaseOut : Curves.easeIn,
+        opacity: context.watch<NearbyViewModel>().isInfoAreaVisible ? 1 : 0,
+        child: AnimatedScale(
+          alignment: Alignment.bottomRight,
+          duration: Duration(milliseconds: context.watch<NearbyViewModel>().isInfoAreaVisible ? 400 : 200),
+          curve: context.watch<NearbyViewModel>().isInfoAreaVisible ? Curves.linearToEaseOut : Curves.easeIn,
+          scale: context.watch<NearbyViewModel>().isInfoAreaVisible ? 1 : 0.9,
+          child: Column(
+              spacing: 0,
+              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                  _infoBar(context, AppLocalizations.of(context)!.no_internet_connection_info_bar_title, AppLocalizations.of(context)!.no_internet_connection_info_bar_subtitle, Icons.wifi_off_outlined)
+                      .visible(!context.watch<NearbyViewModel>().isConnectedWithNetwork),
+                  _infoBar(context, AppLocalizations.of(context)!.bluetooth_not_supported_info_bar_title, AppLocalizations.of(context)!.bluetooth_not_supported_info_bar_subtitle, Icons.bluetooth_disabled_outlined)
+                      .paddingOnly(top: 4)
+                      .visible(!context.watch<NearbyViewModel>().isBluetoothSupported),
+                  _infoBar(context, AppLocalizations.of(context)!.bluetooth_no_permission_info_bar_title, AppLocalizations.of(context)!.bluetooth_no_permission_info_bar_subtitle, Icons.bluetooth_disabled_outlined)
+                      .paddingOnly(top: 4)
+                      .visible(!context.watch<NearbyViewModel>().hasBluetoothPermissions),
+                  _infoBar(context, AppLocalizations.of(context)!.bluetooth_disabled_info_bar_title, AppLocalizations.of(context)!.bluetooth_disabled_info_bar_subtitle, Icons.bluetooth_disabled_outlined)
+                      .paddingOnly(top: 4)
+                      .visible(!context.watch<NearbyViewModel>().isBluetoothEnabled),
+                  _infoBar(context, AppLocalizations.of(context)!.bluetooth_error_info_bar_title, AppLocalizations.of(context)!.bluetooth_error_info_bar_subtitle, Icons.bluetooth_disabled_outlined)
+                      .paddingOnly(top: 4)
+                      .visible(context.watch<NearbyViewModel>().isInfoMessagesButtonVisible),
+              ],
+          ).align(Alignment.bottomCenter),
+        ),
+      );
   }
 
   Widget _scanningAnimation(BuildContext context) {
@@ -425,7 +448,7 @@ class NearbyPage extends StatelessWidget
 
   Widget _bottomBar(BuildContext context) {
     return Row(
-      spacing: 8,
+      spacing: 0,
         children: [
       Expanded(
         flex: (Platform.isAndroid || Platform.isIOS) ? 1 : 0,
@@ -457,7 +480,8 @@ class NearbyPage extends StatelessWidget
           )
             .paddingSymmetric(horizontal: 16)
         )
-        .sized(height: 56),
+        .sized(height: 56)
+        .paddingOnly(right: 8),
       ),
       PositionedBalloon.fade(
           duration: Duration(milliseconds: 300),
@@ -514,7 +538,24 @@ class NearbyPage extends StatelessWidget
           message: AppLocalizations.of(context)!.nearby_page_manual_connection_tooltip,
           preferBelow: false,
         ),
+      ),
+    Badge(
+        label: Text("!", style: TextStyle(fontSize: 14),),
+        isLabelVisible: !context.watch<NearbyViewModel>().isInfoAreaVisible,
+        offset: Offset(0, 0),
+      child: Material(
+          clipBehavior: Clip.hardEdge,
+          color: context.watch<NearbyViewModel>().isInfoAreaVisible ? Theme.of(context).colorScheme.inverseSurface : Theme.of(context).colorScheme.errorContainer,
+          borderRadius: BorderRadius.circular(28),
+          child: Icon(
+              context.watch<NearbyViewModel>().isInfoAreaVisible ? Icons.close : Icons.notifications_outlined,
+              color: context.watch<NearbyViewModel>().isInfoAreaVisible ? Theme.of(context).colorScheme.onInverseSurface : Theme.of(context).colorScheme.onErrorContainer,
+          ).clickable(onTap: () {
+                context.read<NearbyViewModel>().toggleInfoMessagesVisibility();
+          })
       )
+        .sized(height: 56, width: 56),
+    ).paddingOnly(left: 8).visible(context.watch<NearbyViewModel>().isInfoMessagesButtonVisible)
     ]);
   }
 
@@ -527,19 +568,19 @@ class NearbyPage extends StatelessWidget
               children: [
                   Icon(
                       icon,
-                      color: Theme.of(context).colorScheme.onErrorContainer,
+                      color: Theme.of(context).colorScheme.error,
                   ),
                   Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                           Text(
                               title,
-                              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onErrorContainer),
+                              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onSurface),
                           ),
                           Text(
                               subtitle,
                               style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onErrorContainer,
+                                  color: Theme.of(context).colorScheme.onSurface,
                               ),
                           )
                       ],

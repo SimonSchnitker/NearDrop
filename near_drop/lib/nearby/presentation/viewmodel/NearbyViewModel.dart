@@ -21,11 +21,18 @@ class NearbyViewModel extends ChangeNotifier
     bool isBluetoothSupported = true;
     bool isBluetoothEnabled = true;
     bool hasBluetoothPermissions = true;
+
+    // Diese Werte werden verwendet, falls der BleScanner oder BleAdvertiser fehlschlagen.
     bool isBleScannerRunning = true;
     bool isBleAdvertiserRunning = true;
+    get isBluetoothErrorBarVisible => (!isBleAdvertiserRunning || !isBleScannerRunning) && isBluetoothEnabled && hasBluetoothPermissions;
 
     bool isDeviceNotFoundBalloonVisible = false;
     final Duration deviceNotFoundBalloonDelay = const Duration(seconds: 8);
+
+    // Diese Werte werden verwendet, um die Sichtbarkeit der Info-Nachrichten zu steuern.
+    bool isInfoAreaVisible = false;
+    get isInfoMessagesButtonVisible => !isConnectedWithNetwork || !isBluetoothSupported || !isBluetoothEnabled || !hasBluetoothPermissions || isBluetoothErrorBarVisible;
 
     NearbyViewModel()
     {
@@ -78,6 +85,12 @@ class NearbyViewModel extends ChangeNotifier
         _nearbyController.startListeningForDeviceData();
     }
 
+    void toggleInfoMessagesVisibility()
+    {
+        isInfoAreaVisible = !isInfoAreaVisible;
+        notifyListeners();
+    }
+
     void toggleDeviceNotFoundBalloonVisible()
     {
         isDeviceNotFoundBalloonVisible = !isDeviceNotFoundBalloonVisible;
@@ -123,7 +136,7 @@ class NearbyViewModel extends ChangeNotifier
                 {
                     hasBluetoothPermissions = true;
                     await _nearbyController.startBleServices();
-                    _showDeviceNotFoundBalloonAfterDelay();
+                    //_showDeviceNotFoundBalloonAfterDelay();
                 }
             }
             else if (state == BluetoothAdapterState.off)

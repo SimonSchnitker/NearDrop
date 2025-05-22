@@ -117,5 +117,13 @@
   "qr_code_error_device_request": "Device could not be contacted. Check your internet connection.",
   "no_internet_connection_info_bar_title": "No internet connection",
   "no_internet_connection_info_bar_subtitle": "Connect to a network to send and receive files.",
+  "bluetooth_not_supported_info_bar_title": "Bluetooth not supported",
+  "bluetooth_not_supported_info_bar_subtitle": "Your device does not have a Bluetooth component. Devices nearby cannot be found.",
+  "bluetooth_no_permission_info_bar_title": "Bluetooth permission missing",
+  "bluetooth_no_permission_info_bar_subtitle": "Grant the app access to Bluetooth in the settings to find devices nearby.",
+  "bluetooth_disabled_info_bar_title": "Bluetooth disabled",
+  "bluetooth_disabled_info_bar_subtitle": "Enable Bluetooth to find devices nearby.",
+  "bluetooth_error_info_bar_title": "Bluetooth error",
+  "bluetooth_error_info_bar_subtitle": "Schaue in der Hilfe nach für Problemlösungen. Some Bluetooth processes have failed. Check the help for troubleshooting.",
   "drawer_close": "Close"
 }
