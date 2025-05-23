@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:dynamic_system_colors/dynamic_system_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -93,37 +96,41 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Near Drop',
-        localizationsDelegates: [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: [
-            Locale('en'), // English
-            Locale('de'), // Deutsch
-        ],
-      theme: ThemeData(
-          tooltipTheme: TooltipThemeData(
-              decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.inverseSurface,
-                  borderRadius: BorderRadius.circular(4),
-              ),
-          ),
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.light),
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.dark),
-      ),
-      routes: {
-          Routes.welcome: (context) => WelcomePage(),
-          Routes.guestLogin: (context) => GuestLoginPage(),
-          Routes.nearby: (context) => NearbyPage(),
-      },
-      initialRoute: Runtime.deviceDataLoaded ? Routes.nearby : Routes.welcome,
-    );
+      return DynamicColorBuilder(
+          builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+              return MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  title: 'Near Drop',
+                  localizationsDelegates: [
+                      AppLocalizations.delegate,
+                      GlobalMaterialLocalizations.delegate,
+                      GlobalWidgetsLocalizations.delegate,
+                      GlobalCupertinoLocalizations.delegate,
+                  ],
+                  supportedLocales: [
+                      Locale('en'), // English
+                      Locale('de'), // Deutsch
+                  ],
+                  theme: ThemeData(
+                      tooltipTheme: TooltipThemeData(
+                          decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.inverseSurface,
+                              borderRadius: BorderRadius.circular(4),
+                          ),
+                      ),
+                      colorScheme: lightDynamic ?? ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.light),
+                  ),
+                  darkTheme: ThemeData(
+                      colorScheme: darkDynamic ?? ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark),
+                  ),
+                  routes: {
+                      Routes.welcome: (context) => WelcomePage(),
+                      Routes.guestLogin: (context) => GuestLoginPage(),
+                      Routes.nearby: (context) => NearbyPage(),
+                  },
+                  initialRoute: Runtime.deviceDataLoaded ? Routes.nearby : Routes.welcome,
+              );
+          }
+      );
   }
 }

@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   app_links
   ble_peripheral
   connectivity_plus
+  dynamic_system_colors
   file_selector_windows
   flutter_webrtc
   gal

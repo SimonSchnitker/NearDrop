@@ -49,7 +49,11 @@ class NearbyPage extends StatelessWidget
             CustomScrollView(
               physics: PageScrollPhysics(),
               slivers: [
-                _appBar(context),
+                Builder(
+                  builder: (context) {
+                    return _appBar(context);
+                  }
+                ),
                 SliverToBoxAdapter(
                   child: Text(
                       AppLocalizations.of(context)!.nearby_page_devices_label,
@@ -427,14 +431,13 @@ class NearbyPage extends StatelessWidget
   Widget _appBar(BuildContext context) {
     return FlexibleAppBar(
       title: AppLocalizations.of(context)!.app_name,
-      leading: Builder(builder: (context) {
-        return IconButton(
-          icon: Icon(Icons.menu),
+      leading: IconButton(
+          icon: Icon(Icons.menu,),
+          tooltip: AppLocalizations.of(context)!.nearby_page_menu_icon_tooltip,
           onPressed: () {
-            Scaffold.of(context).openDrawer();
+              Scaffold.of(context).openDrawer();
           },
-        );
-      }),
+      ),
       actions: [
           IconButton(onPressed: () {
 
@@ -595,7 +598,6 @@ class NearbyPage extends StatelessWidget
   Widget _cancelTransportDialog(BuildContext context, Device device) {
       return AlertDialog(
         key: device.cancelTransportDialogKey,
-        shadowColor: Theme.of(context).colorScheme.shadow,
         actionsPadding: EdgeInsets.only(bottom: 16, right: 24, left: 24),
         title: Text(
             "Übertragung mit ${device.firstname} beenden?",
@@ -619,7 +621,7 @@ class NearbyPage extends StatelessWidget
   }
 
   Widget _sendDialog(BuildContext context, Device device) {
-      return AlertDialog(shadowColor: Theme.of(context).colorScheme.shadow,
+      return AlertDialog(
           actionsPadding: EdgeInsets.only(bottom: 16, right: 24),
           title: Text(
               AppLocalizations.of(context)!.send_dialog_title(device.firstname),
@@ -631,13 +633,13 @@ class NearbyPage extends StatelessWidget
                 Material(
                     clipBehavior: Clip.hardEdge,
                     borderRadius: BorderRadius.vertical(top: Radius.circular(16), bottom: Radius.circular(4)),
-                    color: Theme.of(context).colorScheme.primaryContainer,
+                    color: Theme.of(context).brightness == Brightness.light ? Theme.of(context).colorScheme.surfaceContainerHighest : Theme.of(context).colorScheme.surfaceContainer,
                     child: ListTile(
-                        leading: Icon(Icons.insert_photo_outlined, color: Theme.of(context).colorScheme.onPrimaryContainer,),
+                        leading: Icon(Icons.insert_photo_outlined, color: Theme.of(context).colorScheme.onSurface,),
                         title: Text(
                             AppLocalizations.of(context)!.send_dialog_media_label,
                             style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                color: Theme.of(context).colorScheme.onSurface,
                             ),
                         ),
                         onTap: () async {
@@ -653,13 +655,13 @@ class NearbyPage extends StatelessWidget
                   Material(
                       clipBehavior: Clip.hardEdge,
                       borderRadius: BorderRadius.vertical(top: Radius.circular(4), bottom: Radius.circular(16)),
-                      color: Theme.of(context).colorScheme.primaryContainer,
+                      color: Theme.of(context).brightness == Brightness.light ? Theme.of(context).colorScheme.surfaceContainerHighest : Theme.of(context).colorScheme.surfaceContainer,
                       child: ListTile(
-                          leading: Icon(Icons.file_copy_outlined, color: Theme.of(context).colorScheme.onPrimaryContainer,),
+                          leading: Icon(Icons.file_copy_outlined, color: Theme.of(context).colorScheme.onSurface,),
                           title: Text(
                               AppLocalizations.of(context)!.send_dialog_files_label,
                                 style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                    color: Theme.of(context).colorScheme.onSurface,
                                 ),
                           ),
                           onTap: () async {
