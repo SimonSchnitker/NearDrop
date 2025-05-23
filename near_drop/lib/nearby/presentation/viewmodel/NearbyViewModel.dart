@@ -82,7 +82,7 @@ class NearbyViewModel extends ChangeNotifier
             _listenForBluetoothStateChanged();
         }
 
-        _nearbyController.startListeningForDeviceData();
+        //_nearbyController.startListeningForDeviceData();
     }
 
     void toggleInfoMessagesVisibility()

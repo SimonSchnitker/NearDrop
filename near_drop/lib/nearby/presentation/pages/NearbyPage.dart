@@ -29,16 +29,13 @@ class NearbyPage extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
-      final transportViewModel = TransportViewModel();
-      transportViewModel.init();
-
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<NearbyViewModel>(
           create: (context) => NearbyViewModel(),
         ),
         ChangeNotifierProvider<TransportViewModel>(
-            create: (context) => transportViewModel
+            create: (context) => TransportViewModel()
         )
       ],
       builder: (context, child) => Scaffold(

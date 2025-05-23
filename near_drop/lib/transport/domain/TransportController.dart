@@ -35,39 +35,32 @@ class TransportController
 {
     static const String FOLDER_NAME = "Near Drop";
     static const int MIN_BYTES_FOR_DATA_VOLUME_WARNING = 20000000; // 20 MB
-    Directory? _targetDirectory;
+    Directory? filesDirectory;
 
     final SignalingController _signalingController;
     final TransportGateway _transportGateway;
 
-    TransportController(this._signalingController, this._transportGateway);
+    TransportController(this._signalingController, this._transportGateway)
+    {
+        initFilesDirectory();
+    }
 
     /// Initialisiert den Zielordner, in den empfangene Dateien gespeichert werden sollen.
-    Future<bool> initTargetDirectory() async
+    Future<void> initFilesDirectory() async
     {
         try
         {
-            _targetDirectory = await _getTargetDirectory();
+            filesDirectory = await _getFilesDirectory();
         }
         catch (e)
         {
             print("Fehler beim Erstellen des Zielordners: $e");
-            return false;
         }
-
-        if (_targetDirectory == null)
-        {
-            print("Zielordner konnte nicht ermittelt werden.");
-            return false;
-        }
-
-        return true;
     }
 
     /// Startet den Signalisierungsprozess und wartet auf eingehende Verbindungen.
     void startSignaling()
     {
-
         _signalingController.onConnectionCreated.stream.listen(_onConnectionCreated);
         _signalingController.startListening();
         print("Signalisierung gestartet.");
@@ -110,6 +103,25 @@ class TransportController
     /// Verarbeitet die eingehende Sendeanfrage.
     Future<void> _handleReceiveFiles(SendRequestFilesDTO sendRequest, Connection connection, Device device) async
     {
+        // Wenn der Zielordner null ist, kann der Transport nicht fortgesetzt werden
+        if (filesDirectory == null)
+        {
+            print("Zielordner ist null.");
+
+            try
+            {
+                // Dem Sender mitteilen, dass der Transport nicht fortgesetzt werden kann
+                await connection.networkStream!.writeString(SendRequestAnswer.error.name);
+            }
+            on Exception catch (e)
+            {
+                print("Fehler beim Senden der Antwort: $e");
+            }
+
+            await device.clearConnection();
+            return;
+        }
+
         // Dem Benutzer die Anfrage anzeigen
         print("Sendeanfrage-Dialog wird angezeigt");
         SendRequestAnswer answer = await showSendRequestDialog(device, sendRequest.filesCount, sendRequest.totalSize, sendRequest.mimeTypeGroup);
@@ -150,7 +162,7 @@ class TransportController
             FileReceiveResult result;
             try
             {
-                result = await _transportGateway.receiveFile(device, connection.networkStream!, progress, _targetDirectory!, receivedFile);
+                result = await _transportGateway.receiveFile(device, connection.networkStream!, progress, filesDirectory!, receivedFile);
             }
             catch (e)
             {
@@ -201,7 +213,7 @@ class TransportController
         device.clearConnection();
 
         // Empfangene Dateien auf der UI anzeigen
-        await showImagePreviewDialog(context: NearbyPage.scaffoldKey.currentContext!, allFiles: receivedFiles, device: device, targetDirectory: _targetDirectory, mimeTypeGroup: sendRequest.mimeTypeGroup);
+        await showImagePreviewDialog(context: NearbyPage.scaffoldKey.currentContext!, allFiles: receivedFiles, device: device, targetDirectory: filesDirectory, mimeTypeGroup: sendRequest.mimeTypeGroup);
     }
 
     /// Kümmert sich darum, dass eine Mediendatei unter Android und iOS in der Gallerie auftaucht.
@@ -265,7 +277,7 @@ class TransportController
     }
 
     /// Gibt den Ordner zurück, in den empfangene Dateien gespeichert werden soll.
-    Future<Directory?> _getTargetDirectory() async
+    Future<Directory?> _getFilesDirectory() async
     {
         Directory? targetDirectory;
 

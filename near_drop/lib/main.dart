@@ -50,6 +50,8 @@ void main() async
         try
         {
             await KiwiContainer().resolve<AuthController>().loadThisDevice();
+            KiwiContainer().resolve<NearbyController>().startListeningForDeviceData();
+            KiwiContainer().resolve<TransportController>().startSignaling();
         }
         catch (e)
         {

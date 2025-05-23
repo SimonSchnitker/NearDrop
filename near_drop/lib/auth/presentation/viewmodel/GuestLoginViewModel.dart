@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:kiwi/kiwi.dart';
 import 'package:near_drop/auth/domain/AuthController.dart';
+import 'package:near_drop/nearby/domain/NearbyController.dart';
+import 'package:near_drop/transport/domain/TransportController.dart';
 import '../../../Runtime.dart';
 
 /// Interaktionslogik der GuestLoginPage.
 class GuestLoginViewModel extends ChangeNotifier
 {
     final AuthController _authController = KiwiContainer().resolve<AuthController>();
+    final NearbyController _nearbyController = KiwiContainer().resolve<NearbyController>();
+    final TransportController _transportController = KiwiContainer().resolve<TransportController>();
     final TextEditingController firstnameController = TextEditingController();
     bool isTermsAccepted = false;
 
@@ -33,6 +37,9 @@ class GuestLoginViewModel extends ChangeNotifier
         {
             throw Exception("RealtimeChannel konnte nicht initialisiert werden");
         }
+
+        _nearbyController.startListeningForDeviceData();
+        _transportController.startSignaling();
 
         firstnameController.clear();
         isTermsAccepted = false;

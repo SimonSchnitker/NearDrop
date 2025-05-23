@@ -13,21 +13,12 @@ import '../domain/TransportController.dart';
 class TransportViewModel extends ChangeNotifier
 {
     final _transportController = KiwiContainer().resolve<TransportController>();
-    bool _isInitialized = false;
     static final _cancelTimeout = Duration(seconds: 8);
-    bool _isTargetDirectoryInitialized = false;
+    bool _isFilesDirectoryInitialized = false;
 
-    /// Initialisiert grundlegende Einstellungen und Prozesse.
-    Future<void> init() async
+    TransportViewModel()
     {
-        if (_isInitialized)
-        {
-            return;
-        }
-
-        _isTargetDirectoryInitialized = await _transportController.initTargetDirectory();
-        _transportController.startSignaling();
-        _isInitialized = true;
+        _isFilesDirectoryInitialized = _transportController.filesDirectory != null;
     }
 
     /// Sendet Dateien an ein Gerät.
