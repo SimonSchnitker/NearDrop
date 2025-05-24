@@ -5,8 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../Runtime.dart';
+import '../../../l10n/gen/app_localizations.dart';
 import '../viewmodel/ManuallyConnectingViewModel.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 Widget manuallyConnectingView(BuildContext context) {
     return ChangeNotifierProvider(

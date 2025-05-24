@@ -16,11 +16,11 @@ import 'package:near_drop/tools/ui/WidgetModifier.dart';
 import 'package:near_drop/transport/presentation/TransportViewModel.dart';
 import 'package:provider/provider.dart';
 import '../../../Runtime.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../core/entity/Device.dart';
 import '../../../core/enums/CommunicationState.dart';
 import '../../../core/enums/ErrorState.dart';
 import '../../../core/enums/OS.dart';
+import '../../../l10n/gen/app_localizations.dart';
 
 class NearbyPage extends StatelessWidget
 {

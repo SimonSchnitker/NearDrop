@@ -28,7 +28,6 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../core/entity/Device.dart';
 import 'event_args/ConnectionCreatedEventArgs.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// Steuert den Transportprozess zwischen Geräten.
 class TransportController

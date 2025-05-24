@@ -1,0 +1,622 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations_de.dart';
+import 'app_localizations_en.dart';
+
+// ignore_for_file: type=lint
+
+/// Callers can lookup localized strings with an instance of AppLocalizations
+/// returned by `AppLocalizations.of(context)`.
+///
+/// Applications need to include `AppLocalizations.delegate()` in their app's
+/// `localizationDelegates` list, and the locales they support in the app's
+/// `supportedLocales` list. For example:
+///
+/// ```dart
+/// import 'gen/app_localizations.dart';
+///
+/// return MaterialApp(
+///   localizationsDelegates: AppLocalizations.localizationsDelegates,
+///   supportedLocales: AppLocalizations.supportedLocales,
+///   home: MyApplicationHome(),
+/// );
+/// ```
+///
+/// ## Update pubspec.yaml
+///
+/// Please make sure to update your pubspec.yaml to include the following
+/// packages:
+///
+/// ```yaml
+/// dependencies:
+///   # Internationalization support.
+///   flutter_localizations:
+///     sdk: flutter
+///   intl: any # Use the pinned version from flutter_localizations
+///
+///   # Rest of dependencies
+/// ```
+///
+/// ## iOS Applications
+///
+/// iOS applications define key application metadata, including supported
+/// locales, in an Info.plist file that is built into the application bundle.
+/// To configure the locales supported by your app, you’ll need to edit this
+/// file.
+///
+/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// Then, in the Project Navigator, open the Info.plist file under the Runner
+/// project’s Runner folder.
+///
+/// Next, select the Information Property List item, select Add Item from the
+/// Editor menu, then select Localizations from the pop-up menu.
+///
+/// Select and expand the newly-created Localizations item then, for each
+/// locale your application supports, add a new item and select the locale
+/// you wish to add from the pop-up menu in the Value field. This list should
+/// be consistent with the languages listed in the AppLocalizations.supportedLocales
+/// property.
+abstract class AppLocalizations {
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+
+  final String localeName;
+
+  static AppLocalizations? of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations);
+  }
+
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
+
+  /// A list of this localizations delegate along with the default localizations
+  /// delegates.
+  ///
+  /// Returns a list of localizations delegates containing this delegate along with
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
+
+  /// A list of this localizations delegate's supported locales.
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('de'),
+    Locale('en'),
+  ];
+
+  /// No description provided for @app_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Near Drop'**
+  String get app_name;
+
+  /// No description provided for @welcome_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share files nearby'**
+  String get welcome_subtitle;
+
+  /// No description provided for @welcome_preview_info_text.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview version'**
+  String get welcome_preview_info_text;
+
+  /// No description provided for @app_info_button.
+  ///
+  /// In en, this message translates to:
+  /// **'App information'**
+  String get app_info_button;
+
+  /// No description provided for @continue_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get continue_button;
+
+  /// No description provided for @app_info_title.
+  ///
+  /// In en, this message translates to:
+  /// **'App information'**
+  String get app_info_title;
+
+  /// No description provided for @imprint_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Imprint'**
+  String get imprint_title;
+
+  /// No description provided for @imprint_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About the developer'**
+  String get imprint_subtitle;
+
+  /// No description provided for @data_privacy_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Data protection'**
+  String get data_privacy_title;
+
+  /// No description provided for @data_privacy_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About the data processing'**
+  String get data_privacy_subtitle;
+
+  /// No description provided for @licenses_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Licences'**
+  String get licenses_title;
+
+  /// No description provided for @licenses_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About used licenses'**
+  String get licenses_subtitle;
+
+  /// No description provided for @version_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get version_title;
+
+  /// No description provided for @guest_login_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Login as guest'**
+  String get guest_login_title;
+
+  /// No description provided for @firstname_textfield_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Firstname'**
+  String get firstname_textfield_label;
+
+  /// No description provided for @firstname_textfield_helper_text.
+  ///
+  /// In en, this message translates to:
+  /// **'Other devices nearby will see this name.'**
+  String get firstname_textfield_helper_text;
+
+  /// No description provided for @guest_login_error_message.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while logging in. Please try again later.'**
+  String get guest_login_error_message;
+
+  /// No description provided for @data_protection_info_text_1.
+  ///
+  /// In en, this message translates to:
+  /// **'I have read and accept the '**
+  String get data_protection_info_text_1;
+
+  /// No description provided for @data_protection_info_text_2.
+  ///
+  /// In en, this message translates to:
+  /// **'data protection regulations'**
+  String get data_protection_info_text_2;
+
+  /// No description provided for @data_protection_info_text_3.
+  ///
+  /// In en, this message translates to:
+  /// **'.'**
+  String get data_protection_info_text_3;
+
+  /// No description provided for @nearby_page_menu_icon_tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Menu'**
+  String get nearby_page_menu_icon_tooltip;
+
+  /// No description provided for @nearby_page_account_icon_tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'My account'**
+  String get nearby_page_account_icon_tooltip;
+
+  /// No description provided for @nearby_page_manual_connection_tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect manually'**
+  String get nearby_page_manual_connection_tooltip;
+
+  /// No description provided for @nearby_page_visibility_info_prefix.
+  ///
+  /// In en, this message translates to:
+  /// **'You are visible as '**
+  String get nearby_page_visibility_info_prefix;
+
+  /// No description provided for @nearby_page_devices_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby devices'**
+  String get nearby_page_devices_label;
+
+  /// No description provided for @nearby_page_no_devices_found_balloon_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Device not found?'**
+  String get nearby_page_no_devices_found_balloon_title;
+
+  /// No description provided for @nearby_page_no_devices_found_balloon_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect you device via qr code.'**
+  String get nearby_page_no_devices_found_balloon_subtitle;
+
+  /// No description provided for @send_dialog_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to {firstname}'**
+  String send_dialog_title(String firstname);
+
+  /// No description provided for @send_dialog_files_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Files'**
+  String get send_dialog_files_label;
+
+  /// No description provided for @send_dialog_media_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos & Videos'**
+  String get send_dialog_media_label;
+
+  /// No description provided for @cancel_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel_button;
+
+  /// No description provided for @send_request_dialog_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Send request'**
+  String get send_request_dialog_title;
+
+  /// No description provided for @send_request_dialog_content.
+  ///
+  /// In en, this message translates to:
+  /// **'{firstname} wants to send you {filesCount} {mimeType}.'**
+  String send_request_dialog_content(
+    String firstname,
+    int filesCount,
+    String mimeType,
+  );
+
+  /// No description provided for @mime_type_image.
+  ///
+  /// In en, this message translates to:
+  /// **'image'**
+  String get mime_type_image;
+
+  /// No description provided for @mime_type_images.
+  ///
+  /// In en, this message translates to:
+  /// **'images'**
+  String get mime_type_images;
+
+  /// No description provided for @mime_type_video.
+  ///
+  /// In en, this message translates to:
+  /// **'video'**
+  String get mime_type_video;
+
+  /// No description provided for @mime_type_videos.
+  ///
+  /// In en, this message translates to:
+  /// **'videos'**
+  String get mime_type_videos;
+
+  /// No description provided for @mime_type_audio.
+  ///
+  /// In en, this message translates to:
+  /// **'audio'**
+  String get mime_type_audio;
+
+  /// No description provided for @mime_type_audios.
+  ///
+  /// In en, this message translates to:
+  /// **'audios'**
+  String get mime_type_audios;
+
+  /// No description provided for @mime_type_media.
+  ///
+  /// In en, this message translates to:
+  /// **'media files'**
+  String get mime_type_media;
+
+  /// No description provided for @mime_type_file.
+  ///
+  /// In en, this message translates to:
+  /// **'file'**
+  String get mime_type_file;
+
+  /// No description provided for @mime_type_files.
+  ///
+  /// In en, this message translates to:
+  /// **'files'**
+  String get mime_type_files;
+
+  /// No description provided for @accept_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get accept_button;
+
+  /// No description provided for @decline_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get decline_button;
+
+  /// No description provided for @communication_state_connecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting...'**
+  String get communication_state_connecting;
+
+  /// No description provided for @communication_state_requesting.
+  ///
+  /// In en, this message translates to:
+  /// **'Requesting...'**
+  String get communication_state_requesting;
+
+  /// No description provided for @communication_state_sending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending...'**
+  String get communication_state_sending;
+
+  /// No description provided for @communication_state_receiving.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiving...'**
+  String get communication_state_receiving;
+
+  /// No description provided for @communication_state_canceling.
+  ///
+  /// In en, this message translates to:
+  /// **'Canceling...'**
+  String get communication_state_canceling;
+
+  /// No description provided for @success_state_sended.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent!'**
+  String get success_state_sended;
+
+  /// No description provided for @success_state_received.
+  ///
+  /// In en, this message translates to:
+  /// **'Received!'**
+  String get success_state_received;
+
+  /// No description provided for @error_state_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error_state_error;
+
+  /// No description provided for @error_state_receiver_declined.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get error_state_receiver_declined;
+
+  /// No description provided for @error_state_canceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Aborted'**
+  String get error_state_canceled;
+
+  /// No description provided for @dialog_close_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get dialog_close_button;
+
+  /// No description provided for @received_files_dialog_show_files_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get received_files_dialog_show_files_button;
+
+  /// No description provided for @received_files_dialog_title.
+  ///
+  /// In en, this message translates to:
+  /// **'{filesCount} {mimeType} received from {firstname}'**
+  String received_files_dialog_title(
+    int filesCount,
+    String mimeType,
+    String firstname,
+  );
+
+  /// No description provided for @received_files_dialog_more_files_text.
+  ///
+  /// In en, this message translates to:
+  /// **'+ {filesCount} more file(s)'**
+  String received_files_dialog_more_files_text(int filesCount);
+
+  /// No description provided for @data_volume_warning_dialog_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Send?'**
+  String get data_volume_warning_dialog_title;
+
+  /// No description provided for @data_volume_warning_dialog_content.
+  ///
+  /// In en, this message translates to:
+  /// **'This occurrence needs minimum {sizeText} of your data volume.'**
+  String data_volume_warning_dialog_content(String sizeText);
+
+  /// No description provided for @data_volume_warning_dialog_accept_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get data_volume_warning_dialog_accept_button;
+
+  /// No description provided for @manually_connecting_sheet_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Manually connect'**
+  String get manually_connecting_sheet_title;
+
+  /// No description provided for @manually_connecting_sheet_scan_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan'**
+  String get manually_connecting_sheet_scan_button;
+
+  /// No description provided for @qr_code_text.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell an other person to scan this QR code with their device.'**
+  String get qr_code_text;
+
+  /// No description provided for @scan_qr_code.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the QR code of another device.'**
+  String get scan_qr_code;
+
+  /// No description provided for @qr_code_error_no_permission.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant camera permission in settings.'**
+  String get qr_code_error_no_permission;
+
+  /// No description provided for @qr_code_error_invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid QR code'**
+  String get qr_code_error_invalid;
+
+  /// No description provided for @qr_code_error_device_already_added.
+  ///
+  /// In en, this message translates to:
+  /// **'Device already found'**
+  String get qr_code_error_device_already_added;
+
+  /// No description provided for @qr_code_error_device_request.
+  ///
+  /// In en, this message translates to:
+  /// **'Device could not be contacted. Check your internet connection.'**
+  String get qr_code_error_device_request;
+
+  /// No description provided for @no_internet_connection_info_bar_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection'**
+  String get no_internet_connection_info_bar_title;
+
+  /// No description provided for @no_internet_connection_info_bar_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to a network to send and receive files.'**
+  String get no_internet_connection_info_bar_subtitle;
+
+  /// No description provided for @bluetooth_not_supported_info_bar_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth not supported'**
+  String get bluetooth_not_supported_info_bar_title;
+
+  /// No description provided for @bluetooth_not_supported_info_bar_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your device does not have a Bluetooth component. Devices nearby cannot be found.'**
+  String get bluetooth_not_supported_info_bar_subtitle;
+
+  /// No description provided for @bluetooth_no_permission_info_bar_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth permission missing'**
+  String get bluetooth_no_permission_info_bar_title;
+
+  /// No description provided for @bluetooth_no_permission_info_bar_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant the app access to Bluetooth in the settings to find devices nearby.'**
+  String get bluetooth_no_permission_info_bar_subtitle;
+
+  /// No description provided for @bluetooth_disabled_info_bar_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth disabled'**
+  String get bluetooth_disabled_info_bar_title;
+
+  /// No description provided for @bluetooth_disabled_info_bar_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Bluetooth to find devices nearby.'**
+  String get bluetooth_disabled_info_bar_subtitle;
+
+  /// No description provided for @bluetooth_error_info_bar_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth error'**
+  String get bluetooth_error_info_bar_title;
+
+  /// No description provided for @bluetooth_error_info_bar_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Schaue in der Hilfe nach für Problemlösungen. Some Bluetooth processes have failed. Check the help for troubleshooting.'**
+  String get bluetooth_error_info_bar_subtitle;
+
+  /// No description provided for @drawer_close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get drawer_close;
+}
+
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
+  const _AppLocalizationsDelegate();
+
+  @override
+  Future<AppLocalizations> load(Locale locale) {
+    return SynchronousFuture<AppLocalizations>(lookupAppLocalizations(locale));
+  }
+
+  @override
+  bool isSupported(Locale locale) =>
+      <String>['de', 'en'].contains(locale.languageCode);
+
+  @override
+  bool shouldReload(_AppLocalizationsDelegate old) => false;
+}
+
+AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when only language code is specified.
+  switch (locale.languageCode) {
+    case 'de':
+      return AppLocalizationsDe();
+    case 'en':
+      return AppLocalizationsEn();
+  }
+
+  throw FlutterError(
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
+}

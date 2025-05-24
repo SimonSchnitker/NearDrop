@@ -5,8 +5,8 @@ import 'package:near_drop/tools/ui/WidgetModifier.dart';
 import 'package:provider/provider.dart';
 import 'package:near_drop/auth/presentation/viewmodel/GuestLoginViewModel.dart';
 import '../../../Routes.dart';
+import '../../../l10n/gen/app_localizations.dart';
 import '../../../tools/ui/LoadingOverlay.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class GuestLoginPage extends StatelessWidget
 {

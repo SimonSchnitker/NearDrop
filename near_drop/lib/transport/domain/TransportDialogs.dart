@@ -5,11 +5,11 @@ import 'package:near_drop/tools/FileSizeHelper.dart';
 import 'package:near_drop/transport/domain/TransportController.dart';
 import 'package:open_app_file/open_app_file.dart';
 import '../../core/entity/Device.dart';
+import '../../l10n/gen/app_localizations.dart';
 import '../../nearby/presentation/pages/NearbyPage.dart';
 import 'enums/MimeTypeGroup.dart';
 import 'enums/SendRequestAnswer.dart';
 import 'models/ReceivedFile.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// Gibt den MIME-Typ-String basierend auf der Gruppe und der Anzahl der Dateien zurück.
 String getMimeTypeString(BuildContext context, MimeTypeGroup mimeTypeGroup, int filesCount)
