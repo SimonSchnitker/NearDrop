@@ -136,7 +136,7 @@ class NearbyViewModel extends ChangeNotifier
                 {
                     hasBluetoothPermissions = true;
                     await _nearbyController.startBleServices();
-                    //_showDeviceNotFoundBalloonAfterDelay();
+                    _showDeviceNotFoundBalloonAfterDelay();
                 }
             }
             else if (state == BluetoothAdapterState.off)
