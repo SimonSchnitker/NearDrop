@@ -144,5 +144,10 @@
     "help_page_install_on_apple_content": "Im Apple App Store herunterladen",
     "help_page_install_on_windows_title": "Near Drop für Windows",
     "help_page_install_on_windows_content": "Im Microsoft Store herunterladen",
-    "nearby_page_help_button_tooltip": "Hilfe"
+    "nearby_page_help_button_tooltip": "Hilfe",
+    "snackbar_message_connection_error": "Während der Übertragung ist ein Verbindungsfehler aufgetreten.",
+    "snackbar_message_timeout": "Es konnte keine Verbindung zum Gerät hergestellt werden.",
+    "snackbar_message_file_access_error": "Es konnte auf mindestens eine Datei nicht zugegriffen werden.",
+    "snackbar_message_receiver_error": "Beim Empfänger ist ein Fehler aufgetreten.",
+    "snackbar_retry_action": "Erneut versuchen"
 }

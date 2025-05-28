@@ -144,5 +144,10 @@
   "help_page_install_on_apple_content": "Available on Apple App Store",
   "help_page_install_on_windows_title": "Near Drop for Windows",
   "help_page_install_on_windows_content": "Available on Microsoft Store",
-  "nearby_page_help_button_tooltip": "Help"
+  "nearby_page_help_button_tooltip": "Help",
+  "snackbar_message_connection_error": "An connection error occurred during the transfer.",
+  "snackbar_message_timeout": "The connection to the device could not be established.",
+  "snackbar_message_file_access_error": "It was not possible to access at least one file.",
+  "snackbar_message_receiver_error": "An error occurred at the receiver.",
+  "snackbar_retry_action": "Retry"
 }

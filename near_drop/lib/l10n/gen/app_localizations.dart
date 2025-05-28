@@ -699,6 +699,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Help'**
   String get nearby_page_help_button_tooltip;
+
+  /// No description provided for @snackbar_message_connection_error.
+  ///
+  /// In en, this message translates to:
+  /// **'An connection error occurred during the transfer.'**
+  String get snackbar_message_connection_error;
+
+  /// No description provided for @snackbar_message_timeout.
+  ///
+  /// In en, this message translates to:
+  /// **'The connection to the device could not be established.'**
+  String get snackbar_message_timeout;
+
+  /// No description provided for @snackbar_message_file_access_error.
+  ///
+  /// In en, this message translates to:
+  /// **'It was not possible to access at least one file.'**
+  String get snackbar_message_file_access_error;
+
+  /// No description provided for @snackbar_message_receiver_error.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred at the receiver.'**
+  String get snackbar_message_receiver_error;
+
+  /// No description provided for @snackbar_retry_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get snackbar_retry_action;
 }
 
 class _AppLocalizationsDelegate

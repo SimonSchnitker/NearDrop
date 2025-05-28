@@ -340,4 +340,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nearby_page_help_button_tooltip => 'Help';
+
+  @override
+  String get snackbar_message_connection_error =>
+      'An connection error occurred during the transfer.';
+
+  @override
+  String get snackbar_message_timeout =>
+      'The connection to the device could not be established.';
+
+  @override
+  String get snackbar_message_file_access_error =>
+      'It was not possible to access at least one file.';
+
+  @override
+  String get snackbar_message_receiver_error =>
+      'An error occurred at the receiver.';
+
+  @override
+  String get snackbar_retry_action => 'Retry';
 }

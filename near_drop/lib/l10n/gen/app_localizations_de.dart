@@ -343,4 +343,23 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get nearby_page_help_button_tooltip => 'Hilfe';
+
+  @override
+  String get snackbar_message_connection_error =>
+      'Während der Übertragung ist ein Verbindungsfehler aufgetreten.';
+
+  @override
+  String get snackbar_message_timeout =>
+      'Es konnte keine Verbindung zum Gerät hergestellt werden.';
+
+  @override
+  String get snackbar_message_file_access_error =>
+      'Es konnte auf mindestens eine Datei nicht zugegriffen werden.';
+
+  @override
+  String get snackbar_message_receiver_error =>
+      'Beim Empfänger ist ein Fehler aufgetreten.';
+
+  @override
+  String get snackbar_retry_action => 'Erneut versuchen';
 }

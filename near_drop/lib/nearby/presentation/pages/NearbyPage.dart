@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:balloon_widget/balloon_widget.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:near_drop/core/entity/CommunicationInfo.dart';
@@ -13,6 +14,7 @@ import 'package:near_drop/nearby/presentation/widgets/ManuallyConnectingBottomSh
 import 'package:near_drop/nearby/presentation/widgets/PlusingCircleLoader.dart';
 import 'package:near_drop/tools/ui/FlexibleAppBar.dart';
 import 'package:near_drop/tools/ui/WidgetModifier.dart';
+import 'package:near_drop/transport/domain/enums/SendResponse.dart';
 import 'package:near_drop/transport/presentation/TransportViewModel.dart';
 import 'package:provider/provider.dart';
 import '../../../Routes.dart';
@@ -77,8 +79,8 @@ class NearbyPage extends StatelessWidget
                     _bottomBar(context),
                 ],
             )
+            .paddingAll(16)
             .safeArea()
-            .paddingAll(16),
           ],
         ),
       ),
@@ -121,21 +123,24 @@ class NearbyPage extends StatelessWidget
   }
 
   Widget _scanningAnimation(BuildContext context) {
-      return AnimatedOpacity(
-        duration: Duration(milliseconds: 600),
-        opacity: context.watch<NearbyViewModel>().nearbyDevices.isEmpty ? 1 : 0,
-        child: Stack(
-            alignment: Alignment.center,
-            children: [
-                PulsingCirclesLoader()
-                    .opacity(0.2),
-                Icon(
-                    Icons.sensors_rounded,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: Platform.isAndroid || Platform.isIOS ? 48 : 40,
-                )
-            ],
-        ).align(Alignment.center).paddingOnly(left: 32, right: 32, top: 110),
+      return IgnorePointer(
+          ignoring: true,
+        child: AnimatedOpacity(
+          duration: Duration(milliseconds: 600),
+          opacity: context.watch<NearbyViewModel>().nearbyDevices.isEmpty ? 1 : 0,
+          child: Stack(
+              alignment: Alignment.center,
+              children: [
+                  PulsingCirclesLoader()
+                      .opacity(0.2),
+                  Icon(
+                      Icons.sensors_rounded,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: Platform.isAndroid || Platform.isIOS ? 48 : 40,
+                  )
+              ],
+          ).align(Alignment.center).paddingOnly(left: 32, right: 32, top: 110),
+        ),
       );
   }
 
@@ -476,7 +481,7 @@ class NearbyPage extends StatelessWidget
                         style: TextStyle(color: Theme.of(context).colorScheme.onSurface)
                     ),
                   ]),
-              ).expanded(),
+              ).expanded(flex: (Platform.isAndroid || Platform.isIOS) ? 1 : 0),
             ],
           )
             .paddingSymmetric(horizontal: 16)
@@ -690,7 +695,41 @@ class NearbyPage extends StatelessWidget
       );
   }
 
+  /// Sendet die ausgewählten Dateien an das angegebene Gerät.
   Future<void> _handleSendFiles(BuildContext context, Device device, List<File> files) async {
-      await context.read<TransportViewModel>().sendFiles(device, files);
+      SendResponse sendResponse = await context.read<TransportViewModel>().sendFiles(device, files);
+
+      String message = "";
+      switch (sendResponse) {
+        case SendResponse.receiverError:
+            message = AppLocalizations.of(context)!.snackbar_message_receiver_error;
+            break;
+        case SendResponse.fileAccessError:
+            message = AppLocalizations.of(context)!.snackbar_message_file_access_error;
+            break;
+        case SendResponse.connectionError:
+            message = AppLocalizations.of(context)!.snackbar_message_connection_error;
+            break;
+        case SendResponse.timeout:
+            message = AppLocalizations.of(context)!.snackbar_message_timeout;
+            break;
+        default:
+              break;
+      }
+
+      if (message.isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text(message),
+                  duration: Duration(seconds: 6),
+                  action: SnackBarAction(
+                      label: AppLocalizations.of(context)!.snackbar_retry_action,
+                      onPressed: () {
+                          _handleSendFiles(context, device, files);
+                      }
+                  ),
+              )
+          );
+      }
   }
 }
