@@ -585,6 +585,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get drawer_close;
+
+  /// No description provided for @account_page_title.
+  ///
+  /// In en, this message translates to:
+  /// **'My data'**
+  String get account_page_title;
+
+  /// No description provided for @account_page_change_firstname_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Change firstname'**
+  String get account_page_change_firstname_label;
+
+  /// No description provided for @account_page_change_firstname_dialog_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Change firstname'**
+  String get account_page_change_firstname_dialog_title;
+
+  /// No description provided for @account_page_change_firstname_textfield_label.
+  ///
+  /// In en, this message translates to:
+  /// **'New firstname'**
+  String get account_page_change_firstname_textfield_label;
+
+  /// No description provided for @account_page_change_firstname_dialog_save_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get account_page_change_firstname_dialog_save_button;
+
+  /// No description provided for @account_page_show_my_data_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Show my data'**
+  String get account_page_show_my_data_label;
+
+  /// No description provided for @account_page_delete_account_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all data'**
+  String get account_page_delete_account_label;
+
+  /// No description provided for @account_page_delete_account_dialog_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all data'**
+  String get account_page_delete_account_dialog_title;
+
+  /// No description provided for @account_page_delete_account_dialog_content.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete all your data? This action cannot be undone.'**
+  String get account_page_delete_account_dialog_content;
+
+  /// No description provided for @account_page_delete_account_dialog_delete_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get account_page_delete_account_dialog_delete_button;
 }
 
 class _AppLocalizationsDelegate

@@ -281,4 +281,35 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get drawer_close => 'Schließen';
+
+  @override
+  String get account_page_title => 'Meine Daten';
+
+  @override
+  String get account_page_change_firstname_label => 'Vorname ändern';
+
+  @override
+  String get account_page_change_firstname_dialog_title => 'Vorname ändern';
+
+  @override
+  String get account_page_change_firstname_textfield_label => 'Neuer Vorname';
+
+  @override
+  String get account_page_change_firstname_dialog_save_button => 'Speichern';
+
+  @override
+  String get account_page_show_my_data_label => 'Meine Daten anzeigen';
+
+  @override
+  String get account_page_delete_account_label => 'Alle Daten löschen';
+
+  @override
+  String get account_page_delete_account_dialog_title => 'Alle Daten löschen';
+
+  @override
+  String get account_page_delete_account_dialog_content =>
+      'Bist du sicher, dass du alle deine Daten löschen möchtest? Dieser Vorgang kann nicht rückgängig gemacht werden.';
+
+  @override
+  String get account_page_delete_account_dialog_delete_button => 'Löschen';
 }

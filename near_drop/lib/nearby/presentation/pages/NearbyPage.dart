@@ -15,6 +15,7 @@ import 'package:near_drop/tools/ui/FlexibleAppBar.dart';
 import 'package:near_drop/tools/ui/WidgetModifier.dart';
 import 'package:near_drop/transport/presentation/TransportViewModel.dart';
 import 'package:provider/provider.dart';
+import '../../../Routes.dart';
 import '../../../Runtime.dart';
 import '../../../core/entity/Device.dart';
 import '../../../core/enums/CommunicationState.dart';
@@ -440,7 +441,7 @@ class NearbyPage extends StatelessWidget
 
           }, icon: Icon(Icons.help_outline)),
         IconButton(onPressed: () {
-
+        Navigator.of(context).pushNamed(Routes.guestSettings);
       }, icon: Icon(Icons.person_outline), tooltip: AppLocalizations.of(context)!.nearby_page_account_icon_tooltip)
       ],
     );
@@ -467,7 +468,7 @@ class NearbyPage extends StatelessWidget
                         style: TextStyle(color: Theme.of(context).colorScheme.onSurface)
                     ),
                     TextSpan(
-                        text: Runtime.firstname,
+                        text: context.watch<NearbyViewModel>().firstname,
                         style: TextStyle(color: Theme.of(context).colorScheme.primary)
                     ),
                     TextSpan(
@@ -475,7 +476,7 @@ class NearbyPage extends StatelessWidget
                         style: TextStyle(color: Theme.of(context).colorScheme.onSurface)
                     ),
                   ]),
-              ),
+              ).expanded(),
             ],
           )
             .paddingSymmetric(horizontal: 16)

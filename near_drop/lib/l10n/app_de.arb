@@ -125,5 +125,15 @@
     "bluetooth_disabled_info_bar_subtitle": "Aktiviere Bluetooth, um Geräte in der Nähe zu finden.",
     "bluetooth_error_info_bar_title": "Bluetooth-Probleme",
     "bluetooth_error_info_bar_subtitle": "Einige Bluetooth-Prozesse sind fehlgeschlagen. Schaue in der Hilfe nach für Problemlösungen.",
-    "drawer_close": "Schließen"
+    "drawer_close": "Schließen",
+    "account_page_title": "Meine Daten",
+    "account_page_change_firstname_label": "Vorname ändern",
+    "account_page_change_firstname_dialog_title": "Vorname ändern",
+    "account_page_change_firstname_textfield_label": "Neuer Vorname",
+    "account_page_change_firstname_dialog_save_button": "Speichern",
+    "account_page_show_my_data_label": "Meine Daten anzeigen",
+    "account_page_delete_account_label": "Alle Daten löschen",
+    "account_page_delete_account_dialog_title": "Alle Daten löschen",
+    "account_page_delete_account_dialog_content": "Bist du sicher, dass du alle deine Daten löschen möchtest? Dieser Vorgang kann nicht rückgängig gemacht werden.",
+    "account_page_delete_account_dialog_delete_button": "Löschen"
 }

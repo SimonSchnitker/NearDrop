@@ -125,5 +125,15 @@
   "bluetooth_disabled_info_bar_subtitle": "Enable Bluetooth to find devices nearby.",
   "bluetooth_error_info_bar_title": "Bluetooth error",
   "bluetooth_error_info_bar_subtitle": "Schaue in der Hilfe nach für Problemlösungen. Some Bluetooth processes have failed. Check the help for troubleshooting.",
-  "drawer_close": "Close"
+  "drawer_close": "Close",
+  "account_page_title": "My data",
+  "account_page_change_firstname_label": "Change firstname",
+  "account_page_change_firstname_dialog_title": "Change firstname",
+  "account_page_change_firstname_textfield_label": "New firstname",
+  "account_page_change_firstname_dialog_save_button": "Save",
+  "account_page_show_my_data_label": "Show my data",
+  "account_page_delete_account_label": "Delete all data",
+  "account_page_delete_account_dialog_title": "Delete all data",
+  "account_page_delete_account_dialog_content": "Are you sure you want to delete all your data? This action cannot be undone.",
+  "account_page_delete_account_dialog_delete_button": "Delete"
 }

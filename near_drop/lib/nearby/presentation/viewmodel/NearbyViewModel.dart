@@ -7,6 +7,7 @@ import 'package:kiwi/kiwi.dart';
 import 'package:near_drop/nearby/domain/NearbyController.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../../../Runtime.dart';
 import '../../../core/entity/Device.dart';
 import '../../../core/enums/DeviceType.dart';
 import '../../../core/enums/OS.dart';
@@ -17,6 +18,7 @@ class NearbyViewModel extends ChangeNotifier
     final NearbyController _nearbyController = KiwiContainer().resolve<NearbyController>();
 
     final List<Device> nearbyDevices = [];
+    String firstname = Runtime.firstname;
     bool isConnectedWithNetwork = true;
     bool isBluetoothSupported = true;
     bool isBluetoothEnabled = true;
@@ -47,6 +49,12 @@ class NearbyViewModel extends ChangeNotifier
                 ""
             ));
         }
+
+        // Auf Änderungen des Vornamens lauschen
+        Runtime.onFirstnameChanged.stream.listen((newFirstname) {
+            firstname = newFirstname;
+            notifyListeners();
+        });
 
         // Auf Änderungen des Bluetooth-Status lauschen
         _nearbyController.onBleAdvertiserStatusChanged.stream.listen((isAdverstising) {

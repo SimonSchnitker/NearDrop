@@ -9,6 +9,12 @@ class AuthGateway
         return await Supabase.instance.client.auth.signInAnonymously();
     }
 
+    /// Meldet den aktuellen Benutzer ab.
+    Future<void> signOut() async
+    {
+        return await Supabase.instance.client.auth.signOut();
+    }
+
     /// Legt eine neue UUID für den Benutzer in der Supabase-Datenbank an oder aktualisiert sie und gibt sie zurück.
     Future<String> updateNearbyUuid() async
     {

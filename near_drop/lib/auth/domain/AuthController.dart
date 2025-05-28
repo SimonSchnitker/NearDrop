@@ -31,6 +31,13 @@ class AuthController
         return response;
     }
 
+    Future<void> signOutAndDeleteAccount() async
+    {
+        await Runtime.realtimeChannel.unsubscribe();
+        await _authGateway.signOut();
+        await _settingsController.clear();
+    }
+
     /// Lädt die eigenen Gerätedaten und aktualisiert ggf. die Nearby-UUID.
     Future<void> loadThisDevice() async
     {

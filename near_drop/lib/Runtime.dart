@@ -12,6 +12,8 @@ class Runtime
         1: "1.0.0",
     };
 
+    static StreamController<String> onFirstnameChanged = StreamController<String>.broadcast();
+
     static bool deviceDataLoaded = false;
     static int deviceId = 0;
     static String firstname = "";
