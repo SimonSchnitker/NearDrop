@@ -4,4 +4,5 @@ class Routes
     static String guestLogin = "/guestLogin";
     static String nearby = "/nearby";
     static String guestSettings = "/guestSettings";
+    static String help = "/help";
 }

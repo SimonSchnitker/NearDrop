@@ -309,4 +309,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get account_page_delete_account_dialog_delete_button => 'Delete';
+
+  @override
+  String get help_page_title => 'Help';
+
+  @override
+  String get help_page_installation_title =>
+      'Install Near Drop on other devices to send and receive files.';
+
+  @override
+  String get help_page_install_on_android_title => 'Near Drop for Android';
+
+  @override
+  String get help_page_install_on_android_content =>
+      'Available on Google Play Store';
+
+  @override
+  String get help_page_install_on_apple_title => 'Near Drop for iOS and macOS';
+
+  @override
+  String get help_page_install_on_apple_content =>
+      'Available on Apple App Store';
+
+  @override
+  String get help_page_install_on_windows_title => 'Near Drop for Windows';
+
+  @override
+  String get help_page_install_on_windows_content =>
+      'Available on Microsoft Store';
+
+  @override
+  String get nearby_page_help_button_tooltip => 'Help';
 }

@@ -135,5 +135,14 @@
     "account_page_delete_account_label": "Alle Daten löschen",
     "account_page_delete_account_dialog_title": "Alle Daten löschen",
     "account_page_delete_account_dialog_content": "Bist du sicher, dass du alle deine Daten löschen möchtest? Dieser Vorgang kann nicht rückgängig gemacht werden.",
-    "account_page_delete_account_dialog_delete_button": "Löschen"
+    "account_page_delete_account_dialog_delete_button": "Löschen",
+    "help_page_title": "Hilfe",
+    "help_page_installation_title": "Installiere Near Drop auf anderen Geräten, um Dateien zu senden und zu empfangen.",
+    "help_page_install_on_android_title": "Near Drop für Android",
+    "help_page_install_on_android_content": "Im Google Play Store herunterladen",
+    "help_page_install_on_apple_title": "Near Drop für iOS & macOS",
+    "help_page_install_on_apple_content": "Im Apple App Store herunterladen",
+    "help_page_install_on_windows_title": "Near Drop für Windows",
+    "help_page_install_on_windows_content": "Im Microsoft Store herunterladen",
+    "nearby_page_help_button_tooltip": "Hilfe"
 }

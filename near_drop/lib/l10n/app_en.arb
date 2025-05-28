@@ -135,5 +135,14 @@
   "account_page_delete_account_label": "Delete all data",
   "account_page_delete_account_dialog_title": "Delete all data",
   "account_page_delete_account_dialog_content": "Are you sure you want to delete all your data? This action cannot be undone.",
-  "account_page_delete_account_dialog_delete_button": "Delete"
+  "account_page_delete_account_dialog_delete_button": "Delete",
+  "help_page_title": "Help",
+  "help_page_installation_title": "Install Near Drop on other devices to send and receive files.",
+  "help_page_install_on_android_title": "Near Drop for Android",
+  "help_page_install_on_android_content": "Available on Google Play Store",
+  "help_page_install_on_apple_title": "Near Drop for iOS and macOS",
+  "help_page_install_on_apple_content": "Available on Apple App Store",
+  "help_page_install_on_windows_title": "Near Drop for Windows",
+  "help_page_install_on_windows_content": "Available on Microsoft Store",
+  "nearby_page_help_button_tooltip": "Help"
 }

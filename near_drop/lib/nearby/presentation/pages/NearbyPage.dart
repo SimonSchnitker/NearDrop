@@ -438,8 +438,8 @@ class NearbyPage extends StatelessWidget
       ),
       actions: [
           IconButton(onPressed: () {
-
-          }, icon: Icon(Icons.help_outline)),
+            Navigator.of(context).pushNamed(Routes.help);
+          }, icon: Icon(Icons.help_outline), tooltip: AppLocalizations.of(context)!.nearby_page_help_button_tooltip),
         IconButton(onPressed: () {
         Navigator.of(context).pushNamed(Routes.guestSettings);
       }, icon: Icon(Icons.person_outline), tooltip: AppLocalizations.of(context)!.nearby_page_account_icon_tooltip)

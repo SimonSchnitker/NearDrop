@@ -645,6 +645,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get account_page_delete_account_dialog_delete_button;
+
+  /// No description provided for @help_page_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get help_page_title;
+
+  /// No description provided for @help_page_installation_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Install Near Drop on other devices to send and receive files.'**
+  String get help_page_installation_title;
+
+  /// No description provided for @help_page_install_on_android_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Near Drop for Android'**
+  String get help_page_install_on_android_title;
+
+  /// No description provided for @help_page_install_on_android_content.
+  ///
+  /// In en, this message translates to:
+  /// **'Available on Google Play Store'**
+  String get help_page_install_on_android_content;
+
+  /// No description provided for @help_page_install_on_apple_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Near Drop for iOS and macOS'**
+  String get help_page_install_on_apple_title;
+
+  /// No description provided for @help_page_install_on_apple_content.
+  ///
+  /// In en, this message translates to:
+  /// **'Available on Apple App Store'**
+  String get help_page_install_on_apple_content;
+
+  /// No description provided for @help_page_install_on_windows_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Near Drop for Windows'**
+  String get help_page_install_on_windows_title;
+
+  /// No description provided for @help_page_install_on_windows_content.
+  ///
+  /// In en, this message translates to:
+  /// **'Available on Microsoft Store'**
+  String get help_page_install_on_windows_content;
+
+  /// No description provided for @nearby_page_help_button_tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get nearby_page_help_button_tooltip;
 }
 
 class _AppLocalizationsDelegate

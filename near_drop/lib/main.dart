@@ -8,6 +8,7 @@ import 'package:near_drop/Runtime.dart';
 import 'package:near_drop/WelcomePage.dart';
 import 'package:near_drop/auth/domain/AuthController.dart';
 import 'package:near_drop/auth/presentation/pages/GuestSettingsPage.dart';
+import 'package:near_drop/help/presentation/HelpPage.dart';
 import 'package:near_drop/nearby/data/scan/ble/BleAdvertiser.dart';
 import 'package:near_drop/settings/data/SettingsGateway.dart';
 import 'package:near_drop/settings/domain/SettingsController.dart';
@@ -130,7 +131,8 @@ class MyApp extends StatelessWidget {
                       Routes.welcome: (context) => WelcomePage(),
                       Routes.guestLogin: (context) => GuestLoginPage(),
                       Routes.nearby: (context) => NearbyPage(),
-                      Routes.guestSettings: (context) => GuestSettingsPage()
+                      Routes.guestSettings: (context) => GuestSettingsPage(),
+                      Routes.help: (context) => HelpPage(),
                   },
                   initialRoute: Runtime.deviceDataLoaded ? Routes.nearby : Routes.welcome,
               );

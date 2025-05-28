@@ -22,7 +22,7 @@ class GuestSettingsPage extends StatelessWidget {
                       SliverToBoxAdapter(
                           child: Column(
                               children: [
-                                  buildChangeNameView(context),
+                                  _buildChangeNameView(context),
                                   SizedBox(height: 16,),
                                   _buildShowAccuntDataButton(context),
                                   SizedBox(height: 4,),
@@ -36,7 +36,7 @@ class GuestSettingsPage extends StatelessWidget {
       );
     }
 
-    Widget buildChangeNameView(BuildContext context) {
+    Widget _buildChangeNameView(BuildContext context) {
         return Material(
             clipBehavior: Clip.hardEdge,
             color: Theme.of(context).colorScheme.surfaceContainer,
