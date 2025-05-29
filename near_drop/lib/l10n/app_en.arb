@@ -149,5 +149,26 @@
   "snackbar_message_timeout": "The connection to the device could not be established.",
   "snackbar_message_file_access_error": "It was not possible to access at least one file.",
   "snackbar_message_receiver_error": "An error occurred at the receiver.",
-  "snackbar_retry_action": "Retry"
+  "snackbar_retry_action": "Retry",
+  "cancel_transport_title": "Stop transfer with {firstname}?",
+  "@cancel_transport_title": {
+    "placeholders": {
+      "firstname": {
+        "type": "String"
+      }
+    }
+  },
+  "cancel_transport_confirm_dialog_button": "Stop",
+  "cancel_transport_cancel_dialog_button": "Continue",
+  "file_skip_dialog_title": "No access to file",
+  "file_skip_dialog_content": "File {filename} cannot be accessed. Do you want to skip it?",
+  "@file_skip_dialog_content": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
+  "file_skip_dialog_skip_button": "Skip",
+  "file_skip_dialog_cancel_transport_button": "Cancel transfer"
 }

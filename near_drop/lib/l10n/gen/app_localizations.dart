@@ -729,6 +729,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry'**
   String get snackbar_retry_action;
+
+  /// No description provided for @cancel_transport_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop transfer with {firstname}?'**
+  String cancel_transport_title(String firstname);
+
+  /// No description provided for @cancel_transport_confirm_dialog_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get cancel_transport_confirm_dialog_button;
+
+  /// No description provided for @cancel_transport_cancel_dialog_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get cancel_transport_cancel_dialog_button;
+
+  /// No description provided for @file_skip_dialog_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No access to file'**
+  String get file_skip_dialog_title;
+
+  /// No description provided for @file_skip_dialog_content.
+  ///
+  /// In en, this message translates to:
+  /// **'File {filename} cannot be accessed. Do you want to skip it?'**
+  String file_skip_dialog_content(String filename);
+
+  /// No description provided for @file_skip_dialog_skip_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get file_skip_dialog_skip_button;
+
+  /// No description provided for @file_skip_dialog_cancel_transport_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel transfer'**
+  String get file_skip_dialog_cancel_transport_button;
 }
 
 class _AppLocalizationsDelegate

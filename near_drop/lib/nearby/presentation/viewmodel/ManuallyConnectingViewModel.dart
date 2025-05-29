@@ -6,6 +6,7 @@ import 'package:near_drop/nearby/presentation/pages/NearbyPage.dart';
 import 'package:near_drop/tools/IdHelper.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 
+/// Zustände die auf der UI angezeigt werden können, wenn ein QR-Code gescannt wird.
 enum QrState
 {
     showingQr,
@@ -13,6 +14,7 @@ enum QrState
     loading,
 }
 
+/// Fehler, die beim Scannen eines QR-Codes auftreten können.
 enum ScanResultError
 {
     none,
@@ -22,6 +24,7 @@ enum ScanResultError
     requestDeviceDataError,
 }
 
+/// Dieses ViewModel wird verwendet, um die Logik für das manuelle Verbinden mit einem Gerät über einen QR-Code zu verwalten.
 class ManuallyConnectingViewModel extends ChangeNotifier
 {
     final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
@@ -31,6 +34,7 @@ class ManuallyConnectingViewModel extends ChangeNotifier
     ScanResultError scanResultError = ScanResultError.none;
     QRViewController? controller;
 
+    /// Setzt den Zustand des QR-Codes und stoppt die Kamera, wenn der Zustand nicht `scanningQr` ist.
     void setQrState(QrState state)
     {
         if (qrState != QrState.scanningQr)
@@ -94,6 +98,7 @@ class ManuallyConnectingViewModel extends ChangeNotifier
         notifyListeners();
     }
 
+    /// Fordert die Gerätedaten für das gegebene UUID an und schließt den ModalBottomSheet, wenn erfolgreich.
     Future<void> _requestDeviceData(String uuid) async
     {
         setQrState(QrState.loading);

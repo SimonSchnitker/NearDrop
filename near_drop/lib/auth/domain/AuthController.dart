@@ -7,6 +7,8 @@ import '../../settings/domain/Setting.dart';
 /// Geschäftslogik zum Authentifizieren.
 class AuthController
 {
+    static const int UUID_VALIDITY_MINUTES = 10;
+
     final AuthGateway _authGateway;
     final SettingsController _settingsController;
 
@@ -31,6 +33,7 @@ class AuthController
         return response;
     }
 
+    /// Meldet den aktuellen Benutzer ab, löscht die Einstellungen und unsubscribt vom Realtime-Kanal.
     Future<void> signOutAndDeleteAccount() async
     {
         await Runtime.realtimeChannel.unsubscribe();
@@ -44,7 +47,7 @@ class AuthController
         String? firstname = await _settingsController.get(firstnameSetting);
         if (firstname == null)
         {
-            throw Exception("Firstname ist null.");
+            firstname = "???";
         }
 
         String? nearbyUuid = await _settingsController.get(nearbyUuidSetting);
@@ -57,11 +60,11 @@ class AuthController
         }
         else
         {
-            DateTime? creationDate = DateTime.parse(nearbyUuidCreation);
+            DateTime? creationDate = DateTime.tryParse(nearbyUuidCreation);
 
-            if (DateTime.now().difference(creationDate).inMinutes > 10)
+            if (creationDate == null || DateTime.now().difference(creationDate).inMinutes > UUID_VALIDITY_MINUTES)
             {
-                // Wenn die UUID älter als 10 Minuten ist, wird eine neue UUID generiert
+                // Wenn die UUID null oder älter als eine bestimmte Zeitspanne ist, wird eine neue UUID generiert
                 await updateNearbyUuid();
             }
             else
@@ -70,11 +73,10 @@ class AuthController
             }
         }
 
-
         bool realtimeChannelInitialized = await Runtime.initializeChannel();
         if (!realtimeChannelInitialized)
         {
-            throw Exception("RealtimeChannel konnte nicht initialisiert werden");
+            throw Exception("RealtimeChannel konnte nicht initialisiert werden.");
         }
 
         Runtime.firstname = firstname;

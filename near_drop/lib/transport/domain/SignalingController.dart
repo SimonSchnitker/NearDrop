@@ -145,8 +145,7 @@ class SignalingController
         else
         {
             print("Antwort konnte nicht gesendet werden.");
-            await connection.close();
-            device.connection = null;
+            await device.clearConnection();
             return;
         }
     }
@@ -348,6 +347,7 @@ class SignalingController
     {
         for (int i = 0; i < sendRetryCount; i++)
         {
+            // Wenn die PeerConnection mittlerweile geschlossen wurde, dann abbrechen.
             if (peerConnection.connectionState == RTCPeerConnectionState.RTCPeerConnectionStateClosed || peerConnection.connectionState == RTCPeerConnectionState.RTCPeerConnectionStateDisconnected || peerConnection.connectionState == RTCPeerConnectionState.RTCPeerConnectionStateFailed)
             {
                 return false;

@@ -15,7 +15,7 @@ class NearbyController
     final StreamController<bool> onBleAdvertiserStatusChanged = StreamController.broadcast();
     final StreamController<bool> onBleScannerStatusChanged = StreamController.broadcast();
 
-    final Duration waitingForDeviceDataTimeout = Duration(seconds: 5);
+    final Duration waitingForDeviceDataTimeout = Duration(seconds: 4);
     final Map<String, DateTime> _requestingDevices = {};
 
     NearbyController(this._bleScanner, this._bleAdvertiser, this._nearbyGateway)
@@ -74,6 +74,12 @@ class NearbyController
     /// Wird aufgerufen, wenn Gerätedaten empfangen wurden.
     Future<void> onDeviceDataReceived(Device device) async
     {
+        // Wenn wir die Gerätedaten nicht angefordert haben, dann abbrechen.
+        if (!_isWaitingForDeviceData(device.nearbyUuid))
+        {
+            return;
+        }
+
         await NearbyDevicesContainer.addIfNotContains(device);
     }
 
@@ -88,7 +94,7 @@ class NearbyController
             return;
         }
 
-        // Ansonsten fordern wir die Gerätedaten an.
+        // Ansonsten fordern wir auch seine Gerätedaten an.
         await requestDeviceData(nearbyUuid);
     }
 
@@ -97,26 +103,6 @@ class NearbyController
     {
         await _bleScanner.start();
         await _bleAdvertiser.start();
-    }
-
-    Future<void> startBleAdvertiser() async
-    {
-        await _bleAdvertiser.start();
-    }
-
-    Future<void> startBleScanner() async
-    {
-        await _bleScanner.start();
-    }
-
-    Future<void> stopBleAdvertiser() async
-    {
-        await _bleAdvertiser.stop();
-    }
-
-    Future<void> stopBleScanner() async
-    {
-        await _bleScanner.stop();
     }
 
     /// Stoppt die BLE-Scanner- und Werbeträgerdienste.

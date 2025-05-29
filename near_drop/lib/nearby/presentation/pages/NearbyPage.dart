@@ -22,7 +22,6 @@ import '../../../Runtime.dart';
 import '../../../core/entity/Device.dart';
 import '../../../core/enums/CommunicationState.dart';
 import '../../../core/enums/ErrorState.dart';
-import '../../../core/enums/OS.dart';
 import '../../../l10n/gen/app_localizations.dart';
 
 class NearbyPage extends StatelessWidget
@@ -69,8 +68,7 @@ class NearbyPage extends StatelessWidget
                 ),
               ],
             ),
-          // Ladeanimation
-          _scanningAnimation(context),
+          _scanningAnimation(context), // Ladeanimation, wenn keine Geräte gefunden wurden
             Column(
                 spacing: 8,
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -87,6 +85,7 @@ class NearbyPage extends StatelessWidget
     );
   }
 
+  /// Ein Infobereich, der verschiedene Informationen anzeigt, wenn Probleme auftreten.
   Widget _infoArea(BuildContext context) {
       return AnimatedOpacity(
         duration: Duration(milliseconds: context.watch<NearbyViewModel>().isInfoAreaVisible ? 400 : 200),
@@ -122,6 +121,7 @@ class NearbyPage extends StatelessWidget
       );
   }
 
+  /// Zeigt eine Ladeanimation an, wenn nach Geräten gesucht wird und keine gefunden wurden.
   Widget _scanningAnimation(BuildContext context) {
       return IgnorePointer(
           ignoring: true,
@@ -144,6 +144,7 @@ class NearbyPage extends StatelessWidget
       );
   }
 
+  /// Seitenleiste, der Informationen über die App anzeigt.
   Widget _drawerAppInfo(BuildContext context) {
       return Drawer(
         child: Column(
@@ -218,6 +219,7 @@ class NearbyPage extends StatelessWidget
       );
   }
 
+  /// Zeigt eine Gitteransicht der gefundenen Geräte an.
   Widget _nearbyDevicesGrid(BuildContext context, List<Device> devices) {
     return SliverGrid(
         delegate: SliverChildBuilderDelegate(
@@ -251,6 +253,7 @@ class NearbyPage extends StatelessWidget
       }
   }
 
+  /// Erstellt ein Widget, das die Informationen eines Geräts anzeigt.
   Widget _deviceItem(BuildContext context, Device device) {
     return ChangeNotifierProvider(
         create: (context) => device,
@@ -392,6 +395,7 @@ class NearbyPage extends StatelessWidget
     );
   }
 
+  /// Gibt den Text für den Kommunikationsstatus zurück.
   String _getCommunicationInfoText(BuildContext context, CommunicationInfo info) {
       switch (info.communicationState) {
           case CommunicationState.connecting:
@@ -431,6 +435,7 @@ class NearbyPage extends StatelessWidget
       return "";
   }
 
+  /// Erstellt die App-Leiste mit dem Titel und den Aktionen.
   Widget _appBar(BuildContext context) {
     return FlexibleAppBar(
       title: AppLocalizations.of(context)!.app_name,
@@ -452,6 +457,7 @@ class NearbyPage extends StatelessWidget
     );
   }
 
+  /// Erstellt die Leiste mit Informationen am unteren Rand der Seite.
   Widget _bottomBar(BuildContext context) {
     return Row(
       spacing: 0,
@@ -514,7 +520,7 @@ class NearbyPage extends StatelessWidget
                 ).paddingSymmetric(horizontal: 8, vertical: 4),
               )
               .onTap(() {
-                  context.read<NearbyViewModel>().toggleDeviceNotFoundBalloonVisible();
+                  context.read<NearbyViewModel>().setDeviceNotFoundBalloonVisibility(false);
               })
           ),
         child: Material(
@@ -526,6 +532,7 @@ class NearbyPage extends StatelessWidget
           .clickable(
             borderRadius: BorderRadius.circular(28),
             onTap: () {
+                context.read<NearbyViewModel>().setDeviceNotFoundBalloonVisibility(false);
                 showModalBottomSheet(
                     context: context,
                     builder: (context) => manuallyConnectingView(context),
@@ -565,6 +572,7 @@ class NearbyPage extends StatelessWidget
     ]);
   }
 
+  /// Erstellt eine Infomitteilung mit einem Titel, Untertitel und einem Icon.
   Widget _infoBar(BuildContext context, String title, String subtitle, IconData icon) {
       return Material(
           color: Theme.of(context).colorScheme.errorContainer,
@@ -598,31 +606,33 @@ class NearbyPage extends StatelessWidget
       );
   }
 
+  /// Zeigt einen Dialog an, um den Transport mit einem Gerät abzubrechen.
   Widget _cancelTransportDialog(BuildContext context, Device device) {
       return AlertDialog(
         key: device.cancelTransportDialogKey,
         actionsPadding: EdgeInsets.only(bottom: 16, right: 24, left: 24),
         title: Text(
-            "Übertragung mit ${device.firstname} beenden?",
+            AppLocalizations.of(context)!.cancel_transport_title(device.firstname),
         ),
         actions: [
             TextButton(
                 onPressed: () {
                     Navigator.of(context).pop();
                 },
-                child: Text(AppLocalizations.of(context)!.cancel_button,)
+                child: Text(AppLocalizations.of(context)!.cancel_transport_cancel_dialog_button,)
             ),
             TextButton(
                 onPressed: () {
                     Navigator.of(context).pop();
                     context.read<TransportViewModel>().cancelTransport(device);
                 },
-                child: Text("Beenden")
+                child: Text(AppLocalizations.of(context)!.cancel_transport_confirm_dialog_button)
             )
         ],
       );
   }
 
+  /// Zeigt einen Dialog an, um Dateien an ein Gerät zu senden.
   Widget _sendDialog(BuildContext context, Device device) {
       return AlertDialog(
           actionsPadding: EdgeInsets.only(bottom: 16, right: 24),

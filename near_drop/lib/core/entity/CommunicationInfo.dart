@@ -78,8 +78,6 @@ class CommunicationInfo extends ChangeNotifier
     /// Setzt einen Fehler-Status.
     Future<void> setErrorState(ErrorState errorState) async
     {
-        print("ErrorState wird gesetzt: $errorState");
-
         this.cancelationRequested = false;
         this.communicationState = CommunicationState.none;
         this.progress = 0.0;

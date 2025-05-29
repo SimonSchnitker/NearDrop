@@ -362,4 +362,30 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get snackbar_retry_action => 'Erneut versuchen';
+
+  @override
+  String cancel_transport_title(String firstname) {
+    return 'Übertragung mit $firstname beenden?';
+  }
+
+  @override
+  String get cancel_transport_confirm_dialog_button => 'Beenden';
+
+  @override
+  String get cancel_transport_cancel_dialog_button => 'Fortsetzen';
+
+  @override
+  String get file_skip_dialog_title => 'Kein Zugriff auf Datei';
+
+  @override
+  String file_skip_dialog_content(String filename) {
+    return 'Auf die Datei $filename kann nicht zugegriffen werden. Möchtest du sie überspringen?';
+  }
+
+  @override
+  String get file_skip_dialog_skip_button => 'Überspringen';
+
+  @override
+  String get file_skip_dialog_cancel_transport_button =>
+      'Übertragung abbrechen';
 }

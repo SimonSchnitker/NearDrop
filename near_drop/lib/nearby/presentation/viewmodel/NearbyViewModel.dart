@@ -84,24 +84,25 @@ class NearbyViewModel extends ChangeNotifier
         });
 
         _listenNetworkStateChanges();
-        _checkBluetoothSupport();
-        if (isBluetoothSupported)
-        {
-            _listenForBluetoothStateChanged();
-        }
-
-        //_nearbyController.startListeningForDeviceData();
+        _checkBluetoothSupport().then((_) {
+            if (isBluetoothSupported)
+            {
+                _listenForBluetoothStateChanges();
+            }
+        });
     }
 
+    /// Zeigt die Info-Nachrichten an oder blendet sie aus.
     void toggleInfoMessagesVisibility()
     {
         isInfoAreaVisible = !isInfoAreaVisible;
         notifyListeners();
     }
 
-    void toggleDeviceNotFoundBalloonVisible()
+    /// Setzt die Sichtbarkeit der Ballon-Nachricht, die angezeigt wird, wenn nach einiger Zeit kein Gerät gefunden wurde.
+    void setDeviceNotFoundBalloonVisibility(bool visible)
     {
-        isDeviceNotFoundBalloonVisible = !isDeviceNotFoundBalloonVisible;
+        isDeviceNotFoundBalloonVisible = visible;
         notifyListeners();
     }
 
@@ -132,7 +133,7 @@ class NearbyViewModel extends ChangeNotifier
     }
 
     /// Lauscht auf Änderungen des Bluetooth-Status.
-    void _listenForBluetoothStateChanged()
+    void _listenForBluetoothStateChanges()
     {
         FlutterBluePlus.adapterState.listen((state) async {
             if (state == BluetoothAdapterState.on)
@@ -217,31 +218,11 @@ class NearbyViewModel extends ChangeNotifier
     {
         await Future.delayed(deviceNotFoundBalloonDelay);
 
-        // Wenn nach dem Delay immer noch keine Geräte gefunden wurden, zeige die Ballon-Nachricht an
+        // Wenn nach dem Delay immer noch keine Geräte gefunden wurden, die Ballon-Nachricht anzeigen.
         if (nearbyDevices.isEmpty)
         {
             isDeviceNotFoundBalloonVisible = true;
             notifyListeners();
         }
-    }
-
-    Future<void> startBleScan() async
-    {
-        await _nearbyController.startBleScanner();
-    }
-
-    Future<void> stopBleScan() async
-    {
-        await _nearbyController.stopBleScanner();
-    }
-
-    Future<void> startBleAdvertiser() async
-    {
-        await _nearbyController.startBleAdvertiser();
-    }
-
-    Future<void> stopBleAdvertiser() async
-    {
-        await _nearbyController.stopBleAdvertiser();
     }
 }

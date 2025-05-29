@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'package:media_scanner/media_scanner.dart';
 import 'package:mime/mime.dart';
 import 'package:near_drop/core/entity/Device.dart';
 import 'package:near_drop/transport/domain/enums/FileReceiveResult.dart';
 import 'package:near_drop/transport/domain/enums/FileSendResult.dart';
 import 'package:near_drop/transport/domain/enums/MimeTypeGroup.dart';
-import 'package:near_drop/transport/domain/enums/SendFileAction.dart';
 import 'package:near_drop/transport/domain/enums/SendRequestAnswer.dart';
 import 'package:near_drop/transport/domain/enums/SendRequestType.dart';
 import 'package:near_drop/transport/domain/enums/TransportFlag.dart';
@@ -23,6 +23,8 @@ class TransportGateway
 {
     final int CHUNK_SIZE = 65536;
     final String CHUNK_FLAG = TransportFlag.chunk.name.toUpperCase();
+    final String FILE_FLAG = TransportFlag.file.name.toUpperCase();
+    final String FILE_SKIP_FLAG = TransportFlag.fileSkip.name.toUpperCase();
     final String ACK_FLAG = TransportFlag.ack.name.toUpperCase();
     final String CANCEL_FLAG = TransportFlag.cancel.name.toUpperCase();
 
@@ -73,35 +75,54 @@ class TransportGateway
     }
 
     /// Sendet eine Info an den Stream, dass die nächste Datei übersprungen werden soll.
-    Future<bool> sendFileSkip(RTCNetworkStream stream, int length) async
+    Future<bool> sendFileSkip(Device device, RTCNetworkStream stream, int length, Progress progress) async
     {
-        Map<String, dynamic> skipInfo = {
-            "action": SendFileAction.skip.name,
+        // Flag an den Stream senden, dass eine Datei übersprungen wird
+        await stream.writeString(FILE_SKIP_FLAG);
+
+        // FileSkip-Informationen senden
+        Map<String, dynamic> fileSkipMap = {
             "length": length,
         };
 
-        await stream.writeString(jsonEncode(skipInfo));
+        await stream.writeString(jsonEncode(fileSkipMap));
         String response = await stream.readString();
-        return response == ACK_FLAG;
+
+        if (response != ACK_FLAG)
+        {
+            return false;
+        }
+
+        // Fortschritt aktualisieren
+        progress.sentBytes += length;
+        device.communicationInfo.setSending(progress.value);
+        return true;
+    }
+
+    /// Sendet ein Cancel-Flag an den Stream, um eine laufende Übertragung abzubrechen.
+    /// Diese Methode wird verwendet, wenn eine Datei nicht gelesen werden konnte und der Benutzer die gesamte Übertragung abbrechen möchte.
+    Future<void> sendCancelFlag(RTCNetworkStream stream) async
+    {
+        await stream.writeString(CANCEL_FLAG);
     }
 
     /// Sendet eine Datei über den Stream.
     Future<FileSendResult> sendFile(Device device, RTCNetworkStream stream, File file, Progress progress) async
     {
+        // Nur zum Testen: Simuliere einen Fehler beim Lesen der Datei
+        /*
+        if (Random().nextBool())
+        {
+            return FileSendResult.fileReadError;
+        }
+         */
+
+        // Dateiinformationen sammeln
         String filename = basename(file.path);
         int fileLength = await file.length();
         String mimeType = lookupMimeType(file.path) ?? "";
 
-        // Dateiinformationen senden
-        Map<String, dynamic> fileInfo = {
-            "action": SendFileAction.file.name,
-            "filename": filename,
-            "length": fileLength,
-            "mimeType": mimeType,
-        };
-        await stream.writeString(jsonEncode(fileInfo));
-
-        // Dateiinhalt senden
+        // Datei versuchen zu öffnen
         final RandomAccessFile raf;
         try
         {
@@ -113,6 +134,18 @@ class TransportGateway
             return FileSendResult.fileReadError;
         }
 
+        // Flag an den Stream senden, dass eine Datei gesendet wird
+        await stream.writeString(FILE_FLAG);
+
+        // Dateiinformationen senden
+        Map<String, dynamic> fileInfo = {
+            "filename": filename,
+            "length": fileLength,
+            "mimeType": mimeType,
+        };
+        await stream.writeString(jsonEncode(fileInfo));
+
+        // Dateiinhalt in Chunks senden
         int bytesRead = 0;
         while (bytesRead < fileLength)
         {
@@ -141,7 +174,7 @@ class TransportGateway
             // Prüfen, ob der Empfänger das Senden abbrechen möchte
             if (response == CANCEL_FLAG)
             {
-                print("Dateiübertragung wird abgebrochen.");
+                print("Empfänger möchte die Dateiübertragung abbrechen.");
                 await raf.close();
                 return FileSendResult.userCanceled;
             }
@@ -149,7 +182,7 @@ class TransportGateway
             {
                 print("Unerwartetes Flag empfangen: $response");
                 await raf.close();
-                return FileSendResult.error;
+                return FileSendResult.wrongFlagOrParameter;
             }
 
             // Fortschritt aktualisieren
@@ -164,39 +197,50 @@ class TransportGateway
     /// Empfängt eine Datei über den Stream.
     Future<FileReceiveResult> receiveFile(Device device, RTCNetworkStream stream, Progress progress, Directory targetDirectory, ReceivedFile receivedFile) async
     {
-        // Payload empfangen
-        String payload = await stream.readString();
-        Map<String, dynamic> fileInfoMap = jsonDecode(payload);
+        // Flag empfangen
+        String flag = await stream.readString();
 
-        if (!fileInfoMap.containsKey("action") || !fileInfoMap.containsKey("length"))
+        if (flag == CANCEL_FLAG)
         {
-            print("Fehlende Parameter in der fileInfoMap: $fileInfoMap");
-            return FileReceiveResult.wrongParameters;
+            print("Sender möchte die Dateiübertragung abbrechen.");
+            return FileReceiveResult.userCanceled;
         }
-
-        String action = fileInfoMap["action"];
-        int fileLength = fileInfoMap["length"];
-
-        // Wenn die Datei übersprungen werden soll, den Fortschritt direkt setzen
-        if (action == SendFileAction.skip.name)
+        else if (flag == FILE_SKIP_FLAG)
         {
+            String payload = await stream.readString();
+            Map<String, dynamic> fileSkipMap = jsonDecode(payload);
+            if (!fileSkipMap.containsKey("length"))
+            {
+                print("Üngültige Parameter in der fileSkipMap: $fileSkipMap");
+                return FileReceiveResult.wrongParameters;
+            }
+
+            // Fortschritt direkt setzen
+            int fileLength = fileSkipMap["length"];
             progress.sentBytes += fileLength;
             device.communicationInfo.setReceiving(progress.value);
+
+            // Bestätigung senden
+            await stream.writeString(ACK_FLAG);
             return FileReceiveResult.skipped;
         }
-
-        if (action != SendFileAction.file.name)
+        else if (flag != FILE_FLAG)
         {
-            print("Unbekannte Aktion: $action");
+            print("Unbekanntes Flag empfangen: $flag");
             return FileReceiveResult.error;
         }
 
-        if (!fileInfoMap.containsKey("filename") || !fileInfoMap.containsKey("mimeType"))
+        // Dateiinformationen empfangen
+        String payload = await stream.readString();
+        Map<String, dynamic> fileInfoMap = jsonDecode(payload);
+
+        if (!fileInfoMap.containsKey("length") || !fileInfoMap.containsKey("filename") || !fileInfoMap.containsKey("mimeType"))
         {
-            print("Fehlende Parameter in der fileInfoMap: $fileInfoMap");
+            print("Üngültige Parameter in der fileInfoMap: $fileInfoMap");
             return FileReceiveResult.wrongParameters;
         }
 
+        int fileLength = fileInfoMap["length"];
         String filename = fileInfoMap["filename"];
         String mimeType = fileInfoMap["mimeType"];
 

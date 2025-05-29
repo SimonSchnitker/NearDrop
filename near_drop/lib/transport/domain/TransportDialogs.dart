@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:near_drop/tools/FileSizeHelper.dart';
 import 'package:near_drop/transport/domain/TransportController.dart';
 import 'package:open_app_file/open_app_file.dart';
+import 'package:path/path.dart';
 import '../../core/entity/Device.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../nearby/presentation/pages/NearbyPage.dart';
@@ -35,6 +36,40 @@ String getMimeTypeString(BuildContext context, MimeTypeGroup mimeTypeGroup, int 
                 ? AppLocalizations.of(context)!.mime_type_file
                 : AppLocalizations.of(context)!.mime_type_files;
     }
+}
+
+Future<bool> showAskSkipFileDialog(File file) async
+{
+    if (NearbyPage.scaffoldKey.currentContext == null)
+    {
+        print("Fehler: ScaffoldContext ist null.");
+        return false;
+    }
+
+    BuildContext context = NearbyPage.scaffoldKey.currentContext!;
+    String filename = basename(file.path);
+
+    bool skipFile = false;
+    await showDialog(
+        context: context,
+        builder: (dialogContext) =>
+            AlertDialog(
+                title: Text(AppLocalizations.of(context)!.file_skip_dialog_title),
+                content: Text(AppLocalizations.of(context)!.file_skip_dialog_content(filename)),
+                actions: [
+                    TextButton(onPressed: () {
+                        skipFile = false;
+                        Navigator.pop(dialogContext);
+                    }, child: Text(AppLocalizations.of(context)!.file_skip_dialog_cancel_transport_button)),
+                    TextButton(onPressed: () {
+                        skipFile = true;
+                        Navigator.pop(dialogContext);
+                    }, child: Text(AppLocalizations.of(context)!.file_skip_dialog_skip_button)),
+                ],
+            )
+    );
+
+    return skipFile;
 }
 
 /// Zeigt ein Dialogfeld an, um die Sendeanfrage des Geräts zu akzeptieren oder abzulehnen.

@@ -30,7 +30,7 @@ class NearbyGateway
             "sender": Runtime.nearbyUuid,
             "firstname": Runtime.firstname,
             "name": Runtime.deviceName,
-            "device_type": Runtime.deviceType.index,
+            "device_type": Runtime.deviceType.index, // Der Name "type" ist von Supabase reserviert, daher "device_type" verwenden
             "os": Runtime.os.index,
             "version": Runtime.version,
         });
@@ -54,7 +54,7 @@ class NearbyGateway
             String nearbyUuid = data["sender"];
             String firstname = data["firstname"];
             String name = data["name"];
-            int type = data["device_type"];
+            int type = data["device_type"]; // Der Name "type" ist von Supabase reserviert, daher "device_type" verwenden
             int os = data["os"];
             int version = data["version"];
 

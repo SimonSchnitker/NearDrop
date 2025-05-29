@@ -35,6 +35,7 @@ class GuestLoginViewModel extends ChangeNotifier
         bool realtimeChannelInitialized = await Runtime.initializeChannel();
         if (!realtimeChannelInitialized)
         {
+            await _authController.signOutAndDeleteAccount();
             throw Exception("RealtimeChannel konnte nicht initialisiert werden");
         }
 

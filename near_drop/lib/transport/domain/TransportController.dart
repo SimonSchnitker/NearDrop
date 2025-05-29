@@ -122,7 +122,6 @@ class TransportController
         }
 
         // Dem Benutzer die Anfrage anzeigen
-        print("Sendeanfrage-Dialog wird angezeigt");
         SendRequestAnswer answer = await showSendRequestDialog(device, sendRequest.filesCount, sendRequest.totalSize, sendRequest.mimeTypeGroup);
 
         // Wenn der Datenkanal mittlerweile geschlossen wurde, beenden
@@ -166,10 +165,11 @@ class TransportController
             catch (e)
             {
                 print("Fehler beim Empfangen der Datei.");
+                device.communicationInfo.setErrorState(ErrorState.error);
+                await device.clearConnection();
                 await _deleteReceivedFile(receivedFile);
-
-                // TODO: Dialog anzeigen, dass die Datei nicht empfangen werden konnte
-                continue;
+                await _deleteAllReceivedFiles(receivedFiles); // Alle vorherigen Dateien löschen
+                return;
             }
 
             if (result == FileReceiveResult.ok)
@@ -199,12 +199,18 @@ class TransportController
                 await _deleteAllReceivedFiles(receivedFiles); // Alle vorherigen Dateien löschen
                 return;
             }
+            else if (result == FileReceiveResult.skipped)
+            {
+                print("Datei wurde übersprungen: ${receivedFile.name}");
+            }
             else
             {
                 print("Fehler beim Empfangen der Datei.");
+                device.communicationInfo.setErrorState(ErrorState.error);
+                await device.clearConnection();
                 await _deleteReceivedFile(receivedFile);
-
-                // TODO: Dialog anzeigen, dass die Datei nicht empfangen werden konnte
+                await _deleteAllReceivedFiles(receivedFiles); // Alle vorherigen Dateien löschen
+                return;
             }
         }
 
@@ -212,7 +218,10 @@ class TransportController
         device.clearConnection();
 
         // Empfangene Dateien auf der UI anzeigen
-        await showImagePreviewDialog(context: NearbyPage.scaffoldKey.currentContext!, allFiles: receivedFiles, device: device, targetDirectory: filesDirectory, mimeTypeGroup: sendRequest.mimeTypeGroup);
+        if (receivedFiles.isNotEmpty)
+        {
+            await showImagePreviewDialog(context: NearbyPage.scaffoldKey.currentContext!, allFiles: receivedFiles, device: device, targetDirectory: filesDirectory, mimeTypeGroup: sendRequest.mimeTypeGroup);
+        }
     }
 
     /// Kümmert sich darum, dass eine Mediendatei unter Android und iOS in der Gallerie auftaucht.
@@ -307,8 +316,6 @@ class TransportController
 
         return targetDirectory;
     }
-
-
 
     /// Bestimmt die Gruppe der MIME-Typen basierend auf den übergebenen Dateien.
     MimeTypeGroup _getMimeTypeGroup(List<File> files)
@@ -445,23 +452,40 @@ class TransportController
 
             if (sendResult == FileSendResult.fileReadError)
             {
-                // Todo: Dialog anzeigen, dass die Datei nicht gesendet werden konnte
-                int length = await file.length();
-                bool response;
-                try
+                bool skip = await showAskSkipFileDialog(file);
+                if (skip)
                 {
-                     response = await _transportGateway.sendFileSkip(connection.networkStream!, length);
-                }
-                catch (e)
-                {
-                    print("Zugriff auf Datei nicht möglich: $e");
-                    return SendResponse.connectionError;
-                }
+                    int length = await file.length();
+                    bool response;
+                    try
+                    {
+                        response = await _transportGateway.sendFileSkip(device, connection.networkStream!, length, progress);
+                    }
+                    catch (e)
+                    {
+                        print("Fehler beim Senden der FileSkip-Info: $e");
+                        return SendResponse.connectionError;
+                    }
 
-                if (!response)
+                    if (!response)
+                    {
+                        print("Der Empfänger hat ein ungültiges Flag gesendet.");
+                        return SendResponse.receiverError;
+                    }
+                }
+                else
                 {
-                    print("Fehler beim Überspringen der Datei.");
-                    return SendResponse.receiverError;
+                    print("Sender möchte den Transport abbrechen.");
+                    try
+                    {
+                        await _transportGateway.sendCancelFlag(connection.networkStream!);
+                    }
+                    catch (e)
+                    {
+                        print("Fehler beim Senden des Abbruch-Flags: $e");
+                    }
+
+                    return SendResponse.userCanceled;
                 }
             }
             else if (sendResult == FileSendResult.userCanceled)
@@ -469,9 +493,9 @@ class TransportController
                 print("Benutzer hat den Transport abgebrochen.");
                 return SendResponse.userCanceled;
             }
-            else if (sendResult == FileSendResult.error)
+            else if (sendResult == FileSendResult.wrongFlagOrParameter)
             {
-                print("Fehler beim Senden der Datei.");
+                print("Der Empfänger hat ein ungültiges Flag oder Parameter gesendet.");
                 return SendResponse.receiverError;
             }
         }

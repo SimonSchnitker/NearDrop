@@ -21,7 +21,7 @@ Widget manuallyConnectingView(BuildContext context) {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                         Text(
-                            "Manuell verbinden",
+                            AppLocalizations.of(context)!.manually_connecting_sheet_title,
                             style: Theme.of(context).textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.w500),
                         ),
                         SizedBox(height: 24,),

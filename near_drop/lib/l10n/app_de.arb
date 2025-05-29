@@ -149,5 +149,26 @@
     "snackbar_message_timeout": "Es konnte keine Verbindung zum Gerät hergestellt werden.",
     "snackbar_message_file_access_error": "Es konnte auf mindestens eine Datei nicht zugegriffen werden.",
     "snackbar_message_receiver_error": "Beim Empfänger ist ein Fehler aufgetreten.",
-    "snackbar_retry_action": "Erneut versuchen"
+    "snackbar_retry_action": "Erneut versuchen",
+    "cancel_transport_title": "Übertragung mit {firstname} beenden?",
+    "@cancel_transport_title": {
+      "placeholders": {
+        "firstname": {
+          "type": "String"
+        }
+      }
+    },
+    "cancel_transport_confirm_dialog_button": "Beenden",
+    "cancel_transport_cancel_dialog_button": "Fortsetzen",
+    "file_skip_dialog_title": "Kein Zugriff auf Datei",
+    "file_skip_dialog_content": "Auf die Datei {filename} kann nicht zugegriffen werden. Möchtest du sie überspringen?",
+    "@file_skip_dialog_content": {
+      "placeholders": {
+        "filename": {
+          "type": "String"
+        }
+      }
+    },
+    "file_skip_dialog_skip_button": "Überspringen",
+    "file_skip_dialog_cancel_transport_button": "Übertragung abbrechen"
 }
