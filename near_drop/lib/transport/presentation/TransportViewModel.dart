@@ -6,6 +6,7 @@ import 'package:near_drop/core/enums/CommunicationState.dart';
 import 'package:near_drop/core/enums/ErrorState.dart';
 import 'package:near_drop/core/enums/SuccessState.dart';
 import 'package:near_drop/transport/domain/enums/SendResponse.dart';
+import 'package:near_drop/transport/domain/models/Connection.dart';
 import '../../core/entity/Device.dart';
 import '../domain/TransportController.dart';
 
@@ -24,57 +25,50 @@ class TransportViewModel extends ChangeNotifier
     /// Sendet Dateien an ein Gerät.
     Future<SendResponse> sendFiles(Device device, List<File> files) async
     {
-        SendResponse response = await _transportController.sendFiles(device, files);
-
-        switch (response)
-        {
-            case SendResponse.ok:
-                device.communicationInfo.setSuccessState(SuccessState.sendedSuccessfully);
-                break;
-            case SendResponse.receiverDeclined:
-                device.communicationInfo.setErrorState(ErrorState.receiverDeclined);
-                break;
-            case SendResponse.userCanceled:
-                device.communicationInfo.setErrorState(ErrorState.userCanceled);
-                device.onCanceledCompleted.add(null); // Mitteilen, dass der Transport abgebrochen wurde
-                break;
-            default:
-                device.communicationInfo.setErrorState(ErrorState.error);
-        }
-
-        device.clearConnection();
-        return response;
+        return await _transportController.sendFiles(device, files);
     }
 
     /// Bricht die Übertragung ab.
     Future<void> cancelTransport(Device device) async
     {
-        if (device.connection == null)
+        Connection? connection = device.communicationInfo.connection;
+        if (connection == null)
         {
+            device.communicationInfo.reset(); // Den Kommunikationsstatus zurücksetzen, da scheinbar etwas schiefgelaufen ist.
             return;
         }
 
         // Wenn der Status in "Anfragen" ist, wird die sofort abgebrochen, da kein Prozess intern nach dem cacelingRequested-Flag lauscht.
         if (device.communicationInfo.communicationState == CommunicationState.requesting)
         {
-            device.communicationInfo.setErrorState(ErrorState.userCanceled);
-            await device.clearConnection();
+            await device.closeConnection(connection: connection, errorState: ErrorState.userCanceled);
             return;
         }
-
         // Im Status "Verbinden" reicht es das Flag zu setzen, da das Verbinden nicht direkt abgebrochen werden sollte.
-        if (device.communicationInfo.communicationState == CommunicationState.connecting)
+        // Das Verbinden stopp nämlich in jedem Fall nach einiger Zeit.
+        else if (device.communicationInfo.communicationState == CommunicationState.connecting)
         {
             device.communicationInfo.setCanceling();
         }
-        // In allen anderen Zuständen wird das Flag gesetzt und ein Timeout eingestellt, sollte das Abbrechen "feststecken"
+        // In allen anderen Zuständen wird das Flag gesetzt. Interne Methoden prüfen dieses Flag regelmäßig.
+        // Ein Timeout wird eingestellt, sollte das Abbrechen "feststecken".
         else
         {
-            device.onCanceledCompleted.stream.first.timeout(_cancelTimeout, onTimeout: () {
-                device.communicationInfo.setErrorState(ErrorState.userCanceled);
-                device.clearConnection();
+            // Am Event "onCanceledCompleted" wird gewartet, um zu prüfen, ob das Abbrechen erfolgreich war.
+            // Eine interne Methode wird dieses Event auslösen, wenn das Abbrechen abgeschlossen ist.
+            device.communicationInfo.onCanceledCompleted.stream.first.timeout(_cancelTimeout, onTimeout: () async
+            {
+                // Dieser Bereich wird aufgerufen, wenn das Abbrechen nicht innerhalb des Timeouts abgeschlossen wurde.
+                // Prüfen, ob die Verbindung mittlerweile noch aktuell ist
+                if (device.communicationInfo.connection?.connectionId == connection.connectionId)
+                {
+                    await device.closeConnection(connection: connection, errorState: ErrorState.userCanceled);
+                }
+
+                return 0;
             });
 
+            // Abbrechen einleiten
             device.communicationInfo.setCanceling();
         }
     }

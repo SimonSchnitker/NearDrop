@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:external_path/external_path.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:gal/gal.dart';
 import 'package:media_scanner/media_scanner.dart';
@@ -68,6 +66,9 @@ class TransportController
     /// Wird aufgerufen, wenn sich ein Gerät mit uns verbunden hat.
     Future<void> _onConnectionCreated(ConnectionCreatedEventArgs args) async
     {
+        Device device = args.device;
+        Connection connection = args.connection;
+
         // Sendeanfrage empfangen
         SendRequestDTO? sendRequest;
         try
@@ -77,25 +78,26 @@ class TransportController
         on Exception catch (e)
         {
             print("Fehler beim Empfangen der Sendeanfrage: $e");
-            await args.device.clearConnection();
+            await device.closeConnection(connection: connection);
             return;
         }
 
         if (sendRequest == null)
         {
             print("Ungültige Sendeanfrage empfangen.");
-            await args.device.clearConnection();
+            await device.closeConnection(connection: connection);
             return;
         }
 
         // Je nach Typ der Sendeanfrage verarbeiten
         if (sendRequest is SendRequestFilesDTO)
         {
-            await _handleReceiveFiles(sendRequest, args.connection, args.device);
+            await _handleReceiveFiles(sendRequest, connection, device);
         }
+        // Hier können in Zukunft weitere Typen von Sendeanfragen verarbeitet werden (Text, Ordner, etc.)
         else
         {
-            await args.device.clearConnection();
+            await device.closeConnection(connection: connection);
         }
     }
 
@@ -117,7 +119,7 @@ class TransportController
                 print("Fehler beim Senden der Antwort: $e");
             }
 
-            await device.clearConnection();
+            await device.closeConnection(connection: connection);
             return;
         }
 
@@ -138,15 +140,14 @@ class TransportController
         on Exception catch (e)
         {
             print("Fehler beim Senden der Antwort: $e");
-            device.communicationInfo.setErrorState(ErrorState.error);
-            await device.clearConnection();
+            await device.closeConnection(connection: connection, errorState: ErrorState.error);
             return;
         }
 
         // Wenn der Benutzer die Anfrage nicht akzeptiert hat, Verbindung schließen
         if (answer != SendRequestAnswer.accepted)
         {
-            await device.clearConnection();
+            await device.closeConnection(connection: connection);
             return;
         }
 
@@ -165,8 +166,7 @@ class TransportController
             catch (e)
             {
                 print("Fehler beim Empfangen der Datei.");
-                device.communicationInfo.setErrorState(ErrorState.error);
-                await device.clearConnection();
+                await device.closeConnection(connection: connection, errorState: ErrorState.error);
                 await _deleteReceivedFile(receivedFile);
                 await _deleteAllReceivedFiles(receivedFiles); // Alle vorherigen Dateien löschen
                 return;
@@ -192,9 +192,8 @@ class TransportController
             }
             else if (result == FileReceiveResult.userCanceled)
             {
-                device.onCanceledCompleted.add(null); // Mitteilen, dass der Transport abgebrochen wurde
-                device.communicationInfo.setErrorState(ErrorState.userCanceled);
-                await device.clearConnection();
+                device.communicationInfo.onCanceledCompleted.add(connection.connectionId); // Mitteilen, dass das Bearbeiten des Abbruchs abgeschlossen ist (Wird im TransportViewModel benötigt)
+                await device.closeConnection(connection: connection, errorState: ErrorState.userCanceled);
                 await _deleteReceivedFile(receivedFile); // Aktuelle Datei löschen
                 await _deleteAllReceivedFiles(receivedFiles); // Alle vorherigen Dateien löschen
                 return;
@@ -206,16 +205,14 @@ class TransportController
             else
             {
                 print("Fehler beim Empfangen der Datei.");
-                device.communicationInfo.setErrorState(ErrorState.error);
-                await device.clearConnection();
+                await device.closeConnection(connection: connection, errorState: ErrorState.error);
                 await _deleteReceivedFile(receivedFile);
                 await _deleteAllReceivedFiles(receivedFiles); // Alle vorherigen Dateien löschen
                 return;
             }
         }
 
-        device.communicationInfo.setSuccessState(SuccessState.receivedSuccessfully);
-        device.clearConnection();
+        await device.closeConnection(connection: connection, successState: SuccessState.receivedSuccessfully);
 
         // Empfangene Dateien auf der UI anzeigen
         if (receivedFiles.isNotEmpty)
@@ -350,6 +347,9 @@ class TransportController
     /// Sendet Dateien an ein Gerät.
     Future<SendResponse> sendFiles(Device device, List<File> files) async
     {
+        // Aktuelle Verbindung zum Gerät schließen, falls vorhanden
+        await device.closeCurrentConnection();
+
         device.communicationInfo.setConnecting();
 
         // Gesamtgröße der Dateien berechnen
@@ -367,6 +367,7 @@ class TransportController
         on FileSystemException catch (e)
         {
             print("Zugriff auf Datei nicht möglich: $e");
+            device.communicationInfo.setErrorState(ErrorState.error);
             return SendResponse.fileAccessError;
         }
 
@@ -377,6 +378,7 @@ class TransportController
             bool send = await showVolumeDataWarningDialog(totalSize);
             if (!send)
             {
+                device.communicationInfo.setErrorState(ErrorState.userCanceled);
                 return SendResponse.userCanceled;
             }
         }
@@ -386,30 +388,27 @@ class TransportController
         try
         {
              connection = await _signalingController.connect(device);
-
-             // Prüfen, ob der Benutzer das Abbrechen angefordert hat
-             if (device.communicationInfo.cancelationRequested)
-             {
-                 return SendResponse.userCanceled;
-             }
-
-            if (connection == null)
-            {
-                print("Verbindung zu ${device.firstname} fehlgeschlagen.");
-                return SendResponse.timeout;
-            }
         }
         on Exception catch (e)
         {
             print("Verbindung zu ${device.firstname} fehlgeschlagen: $e");
-
-            // Prüfen, ob der Benutzer das Abbrechen angefordert hat
-            if (device.communicationInfo.cancelationRequested)
-            {
-                return SendResponse.userCanceled;
-            }
-
+            device.communicationInfo.setErrorState(ErrorState.error);
             return SendResponse.connectionError;
+        }
+
+        if (connection == null)
+        {
+            print("Verbindung zu ${device.firstname} fehlgeschlagen.");
+            device.communicationInfo.setErrorState(ErrorState.error);
+            return SendResponse.timeout;
+        }
+
+        // Prüfen, ob der Benutzer das Abbrechen angefordert hat
+        if (device.communicationInfo.cancelationRequested)
+        {
+            await device.closeConnection(connection: connection, errorState: ErrorState.userCanceled);
+            device.communicationInfo.onCanceledCompleted.add(connection.connectionId); // Mitteilen, dass das Bearbeiten des Abbruchs abgeschlossen ist (Wird im TransportViewModel benötigt)
+            return SendResponse.userCanceled;
         }
 
         // Sendeanfrage senden
@@ -418,20 +417,24 @@ class TransportController
         try
         {
             answer = await _transportGateway.request(connection.networkStream!, files.length, totalSize, mimeTypeGroup);
-
-            if (answer == SendRequestAnswer.declined)
-            {
-                return SendResponse.receiverDeclined;
-            }
-            else if (answer == SendRequestAnswer.error)
-            {
-                return SendResponse.receiverError;
-            }
         }
         on Exception catch (e)
         {
             print("Fehler beim Senden der Anfrage: $e");
+            await device.closeConnection(connection: connection, errorState: ErrorState.error);
             return SendResponse.connectionError;
+        }
+
+        // Antwort des Empfängers auswerten
+        if (answer == SendRequestAnswer.declined)
+        {
+            await device.closeConnection(connection: connection, errorState: ErrorState.receiverDeclined);
+            return SendResponse.receiverDeclined;
+        }
+        else if (answer == SendRequestAnswer.error)
+        {
+            await device.closeConnection(connection: connection, errorState: ErrorState.error);
+            return SendResponse.receiverError;
         }
 
         // Dateien senden
@@ -447,16 +450,18 @@ class TransportController
             on Exception catch (e)
             {
                 print("Fehler beim Senden der Datei: $e");
+                await device.closeConnection(connection: connection, errorState: ErrorState.error);
                 return SendResponse.connectionError;
             }
 
             if (sendResult == FileSendResult.fileReadError)
             {
+                // Dem Benutzer mit einem Dialog fragen, ob die Datei übersprungen werden soll
                 bool skip = await showAskSkipFileDialog(file);
                 if (skip)
                 {
                     int length = await file.length();
-                    bool response;
+                    bool response = false;
                     try
                     {
                         response = await _transportGateway.sendFileSkip(device, connection.networkStream!, length, progress);
@@ -464,12 +469,14 @@ class TransportController
                     catch (e)
                     {
                         print("Fehler beim Senden der FileSkip-Info: $e");
+                        await device.closeConnection(connection: connection, errorState: ErrorState.error);
                         return SendResponse.connectionError;
                     }
 
                     if (!response)
                     {
                         print("Der Empfänger hat ein ungültiges Flag gesendet.");
+                        await device.closeConnection(connection: connection, errorState: ErrorState.error);
                         return SendResponse.receiverError;
                     }
                 }
@@ -485,21 +492,26 @@ class TransportController
                         print("Fehler beim Senden des Abbruch-Flags: $e");
                     }
 
+                    await device.closeConnection(connection: connection, errorState: ErrorState.userCanceled);
                     return SendResponse.userCanceled;
                 }
             }
             else if (sendResult == FileSendResult.userCanceled)
             {
                 print("Benutzer hat den Transport abgebrochen.");
+                await device.closeConnection(connection: connection, errorState: ErrorState.userCanceled);
+                device.communicationInfo.onCanceledCompleted.add(connection.connectionId); // Mitteilen, dass das Bearbeiten des Abbruchs abgeschlossen ist (Wird im TransportViewModel benötigt)
                 return SendResponse.userCanceled;
             }
             else if (sendResult == FileSendResult.wrongFlagOrParameter)
             {
                 print("Der Empfänger hat ein ungültiges Flag oder Parameter gesendet.");
+                await device.closeConnection(connection: connection, errorState: ErrorState.error);
                 return SendResponse.receiverError;
             }
         }
 
+        await device.closeConnection(connection: connection, successState: SuccessState.sendedSuccessfully);
         return SendResponse.ok;
     }
 }

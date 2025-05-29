@@ -1,17 +1,19 @@
 import 'dart:async';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:near_drop/core/entity/Device.dart';
+import 'package:near_drop/core/enums/ErrorState.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
 import 'package:near_drop/transport/data/SignalingGateway.dart';
 import 'package:near_drop/transport/domain/event_args/ConnectionCreatedEventArgs.dart';
 import 'package:near_drop/transport/domain/models/RTCNetworkStream.dart';
 import 'models/Connection.dart';
 
+/// Steuert den Signalisierungsprozess für WebRTC-Verbindungen.
 class SignalingController
 {
     static const sendRetryCount = 3;
     static const sendRetryDelay = Duration(seconds: 3);
-    static const connectTimeout = Duration(seconds: 15);
+    static const connectTimeout = Duration(seconds: 12);
     static const dataChannelName = "data";
     static const configuration = {
         "iceServers": [
@@ -56,7 +58,7 @@ class SignalingController
         }
 
         // Aktuelle Verbindung zum Gerät schließen, falls vorhanden
-        await device.connection?.close();
+        await device.closeCurrentConnection();
 
         // Angebot auslesen und PeerConnection-Instanz erstellen
         int connectionId = offer["connectionId"];
@@ -65,7 +67,7 @@ class SignalingController
 
         // Verbindung merken
         Connection connection = Connection(peerConnection: peerConnection, connectionId: connectionId);
-        device.connection = connection;
+        device.communicationInfo.connection = connection;
 
         // Verbindungsstatus zum Peer überwachen
         peerConnection.onConnectionState = (state) async {
@@ -73,11 +75,7 @@ class SignalingController
 
             if (state == RTCPeerConnectionState.RTCPeerConnectionStateClosed || state == RTCPeerConnectionState.RTCPeerConnectionStateFailed)
             {
-                // Wenn die aktuelle Verbindung geschlossen wurde, die Kommunikationsdaten zurücksetzen
-                if (device.connection?.connectionId == connectionId)
-                {
-                    await device.clearConnection();
-                }
+                await device.closeConnection(connection: connection);
             }
         };
 
@@ -118,10 +116,10 @@ class SignalingController
                 else if (state == RTCDataChannelState.RTCDataChannelClosed)
                 {
                     // Schonmal die UI zurücksetzen und Dialoge schließen, da der Datenkanal meist deutlich eher geschlossen wird als die PeerConnection
-                    if (device.connection?.connectionId == connectionId)
+                    if (device.communicationInfo.connection?.connectionId == connectionId)
                     {
                         device.communicationInfo.reset();
-                        device.closeOpenDialogs();
+                        //device.closeOpenDialogs();
                     }
                 }
             };
@@ -145,7 +143,7 @@ class SignalingController
         else
         {
             print("Antwort konnte nicht gesendet werden.");
-            await device.clearConnection();
+            await device.closeConnection(connection: connection, errorState: ErrorState.error);
             return;
         }
     }
@@ -169,7 +167,7 @@ class SignalingController
         }
 
         // Prüfen, ob die Verbindung existiert
-        Connection? connection = device.connection;
+        Connection? connection = device.communicationInfo.connection;
         if (connection == null)
         {
             print("Verbindung nicht gefunden: ${answer["sender"]}");
@@ -185,6 +183,7 @@ class SignalingController
         if (connection.peerConnection.signalingState != RTCSignalingState.RTCSignalingStateHaveLocalOffer)
         {
             print("Verbindung nicht im gültigen Zustand: ${connection.peerConnection.signalingState}");
+            await device.closeConnection(connection: connection);
             return;
         }
 
@@ -211,7 +210,7 @@ class SignalingController
         }
 
         // Prüfen, ob die Verbindung existiert
-        Connection? connection = device.connection;
+        Connection? connection = device.communicationInfo.connection;
         if (connection == null)
         {
             print("Verbindung nicht gefunden: ${candidate["sender"]}");
@@ -235,9 +234,6 @@ class SignalingController
     /// Stellt eine Verbindung zu einem Gerät her.
     Future<Connection?> connect(Device device) async
     {
-        // Aktuelle Verbindung zum Gerät schließen, falls vorhanden
-        await device.connection?.close();
-
         Completer<Connection?> completer = Completer<Connection?>();
 
         // Verbinden wird abgebrochen, wenn die Verbindung nicht innerhalb des Timeouts hergestellt werden konnte
@@ -259,7 +255,7 @@ class SignalingController
 
         // Verbindung merken
         Connection connection = Connection(peerConnection: peerConnection, connectionId: connectionId, dataChannel: dataChannel, networkStream: RTCNetworkStream(dataChannel));
-        device.connection = connection;
+        device.communicationInfo.connection = connection;
 
         // Verbindungsstatus zum Peer überwachen
         peerConnection.onConnectionState = (state) async {
@@ -267,11 +263,7 @@ class SignalingController
 
             if (state == RTCPeerConnectionState.RTCPeerConnectionStateClosed || state == RTCPeerConnectionState.RTCPeerConnectionStateFailed)
             {
-                // Wenn die aktuelle Verbindung geschlossen wurde, die Kommunikationsdaten zurücksetzen
-                if (device.connection?.connectionId == connectionId)
-                {
-                    await device.clearConnection();
-                }
+                await device.closeConnection(connection: connection);
             }
         };
 
@@ -290,10 +282,10 @@ class SignalingController
             else if (state == RTCDataChannelState.RTCDataChannelClosed)
             {
                 // Schonmal die UI zurücksetzen und Dialoge schließen, da der Datenkanal meist deutlich eher geschlossen wird als die PeerConnection
-                if (device.connection?.connectionId == connectionId)
+                if (device.communicationInfo.connection?.connectionId == connectionId)
                 {
                     device.communicationInfo.reset();
-                    device.closeOpenDialogs();
+                    //device.closeOpenDialogs();
                 }
             }
         };

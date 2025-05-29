@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:near_drop/core/entity/CommunicationInfo.dart';
+import 'package:near_drop/core/enums/ErrorState.dart';
+import 'package:near_drop/core/enums/SuccessState.dart';
 import 'package:near_drop/transport/domain/models/Connection.dart';
 import '../enums/DeviceType.dart';
 import '../enums/OS.dart';
@@ -15,8 +17,6 @@ class Device extends ChangeNotifier
     bool isSendRequestDialogOpen = false;
     bool isCancelTransportDialogOpen = false;
 
-    StreamController onCanceledCompleted = StreamController.broadcast();
-
     String firstname;
     String name;
     DeviceType type;
@@ -24,22 +24,53 @@ class Device extends ChangeNotifier
     int version;
     String nearbyUuid;
     final communicationInfo = CommunicationInfo();
-    Connection? connection;
 
     Device(this.firstname, this.name, this.type, this.os, this.version, this.nearbyUuid);
 
-    /// Schließt die aktuelle Verbindung, bereinigt alle Ressourcen und setzt die Kommunikationsinformationen zurück.
-    Future<void> clearConnection() async
+    /// Schließt die aktuelle Verbindung.
+    /// Vorsicht: Diese Methode sollte nur aufgerufen werden, wenn bekannt ist, dass die Verbindung aktuell ist. (Bspw. bevor eine neue Verbindung aufgebaut wird.)
+    Future<void> closeCurrentConnection() async
     {
+        await communicationInfo.closeConnection();
+    }
+
+    /// Schließt die aktuelle Verbindung, bereinigt alle Ressourcen und setzt die Kommunikationsinformationen zurück.
+    /// Übergeben werden muss das Verbindungs-Objekt, die geschlossen werden soll.
+    /// Optional kann ein Erfolgs- oder Fehlerstatus gesetzt werden, um den Abschluss der Verbindung zu signalisieren.
+    Future<void> closeConnection({required Connection connection, SuccessState? successState, ErrorState? errorState}) async
+    {
+        // Prüfen, ob die Verbindung bereits geschlossen ist.
+        if (communicationInfo.connection == null)
+        {
+            return;
+        }
+
+        // Wenn die Verbindung nicht mehr aktuell ist, wird nichts unternommen.
+        // Dies ist notwendig, um zu verhindern, dass Statusse auf der UI gesetzt werden, wenn alte Verbindungen geschlossen werden.
+        if (communicationInfo.connection?.connectionId != connection.connectionId)
+        {
+            return;
+        }
+
+        // Optional: Setzen des Erfolgs- oder Fehlerstatus.
+        if (successState != null)
+        {
+            communicationInfo.setSuccessState(successState);
+        }
+        else if (errorState != null)
+        {
+            communicationInfo.setErrorState(errorState);
+        }
+
         communicationInfo.reset();
-        await connection?.close();
-        connection = null;
-        closeOpenDialogs();
+        await communicationInfo.closeConnection();
     }
 
     /// Schließt alle offenen Dialoge, sollten welche geöffnet sein.
     void closeOpenDialogs()
     {
+        return;
+
         BuildContext? context = sendRequestDialogKey.currentContext;
         if (isSendRequestDialogOpen && context != null)
         {

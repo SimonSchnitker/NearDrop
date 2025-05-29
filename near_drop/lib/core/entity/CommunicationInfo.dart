@@ -1,16 +1,29 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:near_drop/core/enums/ErrorState.dart';
 import 'package:near_drop/core/enums/SuccessState.dart';
+import 'package:near_drop/transport/domain/models/Connection.dart';
 import '../enums/CommunicationState.dart';
 
 /// Beschreibt den Kommunikationsstatus und den Fortschritt einer Kommunikation zu einem Gerät.
 class CommunicationInfo extends ChangeNotifier
 {
+    Connection? connection;
     CommunicationState communicationState = CommunicationState.none;
     SuccessState successState = SuccessState.none;
     ErrorState errorState = ErrorState.none;
     double? progress = 0.0;
     bool cancelationRequested = false;
+
+    StreamController<int> onCanceledCompleted = StreamController<int>.broadcast();
+
+    /// Schließt die aktuelle Verbindung.
+    Future<void> closeConnection() async
+    {
+        await connection?.close();
+        connection = null;
+    }
 
     /// Setzt den Status auf "Standardzustand".
     void reset()
