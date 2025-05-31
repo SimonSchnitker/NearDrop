@@ -48,7 +48,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get version_title => 'Version';
 
   @override
-  String get guest_login_title => 'Login as guest';
+  String get guest_login_title => 'Configure your device';
 
   @override
   String get firstname_textfield_label => 'Firstname';
@@ -394,4 +394,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get core_initializing_error_retry_button => 'Retry';
+
+  @override
+  String get onboarding_title => 'First steps';
+
+  @override
+  String get nearby_permission_title => 'Nearby devices';
+
+  @override
+  String get nearby_permission_content =>
+      'Grant the app permission to find nearby devices and determine their relative position. This allows us to detect nearby devices and establish a connection with them.';
+
+  @override
+  String get grant_permission_button => 'Grant permission';
+
+  @override
+  String get grant_permission_skip_button => 'Skip';
 }

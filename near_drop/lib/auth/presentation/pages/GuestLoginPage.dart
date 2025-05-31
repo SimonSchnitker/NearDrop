@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:near_drop/tools/PermissionHelper.dart';
 import 'package:near_drop/tools/ui/FlexibleAppBar.dart';
 import 'package:near_drop/tools/ui/WidgetModifier.dart';
 import 'package:provider/provider.dart';
@@ -95,12 +96,22 @@ class GuestLoginPage extends StatelessWidget
         );
     }
 
+    /// Verarbeitet den Login-Vorgang für einen Gastbenutzer.
     Future<void> _handleLogin(BuildContext context) async
     {
         try
         {
             await showLoadingOverlay(context, context.read<GuestLoginViewModel>().createGuestUser);
-            Navigator.pushNamedAndRemoveUntil(context, Routes.nearby, (Route<dynamic> route) => false);
+
+            // Wenn die Berechtigung für Geräte in der Nähe bereits erteilt wurde, direkt zur Nearby-Seite navigieren.
+            if (await PermissionHelper.hasNearbyPermission())
+            {
+                Navigator.pushNamedAndRemoveUntil(context, Routes.nearby, (Route<dynamic> route) => false);
+            }
+            else
+            {
+                Navigator.pushNamedAndRemoveUntil(context, Routes.onboarding, (Route<dynamic> route) => false);
+            }
         }
         catch (e)
         {

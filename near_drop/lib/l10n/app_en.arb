@@ -12,7 +12,7 @@
 	"licenses_title": "Licences",
 	"licenses_subtitle": "About used licenses",
 	"version_title": "Version",
-	"guest_login_title": "Login as guest",
+	"guest_login_title": "Configure your device",
 	"firstname_textfield_label": "Firstname",
 	"firstname_textfield_helper_text": "Other devices nearby will see this name.",
 	"guest_login_error_message": "An error occurred while logging in. Please try again later.",
@@ -173,5 +173,10 @@
   "file_skip_dialog_cancel_transport_button": "Cancel transfer",
   "core_initializing_loading_text": "Initializing...",
   "core_initializing_error_text": "The initialization process has failed. Check your internet connection and try again.",
-  "core_initializing_error_retry_button": "Retry"
+  "core_initializing_error_retry_button": "Retry",
+  "onboarding_title": "First steps",
+  "nearby_permission_title": "Nearby devices",
+  "nearby_permission_content": "Grant the app permission to find nearby devices and determine their relative position. This allows us to detect nearby devices and establish a connection with them.",
+  "grant_permission_button": "Grant permission",
+  "grant_permission_skip_button": "Skip"
 }

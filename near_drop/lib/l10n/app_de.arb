@@ -12,7 +12,7 @@
     "licenses_title": "Lizenzen",
     "licenses_subtitle": "Über die verwendeten Lizenzen",
     "version_title": "Version",
-    "guest_login_title": "Als Gast anmelden",
+    "guest_login_title": "Dein Gerät konfigurieren",
     "firstname_textfield_label": "Vorname",
     "firstname_textfield_helper_text": "Diesen Namen sehen andere Geräte in der Nähe.",
     "guest_login_error_message": "Beim Anmelden ist ein Fehler aufgetreten. Versuche es später erneut.",
@@ -173,5 +173,10 @@
     "file_skip_dialog_cancel_transport_button": "Übertragung abbrechen",
     "core_initializing_loading_text": "Initialisierung...",
     "core_initializing_error_text": "Der Initialisierungsprozess ist fehlgeschlagen. Prüfe deine Internetverbindung und versuche es erneut.",
-    "core_initializing_error_retry_button": "Erneut versuchen"
+    "core_initializing_error_retry_button": "Erneut versuchen",
+    "onboarding_title": "Erste Schritte",
+    "nearby_permission_title": "Geräte in der Nähe",
+    "nearby_permission_content": "Erteile der App die Berechtigung, Geräte in der Nähe zu finden und ihre relative Position zu bestimmen. Dadurch können wir Geräte in der Nähe erkennen und eine Verbindung zu ihnen herstellen.",
+    "grant_permission_button": "Berechtigung erteilen",
+    "grant_permission_skip_button": "Überspringen"
 }

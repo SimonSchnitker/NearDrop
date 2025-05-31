@@ -179,7 +179,7 @@ abstract class AppLocalizations {
   /// No description provided for @guest_login_title.
   ///
   /// In en, this message translates to:
-  /// **'Login as guest'**
+  /// **'Configure your device'**
   String get guest_login_title;
 
   /// No description provided for @firstname_textfield_label.
@@ -789,6 +789,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry'**
   String get core_initializing_error_retry_button;
+
+  /// No description provided for @onboarding_title.
+  ///
+  /// In en, this message translates to:
+  /// **'First steps'**
+  String get onboarding_title;
+
+  /// No description provided for @nearby_permission_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby devices'**
+  String get nearby_permission_title;
+
+  /// No description provided for @nearby_permission_content.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant the app permission to find nearby devices and determine their relative position. This allows us to detect nearby devices and establish a connection with them.'**
+  String get nearby_permission_content;
+
+  /// No description provided for @grant_permission_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant permission'**
+  String get grant_permission_button;
+
+  /// No description provided for @grant_permission_skip_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get grant_permission_skip_button;
 }
 
 class _AppLocalizationsDelegate

@@ -8,6 +8,7 @@ import 'package:near_drop/auth/domain/AuthController.dart';
 import 'package:near_drop/core/domain/CoreController.dart';
 import 'package:near_drop/nearby/domain/NearbyController.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
+import 'package:near_drop/tools/PermissionHelper.dart';
 import 'package:near_drop/transport/domain/TransportController.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../Runtime.dart';
@@ -39,7 +40,7 @@ class NearbyViewModel extends ChangeNotifier
     get isBluetoothErrorBarVisible => (!isBleAdvertiserRunning || !isBleScannerRunning) && isBluetoothEnabled && hasBluetoothPermissions;
 
     bool isDeviceNotFoundBalloonVisible = false;
-    final Duration deviceNotFoundBalloonDelay = const Duration(seconds: 8);
+    final Duration deviceNotFoundBalloonDelay = const Duration(seconds: 10);
 
     // Diese Werte werden verwendet, um die Sichtbarkeit der Info-Nachrichten zu steuern.
     bool isInfoAreaVisible = false;
@@ -161,7 +162,7 @@ class NearbyViewModel extends ChangeNotifier
             {
                 isBluetoothEnabled = true;
 
-                hasBluetoothPermissions = await _requestBluetoothPermission();
+                hasBluetoothPermissions = await PermissionHelper.hasNearbyPermission();
                 if (hasBluetoothPermissions)
                 {
                     hasBluetoothPermissions = true;
@@ -177,61 +178,6 @@ class NearbyViewModel extends ChangeNotifier
 
             notifyListeners();
         });
-    }
-
-    /// Fordert die Berechtigungen für Bluetooth an.
-    Future<bool> _requestBluetoothPermission() async
-    {
-        if (Platform.isAndroid)
-        {
-            final androidInfo = await DeviceInfoPlugin().androidInfo;
-
-            if (androidInfo.version.sdkInt >= 31) // Android 12 und höher
-            {
-                if (await Permission.bluetoothScan.isGranted && await Permission.bluetoothAdvertise.isGranted && await Permission.bluetoothConnect.isGranted)
-                {
-                    return true;
-                }
-
-                Map<Permission, PermissionStatus> statuses = await [
-                    Permission.bluetoothScan,
-                    Permission.bluetoothAdvertise,
-                    Permission.bluetoothConnect
-                ].request();
-
-                for (var status in statuses.values)
-                {
-                    if (status != PermissionStatus.granted)
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-            else // Für Android 11 und niedriger wird für Bluetooth die Standortberechtigung benötigt
-            {
-                if (await Permission.location.isGranted)
-                {
-                    return true;
-                }
-
-                return await Permission.location.request() == PermissionStatus.granted;
-            }
-        }
-        else if (Platform.isIOS)
-        {
-            if (await Permission.bluetooth.isGranted)
-            {
-                return true;
-            }
-
-            return await Permission.bluetooth.request() == PermissionStatus.granted;
-        }
-        else
-        {
-            return true; // Für Windows und macOS ist keine Berechtigung erforderlich
-        }
     }
 
     /// Zeigt eine Ballon-Nachricht an, wenn nach einem Delay immer noch keine Geräte gefunden wurden.

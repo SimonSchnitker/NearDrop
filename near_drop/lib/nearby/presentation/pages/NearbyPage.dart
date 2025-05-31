@@ -492,7 +492,7 @@ class NearbyPage extends StatelessWidget
           borderRadius: BorderRadius.circular(28),
           color: Theme.of(context).colorScheme.surfaceContainer,
           child: AnimatedFadeSwitcher(
-              duration: Duration(milliseconds: 500),
+              duration: Duration(milliseconds: 400),
               child: context.watch<NearbyViewModel>().isInitializingNearbyUuid ?
                   Padding(
                     key: ValueKey(0),

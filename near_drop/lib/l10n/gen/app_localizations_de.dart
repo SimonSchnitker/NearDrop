@@ -49,7 +49,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get version_title => 'Version';
 
   @override
-  String get guest_login_title => 'Als Gast anmelden';
+  String get guest_login_title => 'Dein Gerät konfigurieren';
 
   @override
   String get firstname_textfield_label => 'Vorname';
@@ -398,4 +398,20 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get core_initializing_error_retry_button => 'Erneut versuchen';
+
+  @override
+  String get onboarding_title => 'Erste Schritte';
+
+  @override
+  String get nearby_permission_title => 'Geräte in der Nähe';
+
+  @override
+  String get nearby_permission_content =>
+      'Erteile der App die Berechtigung, Geräte in der Nähe zu finden und ihre relative Position zu bestimmen. Dadurch können wir Geräte in der Nähe erkennen und eine Verbindung zu ihnen herstellen.';
+
+  @override
+  String get grant_permission_button => 'Berechtigung erteilen';
+
+  @override
+  String get grant_permission_skip_button => 'Überspringen';
 }
