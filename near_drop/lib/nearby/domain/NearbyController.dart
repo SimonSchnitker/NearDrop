@@ -3,7 +3,8 @@ import 'package:near_drop/nearby/data/NearbyGateway.dart';
 import 'package:near_drop/nearby/data/scan/ble/BleAdvertiser.dart';
 import 'package:near_drop/nearby/data/scan/ble/BleScanner.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
-import '../../core/entity/Device.dart';
+
+import '../../core/domain/entity/Device.dart';
 
 /// Steuert das Suchen nach Geräten in der Nähe und den Austausch von Gerätedaten.
 class NearbyController

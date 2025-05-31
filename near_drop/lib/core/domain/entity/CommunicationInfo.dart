@@ -1,10 +1,9 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:near_drop/core/enums/ErrorState.dart';
-import 'package:near_drop/core/enums/SuccessState.dart';
 import 'package:near_drop/transport/domain/models/Connection.dart';
 import '../enums/CommunicationState.dart';
+import '../enums/ErrorState.dart';
+import '../enums/SuccessState.dart';
 
 /// Beschreibt den Kommunikationsstatus und den Fortschritt einer Kommunikation zu einem Gerät.
 class CommunicationInfo extends ChangeNotifier

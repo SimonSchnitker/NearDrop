@@ -1,15 +1,11 @@
 import 'dart:io';
-import 'dart:math';
-
 import 'package:balloon_widget/balloon_widget.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:near_drop/core/entity/CommunicationInfo.dart';
-import 'package:near_drop/core/enums/DeviceType.dart';
-import 'package:near_drop/core/enums/SuccessState.dart';
 import 'package:near_drop/nearby/presentation/viewmodel/NearbyViewModel.dart';
+import 'package:near_drop/nearby/presentation/widgets/AnimatedFadeSwitcher.dart';
 import 'package:near_drop/nearby/presentation/widgets/ManuallyConnectingBottomSheet.dart';
 import 'package:near_drop/nearby/presentation/widgets/PlusingCircleLoader.dart';
 import 'package:near_drop/tools/ui/FlexibleAppBar.dart';
@@ -19,9 +15,12 @@ import 'package:near_drop/transport/presentation/TransportViewModel.dart';
 import 'package:provider/provider.dart';
 import '../../../Routes.dart';
 import '../../../Runtime.dart';
-import '../../../core/entity/Device.dart';
-import '../../../core/enums/CommunicationState.dart';
-import '../../../core/enums/ErrorState.dart';
+import '../../../core/domain/entity/CommunicationInfo.dart';
+import '../../../core/domain/entity/Device.dart';
+import '../../../core/domain/enums/CommunicationState.dart';
+import '../../../core/domain/enums/DeviceType.dart';
+import '../../../core/domain/enums/ErrorState.dart';
+import '../../../core/domain/enums/SuccessState.dart';
 import '../../../l10n/gen/app_localizations.dart';
 
 class NearbyPage extends StatelessWidget
@@ -68,13 +67,16 @@ class NearbyPage extends StatelessWidget
                 ),
               ],
             ),
-          _scanningAnimation(context), // Ladeanimation, wenn keine Geräte gefunden wurden
+            _scanningAnimation(context) // Ladeanimation, wenn keine Geräte gefunden wurden
+                .visible(context.watch<NearbyViewModel>().isInitializingFailed == false),
+            _initializingNearbyUuidFailedView(context)
+              .visible(context.watch<NearbyViewModel>().isInitializingFailed),
             Column(
                 spacing: 8,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                     _infoArea(context),
-                    _bottomBar(context),
+                    _bottomBar(context).visible(context.watch<NearbyViewModel>().isInitializingFailed == false),
                 ],
             )
             .paddingAll(16)
@@ -83,6 +85,28 @@ class NearbyPage extends StatelessWidget
         ),
       ),
     );
+  }
+
+  Widget _initializingNearbyUuidFailedView(BuildContext context) {
+      return Column(
+          spacing: 8,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+              Icon(
+                  Icons.error_outline,
+                  color: Theme.of(context).colorScheme.error,
+                  size: 28,
+              ),
+              Text(
+                  AppLocalizations.of(context)!.core_initializing_error_text,
+                  textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 8),
+              FilledButton(onPressed: () {
+                  context.read<NearbyViewModel>().initializeCore();
+              }, child: Text(AppLocalizations.of(context)!.core_initializing_error_retry_button))
+          ],
+      ).centered().paddingSymmetric(horizontal: 40);
   }
 
   /// Ein Infobereich, der verschiedene Informationen anzeigt, wenn Probleme auftreten.
@@ -467,30 +491,51 @@ class NearbyPage extends StatelessWidget
         child: Material(
           borderRadius: BorderRadius.circular(28),
           color: Theme.of(context).colorScheme.surfaceContainer,
-          child: Row(
-            spacing: 12,
-            children: [
-              Icon(Icons.remove_red_eye_outlined),
-              RichText(
-                text: TextSpan(style: TextStyle(fontWeight: FontWeight.w500),
-                  children: [
-                    TextSpan(
-                        text: AppLocalizations.of(context)!.nearby_page_visibility_info_prefix,
-                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface)
+          child: AnimatedFadeSwitcher(
+              duration: Duration(milliseconds: 500),
+              child: context.watch<NearbyViewModel>().isInitializingNearbyUuid ?
+                  Padding(
+                    key: ValueKey(0),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                        spacing: 16,
+                        children: [
+                            CircularProgressIndicator(strokeWidth: 3, strokeCap: StrokeCap.round,).sized(height: 20, width: 20),
+                            Text(
+                                AppLocalizations.of(context)!.core_initializing_loading_text,
+                                style: Theme.of(context).textTheme.labelLarge,
+                            )
+                        ],
                     ),
-                    TextSpan(
-                        text: context.watch<NearbyViewModel>().firstname,
-                        style: TextStyle(color: Theme.of(context).colorScheme.primary)
-                    ),
-                    TextSpan(
-                        text: ".",
-                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface)
-                    ),
-                  ]),
-              ).expanded(flex: (Platform.isAndroid || Platform.isIOS) ? 1 : 0),
-            ],
-          )
-            .paddingSymmetric(horizontal: 16)
+                  ) :
+              Padding(
+                key: ValueKey(1),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                    spacing: 12,
+                    children: [
+                        Icon(Icons.remove_red_eye_outlined),
+                        RichText(
+                            text: TextSpan(style: TextStyle(fontWeight: FontWeight.w500),
+                                children: [
+                                    TextSpan(
+                                        text: AppLocalizations.of(context)!.nearby_page_visibility_info_prefix,
+                                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface)
+                                    ),
+                                    TextSpan(
+                                        text: context.watch<NearbyViewModel>().firstname,
+                                        style: TextStyle(color: Theme.of(context).colorScheme.primary)
+                                    ),
+                                    TextSpan(
+                                        text: ".",
+                                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface)
+                                    ),
+                                ]),
+                        ).expanded(flex: (Platform.isAndroid || Platform.isIOS) ? 1 : 0),
+                    ],
+                ),
+              ),
+          ),
         )
         .sized(height: 56)
         .paddingOnly(right: 8),
@@ -519,19 +564,10 @@ class NearbyPage extends StatelessWidget
                   ],
                 ).paddingSymmetric(horizontal: 8, vertical: 4),
               )
-              .onTap(() {
-                  context.read<NearbyViewModel>().setDeviceNotFoundBalloonVisibility(false);
-              })
           ),
-        child: Material(
-          color: Theme.of(context).colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(28),
-          child: Icon(
-              Icons.qr_code_2
-          )
-          .clickable(
-            borderRadius: BorderRadius.circular(28),
-            onTap: () {
+        child: IconButton(style: IconButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.surfaceContainer),
+            color: Theme.of(context).colorScheme.onSurface,
+            onPressed: context.watch<NearbyViewModel>().isInitializingNearbyUuid || !context.watch<NearbyViewModel>().isNearbyUuidInitialized ? null : () {
                 context.read<NearbyViewModel>().setDeviceNotFoundBalloonVisibility(false);
                 showModalBottomSheet(
                     context: context,
@@ -543,13 +579,13 @@ class NearbyPage extends StatelessWidget
                         reverseDuration: Duration(milliseconds: 250),
                     ),
                 );
-            }
-          ),
+            },
+            icon: Icon(Icons.qr_code_2)
         )
-        .sized(height: 56, width: 56)
-        .tooltip(
-          message: AppLocalizations.of(context)!.nearby_page_manual_connection_tooltip,
-          preferBelow: false,
+            .sized(width: 56, height: 56)
+            .tooltip(
+            message: AppLocalizations.of(context)!.nearby_page_manual_connection_tooltip,
+            preferBelow: false,
         ),
       ),
     Badge(

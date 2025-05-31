@@ -1,12 +1,11 @@
 import 'dart:async';
-
 import 'package:flutter/widgets.dart';
-import 'package:near_drop/core/entity/CommunicationInfo.dart';
-import 'package:near_drop/core/enums/ErrorState.dart';
-import 'package:near_drop/core/enums/SuccessState.dart';
 import 'package:near_drop/transport/domain/models/Connection.dart';
 import '../enums/DeviceType.dart';
+import '../enums/ErrorState.dart';
 import '../enums/OS.dart';
+import '../enums/SuccessState.dart';
+import 'CommunicationInfo.dart';
 
 /// Definiert den Aufbau eines Geräts.
 class Device extends ChangeNotifier

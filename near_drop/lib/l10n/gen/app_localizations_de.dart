@@ -388,4 +388,14 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get file_skip_dialog_cancel_transport_button =>
       'Übertragung abbrechen';
+
+  @override
+  String get core_initializing_loading_text => 'Initialisierung...';
+
+  @override
+  String get core_initializing_error_text =>
+      'Der Initialisierungsprozess ist fehlgeschlagen. Prüfe deine Internetverbindung und versuche es erneut.';
+
+  @override
+  String get core_initializing_error_retry_button => 'Erneut versuchen';
 }

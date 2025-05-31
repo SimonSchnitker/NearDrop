@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:mutex/mutex.dart';
-import '../../core/entity/Device.dart';
+import '../../core/domain/entity/Device.dart';
 
 /// Container für Geräte in der Nähe.
 class NearbyDevicesContainer

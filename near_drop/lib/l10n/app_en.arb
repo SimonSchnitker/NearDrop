@@ -170,5 +170,8 @@
     }
   },
   "file_skip_dialog_skip_button": "Skip",
-  "file_skip_dialog_cancel_transport_button": "Cancel transfer"
+  "file_skip_dialog_cancel_transport_button": "Cancel transfer",
+  "core_initializing_loading_text": "Initializing...",
+  "core_initializing_error_text": "The initialization process has failed. Check your internet connection and try again.",
+  "core_initializing_error_retry_button": "Retry"
 }

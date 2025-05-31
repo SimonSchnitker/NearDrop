@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'package:near_drop/core/enums/DeviceType.dart';
-import 'package:near_drop/core/enums/OS.dart';
 import 'package:near_drop/tools/DeviceHelper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'core/domain/enums/DeviceType.dart';
+import 'core/domain/enums/OS.dart';
 
 /// Stellt Laufzeit-Daten bereit.
 class Runtime
@@ -14,7 +14,6 @@ class Runtime
 
     static StreamController<String> onFirstnameChanged = StreamController<String>.broadcast();
 
-    static bool deviceDataLoaded = false;
     static int deviceId = 0;
     static String firstname = "";
     static String deviceName = "";

@@ -9,8 +9,6 @@ import '../../../Runtime.dart';
 class GuestLoginViewModel extends ChangeNotifier
 {
     final AuthController _authController = KiwiContainer().resolve<AuthController>();
-    final NearbyController _nearbyController = KiwiContainer().resolve<NearbyController>();
-    final TransportController _transportController = KiwiContainer().resolve<TransportController>();
     final TextEditingController firstnameController = TextEditingController();
     bool isTermsAccepted = false;
 
@@ -30,17 +28,6 @@ class GuestLoginViewModel extends ChangeNotifier
     Future<void> createGuestUser() async
     {
         await _authController.signInAnonymous(firstnameController.text);
-        await _authController.updateNearbyUuid();
-
-        bool realtimeChannelInitialized = await Runtime.initializeChannel();
-        if (!realtimeChannelInitialized)
-        {
-            await _authController.signOutAndDeleteAccount();
-            throw Exception("RealtimeChannel konnte nicht initialisiert werden");
-        }
-
-        _nearbyController.startListeningForDeviceData();
-        _transportController.startSignaling();
 
         firstnameController.clear();
         isTermsAccepted = false;

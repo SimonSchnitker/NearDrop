@@ -5,7 +5,7 @@ import 'package:near_drop/tools/FileSizeHelper.dart';
 import 'package:near_drop/transport/domain/TransportController.dart';
 import 'package:open_app_file/open_app_file.dart';
 import 'package:path/path.dart';
-import '../../core/entity/Device.dart';
+import '../../core/domain/entity/Device.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../nearby/presentation/pages/NearbyPage.dart';
 import 'enums/MimeTypeGroup.dart';

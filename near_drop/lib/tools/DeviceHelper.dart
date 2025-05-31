@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
-import '../core/enums/DeviceType.dart';
-import '../core/enums/OS.dart';
+import '../core/domain/enums/DeviceType.dart';
+import '../core/domain/enums/OS.dart';
 
 /// Hilfsklasse für Geräteinformationen.
 class DeviceHelper

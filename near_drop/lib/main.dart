@@ -8,6 +8,7 @@ import 'package:near_drop/Runtime.dart';
 import 'package:near_drop/WelcomePage.dart';
 import 'package:near_drop/auth/domain/AuthController.dart';
 import 'package:near_drop/auth/presentation/pages/GuestSettingsPage.dart';
+import 'package:near_drop/core/data/CoreGateway.dart';
 import 'package:near_drop/help/presentation/HelpPage.dart';
 import 'package:near_drop/nearby/data/scan/ble/BleAdvertiser.dart';
 import 'package:near_drop/settings/data/SettingsGateway.dart';
@@ -20,6 +21,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'Routes.dart';
 import 'auth/data/AuthGateway.dart';
 import 'auth/presentation/pages/GuestLoginPage.dart';
+import 'core/domain/CoreController.dart';
 import 'l10n/gen/app_localizations.dart';
 import 'nearby/data/NearbyGateway.dart';
 import 'nearby/data/scan/ble/BleScanner.dart';
@@ -47,20 +49,10 @@ void main() async
         anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqcWdmb3p3aGRyYWtzemNueGtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg5MzYzNDcsImV4cCI6MjA1NDUxMjM0N30.r2aXQ47Q6fl5suHv5tv6B-w1d52hyD-Pwi0Xi6ICpxk"
     );
 
+    // Benutzerdaten laden
     if (Supabase.instance.client.auth.currentUser != null)
     {
-        try
-        {
-            await KiwiContainer().resolve<AuthController>().loadThisDevice();
-            KiwiContainer().resolve<NearbyController>().startListeningForDeviceData();
-            KiwiContainer().resolve<TransportController>().startSignaling();
-        }
-        catch (e)
-        {
-            //await Supabase.instance.client.auth.signOut();
-            print("Error loading device data: $e");
-            // TODO: Fehler-Page anzeigen
-        }
+        await KiwiContainer().resolve<AuthController>().loadUserData();
     }
 
     runApp(const MyApp());
@@ -80,6 +72,8 @@ void initializeDIContainer()
     final signalingController = SignalingController(signalingGateway);
     final transportGateway = TransportGateway();
     final transportController = TransportController(signalingController, transportGateway);
+    final coreGateway = CoreGateway();
+    final coreController = CoreController(coreGateway, settingsController);
 
     KiwiContainer().registerInstance(settingsGateway);
     KiwiContainer().registerInstance(settingsController);
@@ -93,6 +87,8 @@ void initializeDIContainer()
     KiwiContainer().registerInstance(signalingController);
     KiwiContainer().registerInstance(transportController);
     KiwiContainer().registerInstance(transportGateway);
+    KiwiContainer().registerInstance(coreGateway);
+    KiwiContainer().registerInstance(coreController);
 }
 
 class MyApp extends StatelessWidget {
@@ -134,7 +130,7 @@ class MyApp extends StatelessWidget {
                       Routes.guestSettings: (context) => GuestSettingsPage(),
                       Routes.help: (context) => HelpPage(),
                   },
-                  initialRoute: Runtime.deviceDataLoaded ? Routes.nearby : Routes.welcome,
+                  initialRoute: Supabase.instance.client.auth.currentUser == null ? Routes.welcome : Routes.nearby,
               );
           }
       );

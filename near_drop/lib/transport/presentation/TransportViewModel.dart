@@ -2,13 +2,12 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:kiwi/kiwi.dart';
-import 'package:near_drop/core/enums/CommunicationState.dart';
-import 'package:near_drop/core/enums/ErrorState.dart';
-import 'package:near_drop/core/enums/SuccessState.dart';
 import 'package:near_drop/transport/domain/enums/SendResponse.dart';
-import 'package:near_drop/transport/domain/models/Connection.dart';
-import '../../core/entity/Device.dart';
+import '../../core/domain/entity/Device.dart';
+import '../../core/domain/enums/CommunicationState.dart';
+import '../../core/domain/enums/ErrorState.dart';
 import '../domain/TransportController.dart';
+import '../domain/models/Connection.dart';
 
 /// Steuert die UI des Dateiübertragungsprozesses.
 class TransportViewModel extends ChangeNotifier

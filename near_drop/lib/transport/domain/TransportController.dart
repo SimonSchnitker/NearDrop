@@ -6,8 +6,6 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:gal/gal.dart';
 import 'package:media_scanner/media_scanner.dart';
 import 'package:mime/mime.dart';
-import 'package:near_drop/core/enums/ErrorState.dart';
-import 'package:near_drop/core/enums/SuccessState.dart';
 import 'package:near_drop/nearby/presentation/pages/NearbyPage.dart';
 import 'package:near_drop/transport/data/TransportGateway.dart';
 import 'package:near_drop/transport/domain/SignalingController.dart';
@@ -24,7 +22,9 @@ import 'package:near_drop/transport/data/dto/SendRequestFilesDTO.dart';
 import 'package:near_drop/transport/domain/models/ReceivedFile.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import '../../core/entity/Device.dart';
+import '../../core/domain/entity/Device.dart';
+import '../../core/domain/enums/ErrorState.dart';
+import '../../core/domain/enums/SuccessState.dart';
 import 'event_args/ConnectionCreatedEventArgs.dart';
 
 /// Steuert den Transportprozess zwischen Geräten.
@@ -129,6 +129,7 @@ class TransportController
         // Wenn der Datenkanal mittlerweile geschlossen wurde, beenden
         if (connection.dataChannel?.state != RTCDataChannelState.RTCDataChannelOpen)
         {
+            await device.closeConnection(connection: connection, errorState: ErrorState.error);
             return;
         }
 
@@ -352,7 +353,7 @@ class TransportController
 
         device.communicationInfo.setConnecting();
 
-        // Gesamtgröße der Dateien berechnen
+        // Gesamtgröße der Dateien berechnen und MimeTypeGroup bestimmen
         int totalSize = 0;
         MimeTypeGroup mimeTypeGroup = MimeTypeGroup.mixed;
         try
@@ -391,14 +392,14 @@ class TransportController
         }
         on Exception catch (e)
         {
-            print("Verbindung zu ${device.firstname} fehlgeschlagen: $e");
+            print("Verbindungsaufbau zu ${device.firstname} fehlgeschlagen: $e");
             device.communicationInfo.setErrorState(ErrorState.error);
             return SendResponse.connectionError;
         }
 
         if (connection == null)
         {
-            print("Verbindung zu ${device.firstname} fehlgeschlagen.");
+            print("Verbindungsaufbau zu ${device.firstname} fehlgeschlagen.");
             device.communicationInfo.setErrorState(ErrorState.error);
             return SendResponse.timeout;
         }

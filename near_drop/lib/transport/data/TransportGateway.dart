@@ -1,9 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
-import 'package:media_scanner/media_scanner.dart';
 import 'package:mime/mime.dart';
-import 'package:near_drop/core/entity/Device.dart';
 import 'package:near_drop/transport/domain/enums/FileReceiveResult.dart';
 import 'package:near_drop/transport/domain/enums/FileSendResult.dart';
 import 'package:near_drop/transport/domain/enums/MimeTypeGroup.dart';
@@ -16,6 +13,7 @@ import 'package:near_drop/transport/data/dto/SendRequestDTO.dart';
 import 'package:near_drop/transport/domain/models/ReceivedFile.dart';
 import 'package:path/path.dart';
 
+import '../../core/domain/entity/Device.dart';
 import 'dto/SendRequestFilesDTO.dart';
 
 /// Diese Klasse ist für das Senden und Empfangen von Dateien über den Datenkanal verantwortlich.

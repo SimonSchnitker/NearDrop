@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:near_drop/Runtime.dart';
-import 'package:near_drop/core/entity/Device.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../core/enums/DeviceType.dart';
-import '../../core/enums/OS.dart';
+import '../../core/domain/entity/Device.dart';
+import '../../core/domain/enums/DeviceType.dart';
+import '../../core/domain/enums/OS.dart';
 
 /// Gateway für die Kommunikation mit anderen Geräten in der Nähe.
 class NearbyGateway

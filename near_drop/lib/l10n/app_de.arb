@@ -170,5 +170,8 @@
       }
     },
     "file_skip_dialog_skip_button": "Überspringen",
-    "file_skip_dialog_cancel_transport_button": "Übertragung abbrechen"
+    "file_skip_dialog_cancel_transport_button": "Übertragung abbrechen",
+    "core_initializing_loading_text": "Initialisierung...",
+    "core_initializing_error_text": "Der Initialisierungsprozess ist fehlgeschlagen. Prüfe deine Internetverbindung und versuche es erneut.",
+    "core_initializing_error_retry_button": "Erneut versuchen"
 }

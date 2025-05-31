@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:near_drop/Runtime.dart';
-import 'package:near_drop/core/entity/Device.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../core/domain/entity/Device.dart';
 
 /// Definiert Methoden zum Austauschen von WebRTC-Angeboten, -Antworten und -ICE-Kandidaten.
 class SignalingGateway

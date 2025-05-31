@@ -4,18 +4,21 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus_windows/flutter_blue_plus_windows.dart';
 import 'package:kiwi/kiwi.dart';
+import 'package:near_drop/auth/domain/AuthController.dart';
+import 'package:near_drop/core/domain/CoreController.dart';
 import 'package:near_drop/nearby/domain/NearbyController.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
+import 'package:near_drop/transport/domain/TransportController.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../Runtime.dart';
-import '../../../core/entity/Device.dart';
-import '../../../core/enums/DeviceType.dart';
-import '../../../core/enums/OS.dart';
+import '../../../core/domain/entity/Device.dart';
 
 /// Interaktionslogik der NearbyPage.
 class NearbyViewModel extends ChangeNotifier
 {
     final NearbyController _nearbyController = KiwiContainer().resolve<NearbyController>();
+    final TransportController _transportController = KiwiContainer().resolve<TransportController>();
+    final CoreController _coreController = KiwiContainer().resolve<CoreController>();
 
     final List<Device> nearbyDevices = [];
     String firstname = Runtime.firstname;
@@ -23,6 +26,12 @@ class NearbyViewModel extends ChangeNotifier
     bool isBluetoothSupported = true;
     bool isBluetoothEnabled = true;
     bool hasBluetoothPermissions = true;
+
+    // Diese Werte geben an, ob die UUID für Nearby initialisiert wird und ob sie bereits initialisiert wurde.
+    // Ohne die UUID sind die meisten Funktionen der App nicht nutzbar.
+    bool isInitializingNearbyUuid = false;
+    bool isNearbyUuidInitialized = false;
+    bool isInitializingFailed = false;
 
     // Diese Werte werden verwendet, falls der BleScanner oder BleAdvertiser fehlschlagen.
     bool isBleScannerRunning = true;
@@ -38,18 +47,6 @@ class NearbyViewModel extends ChangeNotifier
 
     NearbyViewModel()
     {
-        for (int i = 0; i < 0; i++)
-        {
-            nearbyDevices.add(Device(
-                "Simon",
-                "Pixel 9 Pro",
-                DeviceType.phone,
-                OS.android,
-                1,
-                ""
-            ));
-        }
-
         // Auf Änderungen des Vornamens lauschen
         Runtime.onFirstnameChanged.stream.listen((newFirstname) {
             firstname = newFirstname;
@@ -66,6 +63,7 @@ class NearbyViewModel extends ChangeNotifier
             notifyListeners();
         });
 
+        // Darauf lauschen, wenn Geräte hinzugefügt oder entfernt werden.
         NearbyDevicesContainer.onAdded.stream.listen((device) {
             nearbyDevices.add(device);
 
@@ -77,19 +75,44 @@ class NearbyViewModel extends ChangeNotifier
 
             notifyListeners();
         });
-
         NearbyDevicesContainer.onRemoved.stream.listen((device) {
             nearbyDevices.remove(device);
             notifyListeners();
         });
 
         _listenNetworkStateChanges();
-        _checkBluetoothSupport().then((_) {
-            if (isBluetoothSupported)
-            {
-                _listenForBluetoothStateChanges();
-            }
-        });
+        initializeCore();
+    }
+
+    /// Initialisiert die Core-Funktionen der App.
+    Future<void> initializeCore() async
+    {
+        isInitializingFailed = false;
+        isInitializingNearbyUuid = true;
+        notifyListeners();
+
+        try
+        {
+            await _coreController.inizialize();
+        }
+        catch (e)
+        {
+            isInitializingNearbyUuid = false;
+            isNearbyUuidInitialized = false;
+            isInitializingFailed = true;
+            notifyListeners();
+            return;
+        }
+
+        isInitializingNearbyUuid = false;
+        isNearbyUuidInitialized = true;
+        isInitializingFailed = false;
+        notifyListeners();
+
+        // Wenn erfolgreich, alle notwendigen Dienste starten
+        _nearbyController.startListeningForDeviceData();
+        _transportController.startSignaling();
+        _listenForBluetoothStateChanges();
     }
 
     /// Zeigt die Info-Nachrichten an oder blendet sie aus.
@@ -123,18 +146,16 @@ class NearbyViewModel extends ChangeNotifier
         });
     }
 
-    /// Prüft, ob das Gerät Bluetooth unterstützt.
-    Future<void> _checkBluetoothSupport() async
+    /// Lauscht auf Änderungen des Bluetooth-Status.
+    Future<void> _listenForBluetoothStateChanges() async
     {
         if (await FlutterBluePlus.isSupported == false)
         {
             isBluetoothSupported = false;
+            notifyListeners();
+            return;
         }
-    }
 
-    /// Lauscht auf Änderungen des Bluetooth-Status.
-    void _listenForBluetoothStateChanges()
-    {
         FlutterBluePlus.adapterState.listen((state) async {
             if (state == BluetoothAdapterState.on)
             {

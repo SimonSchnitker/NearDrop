@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:near_drop/core/entity/Device.dart';
-import 'package:near_drop/core/enums/ErrorState.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
 import 'package:near_drop/transport/data/SignalingGateway.dart';
 import 'package:near_drop/transport/domain/event_args/ConnectionCreatedEventArgs.dart';
 import 'package:near_drop/transport/domain/models/RTCNetworkStream.dart';
+import '../../core/domain/entity/Device.dart';
+import '../../core/domain/enums/ErrorState.dart';
 import 'models/Connection.dart';
 
 /// Steuert den Signalisierungsprozess für WebRTC-Verbindungen.

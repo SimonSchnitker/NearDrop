@@ -771,6 +771,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel transfer'**
   String get file_skip_dialog_cancel_transport_button;
+
+  /// No description provided for @core_initializing_loading_text.
+  ///
+  /// In en, this message translates to:
+  /// **'Initializing...'**
+  String get core_initializing_loading_text;
+
+  /// No description provided for @core_initializing_error_text.
+  ///
+  /// In en, this message translates to:
+  /// **'The initialization process has failed. Check your internet connection and try again.'**
+  String get core_initializing_error_text;
+
+  /// No description provided for @core_initializing_error_retry_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get core_initializing_error_retry_button;
 }
 
 class _AppLocalizationsDelegate
