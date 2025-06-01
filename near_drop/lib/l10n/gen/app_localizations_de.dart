@@ -317,7 +317,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get help_page_title => 'Hilfe';
 
   @override
-  String get help_page_installation_title =>
+  String get help_page_installation_title => 'Installation';
+
+  @override
+  String get help_page_installation_description =>
       'Installiere Near Drop auf anderen Geräten, um Dateien zu senden und zu empfangen.';
 
   @override
@@ -340,6 +343,41 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get help_page_install_on_windows_content =>
       'Im Microsoft Store herunterladen';
+
+  @override
+  String get help_page_faq_title => 'Fragen & Antworten';
+
+  @override
+  String get help_page_faq_received_files_question =>
+      'Wo finde ich empfangene Dateien?';
+
+  @override
+  String get help_page_received_files_bottom_sheet_title =>
+      'Empfangene Dateien';
+
+  @override
+  String get help_page_received_files_bottom_sheet_media_label =>
+      'Fotos & Videos';
+
+  @override
+  String get help_page_received_files_bottom_sheet_media_content =>
+      'Empfangene Fotos & Videos findest du in deiner Fotos-App im Album \'Near Drop\'.';
+
+  @override
+  String get help_page_received_files_bottom_sheet_files_label =>
+      'Andere Dateien';
+
+  @override
+  String get help_page_received_files_bottom_sheet_files_content =>
+      'Alle anderen empfangene Dateien findest du im Downloads-Ordner deines Geräts.';
+
+  @override
+  String get help_page_received_files_bottom_sheet_files_title_desktop =>
+      'Dateien';
+
+  @override
+  String get help_page_received_files_bottom_sheet_files_content_desktop =>
+      'Alle empfangene Dateien findest du im Downloads-Ordner.';
 
   @override
   String get nearby_page_help_button_tooltip => 'Hilfe';

@@ -2,11 +2,15 @@ import 'dart:async';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:external_path/external_path.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:gal/gal.dart';
 import 'package:media_scanner/media_scanner.dart';
 import 'package:mime/mime.dart';
+import 'package:near_drop/help/presentation/ReceivedFilesLocationInfoView.dart';
 import 'package:near_drop/nearby/presentation/pages/NearbyPage.dart';
+import 'package:near_drop/settings/domain/Setting.dart';
+import 'package:near_drop/settings/domain/SettingsController.dart';
 import 'package:near_drop/transport/data/TransportGateway.dart';
 import 'package:near_drop/transport/domain/SignalingController.dart';
 import 'package:near_drop/transport/domain/TransportDialogs.dart';
@@ -30,14 +34,16 @@ import 'event_args/ConnectionCreatedEventArgs.dart';
 /// Steuert den Transportprozess zwischen Geräten.
 class TransportController
 {
+    static final Setting _isFirstTimeReceivingFilesSetting = Setting("isFirstTimeReceivingFiles", bool);
     static const String FOLDER_NAME = "Near Drop";
     static const int MIN_BYTES_FOR_DATA_VOLUME_WARNING = 20000000; // 20 MB
     Directory? filesDirectory;
 
     final SignalingController _signalingController;
     final TransportGateway _transportGateway;
+    final SettingsController _settingsController;
 
-    TransportController(this._signalingController, this._transportGateway)
+    TransportController(this._signalingController, this._transportGateway, this._settingsController)
     {
         initFilesDirectory();
     }
@@ -214,11 +220,24 @@ class TransportController
         }
 
         await device.closeConnection(connection: connection, successState: SuccessState.receivedSuccessfully);
+        if (receivedFiles.isEmpty)
+        {
+            return;
+        }
 
         // Empfangene Dateien auf der UI anzeigen
-        if (receivedFiles.isNotEmpty)
+        await showImagePreviewDialog(context: NearbyPage.scaffoldKey.currentContext!, allFiles: receivedFiles, device: device, targetDirectory: filesDirectory, mimeTypeGroup: sendRequest.mimeTypeGroup);
+
+        // BottomSheet mit Erklärung anzeigen, wenn Dateien auf diesem Gerät zum allerersten Mal empfangen wurden
+        bool? isFirstTimeReceivingFiles = await _settingsController.get(_isFirstTimeReceivingFilesSetting);
+        if (isFirstTimeReceivingFiles == null)
         {
-            await showImagePreviewDialog(context: NearbyPage.scaffoldKey.currentContext!, allFiles: receivedFiles, device: device, targetDirectory: filesDirectory, mimeTypeGroup: sendRequest.mimeTypeGroup);
+            await _settingsController.set(_isFirstTimeReceivingFilesSetting, true); // Merken, dass Dateien empfangen wurden
+            await showModalBottomSheet(
+                context: NearbyPage.scaffoldKey.currentContext!,
+                builder: (_) => ReceivedFilesLocationInfoView(),
+                showDragHandle: true
+            );
         }
     }
 

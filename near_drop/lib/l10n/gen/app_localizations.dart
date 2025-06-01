@@ -655,8 +655,14 @@ abstract class AppLocalizations {
   /// No description provided for @help_page_installation_title.
   ///
   /// In en, this message translates to:
-  /// **'Install Near Drop on other devices to send and receive files.'**
+  /// **'Installation'**
   String get help_page_installation_title;
+
+  /// No description provided for @help_page_installation_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Install Near Drop on other devices to send and receive files.'**
+  String get help_page_installation_description;
 
   /// No description provided for @help_page_install_on_android_title.
   ///
@@ -693,6 +699,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Available on Microsoft Store'**
   String get help_page_install_on_windows_content;
+
+  /// No description provided for @help_page_faq_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Answered questions'**
+  String get help_page_faq_title;
+
+  /// No description provided for @help_page_faq_received_files_question.
+  ///
+  /// In en, this message translates to:
+  /// **'Where can I find received files?'**
+  String get help_page_faq_received_files_question;
+
+  /// No description provided for @help_page_received_files_bottom_sheet_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Received files'**
+  String get help_page_received_files_bottom_sheet_title;
+
+  /// No description provided for @help_page_received_files_bottom_sheet_media_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos & Videos'**
+  String get help_page_received_files_bottom_sheet_media_label;
+
+  /// No description provided for @help_page_received_files_bottom_sheet_media_content.
+  ///
+  /// In en, this message translates to:
+  /// **'Received photos and videos can be found in your Photos app in the album \'Near Drop\'.'**
+  String get help_page_received_files_bottom_sheet_media_content;
+
+  /// No description provided for @help_page_received_files_bottom_sheet_files_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Other files'**
+  String get help_page_received_files_bottom_sheet_files_label;
+
+  /// No description provided for @help_page_received_files_bottom_sheet_files_content.
+  ///
+  /// In en, this message translates to:
+  /// **'All other received files can be found in the Downloads folder of your device.'**
+  String get help_page_received_files_bottom_sheet_files_content;
+
+  /// No description provided for @help_page_received_files_bottom_sheet_files_title_desktop.
+  ///
+  /// In en, this message translates to:
+  /// **'Files'**
+  String get help_page_received_files_bottom_sheet_files_title_desktop;
+
+  /// No description provided for @help_page_received_files_bottom_sheet_files_content_desktop.
+  ///
+  /// In en, this message translates to:
+  /// **'All received files can be found in the Downloads folder.'**
+  String get help_page_received_files_bottom_sheet_files_content_desktop;
 
   /// No description provided for @nearby_page_help_button_tooltip.
   ///

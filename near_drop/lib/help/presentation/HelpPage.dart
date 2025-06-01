@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:near_drop/Routes.dart';
+import 'package:near_drop/help/presentation/ReceivedFilesLocationInfoView.dart';
 import 'package:near_drop/tools/ui/FlexibleAppBar.dart';
+import 'package:near_drop/tools/ui/ShapedMaterial.dart';
 import 'package:near_drop/tools/ui/WidgetModifier.dart';
 import 'package:provider/provider.dart';
 import 'HelpViewModel.dart';
@@ -17,17 +20,47 @@ class HelpPage extends StatelessWidget {
                         FlexibleAppBar(title: AppLocalizations.of(context)!.help_page_title),
                         SliverToBoxAdapter(
                             child: Column(
-                                spacing: 4,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                     Text(
                                         AppLocalizations.of(context)!.help_page_installation_title,
+                                        style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Theme.of(context).colorScheme.primary),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                        AppLocalizations.of(context)!.help_page_installation_description,
                                         style: Theme.of(context).textTheme.bodyLarge,
                                     ),
-                                    SizedBox(height: 8),
+                                    SizedBox(height: 16),
                                     _buildAndroidItem(context),
+                                    SizedBox(height: 4),
                                     _buildiOSItem(context),
+                                    SizedBox(height: 4),
                                     _buildWindowsItem(context),
+                                    SizedBox(height: 32),
+                                    Text(
+                                        AppLocalizations.of(context)!.help_page_faq_title,
+                                        style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Theme.of(context).colorScheme.primary),
+                                    ),
+                                    SizedBox(height: 8),
+                                    ShapedMaterial(
+                                        shapePosition: ShapePosition.only,
+                                        onTap: () {
+                                            showModalBottomSheet(
+                                                context: context,
+                                                builder: (_) => ReceivedFilesLocationInfoView(),
+                                                showDragHandle: true,
+                                                sheetAnimationStyle: AnimationStyle(
+                                                    duration: Duration(milliseconds: 380),
+                                                    reverseDuration: Duration(milliseconds: 250),
+                                                )
+                                            );
+                                        },
+                                        child: ListTile(
+                                            leading: Icon(Icons.download_outlined),
+                                            title: Text(AppLocalizations.of(context)!.help_page_faq_received_files_question),
+                                        )
+                                    )
                                 ],
                             ).paddingAll(16),
                         ),

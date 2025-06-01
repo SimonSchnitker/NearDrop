@@ -17,6 +17,7 @@ Widget FlexibleAppBar({required String title, Widget? leading, List<Widget>? act
 
                 return FlexibleSpaceBar(
                     titlePadding: EdgeInsets.only(left: padding, bottom: 16),
+                    centerTitle: false,
                     expandedTitleScale: 1.9,
                     title: Text(
                         title,

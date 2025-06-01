@@ -10,6 +10,7 @@ import 'package:near_drop/auth/domain/AuthController.dart';
 import 'package:near_drop/auth/presentation/pages/GuestSettingsPage.dart';
 import 'package:near_drop/core/data/CoreGateway.dart';
 import 'package:near_drop/help/presentation/HelpPage.dart';
+import 'package:near_drop/help/presentation/ReceivedFilesLocationInfoView.dart';
 import 'package:near_drop/nearby/data/scan/ble/BleAdvertiser.dart';
 import 'package:near_drop/onboarding/presentation/OnboardingPage.dart';
 import 'package:near_drop/settings/data/SettingsGateway.dart';
@@ -72,7 +73,7 @@ void initializeDIContainer()
     final signalingGateway = SignalingGateway();
     final signalingController = SignalingController(signalingGateway);
     final transportGateway = TransportGateway();
-    final transportController = TransportController(signalingController, transportGateway);
+    final transportController = TransportController(signalingController, transportGateway, settingsController);
     final coreGateway = CoreGateway();
     final coreController = CoreController(coreGateway, settingsController);
 
@@ -130,7 +131,7 @@ class MyApp extends StatelessWidget {
                       Routes.nearby: (context) => NearbyPage(),
                       Routes.guestSettings: (context) => GuestSettingsPage(),
                       Routes.help: (context) => HelpPage(),
-                      Routes.onboarding: (context) => OnboardingPage(),
+                      Routes.onboarding: (context) => OnboardingPage()
                   },
                   initialRoute: Supabase.instance.client.auth.currentUser == null ? Routes.welcome : Routes.nearby,
               );
