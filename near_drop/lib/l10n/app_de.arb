@@ -1,5 +1,5 @@
 {
-    "app_name": "Near Drop",
+    "app_name": "Share Zone",
     "welcome_subtitle": "Dateien schnell & drahtlos in der Nähe teilen",
     "welcome_preview_info_text": "Vorschauversion",
     "app_info_button": "App-Info",
@@ -12,7 +12,7 @@
     "licenses_title": "Lizenzen",
     "licenses_subtitle": "Über die verwendeten Lizenzen",
     "version_title": "Version",
-    "guest_login_title": "Dein Gerät konfigurieren",
+    "guest_login_title": "Profil anlegen",
     "firstname_textfield_label": "Vorname",
     "firstname_textfield_helper_text": "Diesen Namen sehen andere Geräte in der Nähe.",
     "guest_login_error_message": "Beim Anmelden ist ein Fehler aufgetreten. Versuche es später erneut.",
@@ -136,6 +136,7 @@
     "account_page_delete_account_dialog_title": "Alle Daten löschen",
     "account_page_delete_account_dialog_content": "Bist du sicher, dass du alle deine Daten löschen möchtest? Dieser Vorgang kann nicht rückgängig gemacht werden.",
     "account_page_delete_account_dialog_delete_button": "Löschen",
+    "account_page_delete_account_error_message": "Beim Löschen deiner Daten ist ein Fehler aufgetreten. Prüfe deine Internetverbindung oder versuche es später erneut.",
     "help_page_title": "Hilfe",
     "help_page_installation_title": "Installation",
     "help_page_installation_description": "Installiere Near Drop auf anderen Geräten, um Dateien zu senden und zu empfangen.",

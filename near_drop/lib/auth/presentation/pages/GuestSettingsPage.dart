@@ -138,13 +138,18 @@ class GuestSettingsPage extends StatelessWidget {
                 ),
                 TextButton(
                     onPressed: () async {
-                        Navigator.of(context).pop(); // Dialog schließen
-                        await showLoadingOverlay(context, context.read<GuestSettingsViewModel>().deleteAccount);
-                        Navigator.of(context).pushNamedAndRemoveUntil(Routes.welcome, (route) => false); // Zurück zur Willkommensseite
+                        _handleLogout(context);
                     },
                     child: Text(AppLocalizations.of(context)!.account_page_delete_account_dialog_delete_button, style: TextStyle(color: Theme.of(context).colorScheme.error),),
                 ),
             ],
         );
+    }
+
+    Future<void> _handleLogout(BuildContext context) async
+    {
+        Navigator.of(context).pop(); // Dialog schließen
+        await showLoadingOverlay(context, context.read<GuestSettingsViewModel>().deleteAccount);
+        Navigator.of(context).pushNamedAndRemoveUntil(Routes.welcome, (route) => false); // Zurück zur Willkommensseite
     }
 }

@@ -1,16 +1,14 @@
-import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus_windows/flutter_blue_plus_windows.dart';
 import 'package:kiwi/kiwi.dart';
-import 'package:near_drop/auth/domain/AuthController.dart';
 import 'package:near_drop/core/domain/CoreController.dart';
+import 'package:near_drop/core/domain/enums/DeviceType.dart';
+import 'package:near_drop/core/domain/enums/OS.dart';
 import 'package:near_drop/nearby/domain/NearbyController.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
 import 'package:near_drop/tools/PermissionHelper.dart';
 import 'package:near_drop/transport/domain/TransportController.dart';
-import 'package:permission_handler/permission_handler.dart';
 import '../../../Runtime.dart';
 import '../../../core/domain/entity/Device.dart';
 
@@ -35,16 +33,16 @@ class NearbyViewModel extends ChangeNotifier
     bool isInitializingFailed = false;
 
     // Diese Werte werden verwendet, falls der BleScanner oder BleAdvertiser fehlschlagen.
-    bool isBleScannerRunning = true;
-    bool isBleAdvertiserRunning = true;
-    get isBluetoothErrorBarVisible => (!isBleAdvertiserRunning || !isBleScannerRunning) && isBluetoothEnabled && hasBluetoothPermissions;
+    //bool isBleScannerRunning = true;
+    //bool isBleAdvertiserRunning = true;
+    //get isBluetoothErrorBarVisible => (!isBleAdvertiserRunning || !isBleScannerRunning) && isBluetoothEnabled && hasBluetoothPermissions;
 
     bool isDeviceNotFoundBalloonVisible = false;
     final Duration deviceNotFoundBalloonDelay = const Duration(seconds: 10);
 
     // Diese Werte werden verwendet, um die Sichtbarkeit der Info-Nachrichten zu steuern.
     bool isInfoAreaVisible = false;
-    get isInfoMessagesButtonVisible => !isConnectedWithNetwork || !isBluetoothSupported || !isBluetoothEnabled || !hasBluetoothPermissions || isBluetoothErrorBarVisible;
+    get isInfoMessagesButtonVisible => !isConnectedWithNetwork || !isBluetoothSupported || !isBluetoothEnabled || !hasBluetoothPermissions;
 
     NearbyViewModel()
     {
@@ -56,12 +54,12 @@ class NearbyViewModel extends ChangeNotifier
 
         // Auf Änderungen des Bluetooth-Status lauschen
         _nearbyController.onBleAdvertiserStatusChanged.stream.listen((isAdverstising) {
-            isBleAdvertiserRunning = isAdverstising;
-            notifyListeners();
+            //isBleAdvertiserRunning = isAdverstising;
+            //notifyListeners();
         });
         _nearbyController.onBleScannerStatusChanged.stream.listen((isScanning) {
-            isBleScannerRunning = isScanning;
-            notifyListeners();
+            //isBleScannerRunning = isScanning;
+            //notifyListeners();
         });
 
         // Darauf lauschen, wenn Geräte hinzugefügt oder entfernt werden.

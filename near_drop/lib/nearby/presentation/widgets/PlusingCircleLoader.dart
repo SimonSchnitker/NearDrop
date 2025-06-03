@@ -39,7 +39,7 @@ class _PulsingCirclesLoaderState extends State<PulsingCirclesLoader>
             duration: widget.duration,
         )..repeat();
 
-        _scaleTween = Tween<double>(begin: 0.1, end: Platform.isAndroid || Platform.isIOS ? 1.0 : 0.75);
+        _scaleTween = Tween<double>(begin: Platform.isAndroid || Platform.isIOS ? 0.1 : 0.05, end: Platform.isAndroid || Platform.isIOS ? 1.0 : 0.6);
 
         _opacityTweenSequence = TweenSequence<double>([
             // Schnelles Einfaden (z.B. erste 10% der Animationszeit des jeweiligen Kreises)

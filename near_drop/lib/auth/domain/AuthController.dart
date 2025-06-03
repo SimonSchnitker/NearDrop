@@ -31,8 +31,17 @@ class AuthController
     /// Meldet den aktuellen Benutzer ab, löscht die Einstellungen und unsubscribt vom Realtime-Kanal.
     Future<void> signOutAndDeleteAccount() async
     {
+        try
+        {
+            await _authGateway.signOut();
+        }
+        catch (e)
+        {
+            // Wenn der Benutzer keine Internetverbindung hat, kommt es hier zu einer Exception.
+            // Ignorieren, da Supabase den Benutzer trotzdem abmeldet.
+        }
+
         await Runtime.realtimeChannel.unsubscribe();
-        await _authGateway.signOut();
         await _settingsController.clear();
     }
 

@@ -9,6 +9,7 @@ import 'package:near_drop/nearby/presentation/widgets/AnimatedFadeSwitcher.dart'
 import 'package:near_drop/nearby/presentation/widgets/ManuallyConnectingBottomSheet.dart';
 import 'package:near_drop/nearby/presentation/widgets/PlusingCircleLoader.dart';
 import 'package:near_drop/tools/ui/FlexibleAppBar.dart';
+import 'package:near_drop/tools/ui/ShapedMaterial.dart';
 import 'package:near_drop/tools/ui/WidgetModifier.dart';
 import 'package:near_drop/transport/domain/enums/SendResponse.dart';
 import 'package:near_drop/transport/presentation/TransportViewModel.dart';
@@ -138,7 +139,8 @@ class NearbyPage extends StatelessWidget
                       .visible(!context.watch<NearbyViewModel>().isBluetoothEnabled),
                   _infoBar(context, AppLocalizations.of(context)!.bluetooth_error_info_bar_title, AppLocalizations.of(context)!.bluetooth_error_info_bar_subtitle, Icons.bluetooth_disabled_outlined)
                       .paddingOnly(top: 4)
-                      .visible(context.watch<NearbyViewModel>().isInfoMessagesButtonVisible),
+                      .visible(false),
+                      //.visible(context.watch<NearbyViewModel>().isInfoMessagesButtonVisible),
               ],
           ).align(Alignment.bottomCenter),
         ),
@@ -192,37 +194,36 @@ class NearbyPage extends StatelessWidget
                   ],
                 ),
                 SizedBox(height: 16),
-                Material(
+                ShapedMaterial(
+                    shapePosition: ShapePosition.start,
                     color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                    borderRadius: BorderRadius.all(Radius.circular(24)),
-                    clipBehavior: Clip.hardEdge,
-                    child: Column(
-                        children: [
-                            ListTile(
-                                title: Text(AppLocalizations.of(context)!.imprint_title, style: TextStyle(color: Theme.of(context).colorScheme.onSurface),),
-                                leading: Icon(Icons.info_outline),
-                                iconColor: Theme.of(context).colorScheme.onSurface,
-                                onTap: () {
-
-                                },
-                            ),
-                            ListTile(
-                                title: Text(AppLocalizations.of(context)!.data_privacy_title, style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
-                                leading: Icon(Icons.shield_outlined),
-                                iconColor: Theme.of(context).colorScheme.onSurface,
-                                onTap: () {
-
-                                },
-                            ),
-                            ListTile(
-                                title: Text(AppLocalizations.of(context)!.licenses_title, style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
-                                leading: Icon(Icons.verified_user_outlined),
-                                iconColor: Theme.of(context).colorScheme.onSurface,
-                                onTap: () {
-                                    showLicensePage(context: context);
-                                },
-                            )
-                        ],
+                    child: ListTile(
+                        title: Text(AppLocalizations.of(context)!.imprint_title, style: TextStyle(color: Theme.of(context).colorScheme.onSurface),),
+                        leading: Icon(Icons.info_outline),
+                        iconColor: Theme.of(context).colorScheme.onSurface,
+                    ),
+                ),
+                SizedBox(height: 4),
+                ShapedMaterial(
+                    shapePosition: ShapePosition.middle,
+                    color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    child: ListTile(
+                        title: Text(AppLocalizations.of(context)!.data_privacy_title, style: TextStyle(color: Theme.of(context).colorScheme.onSurface),),
+                        leading: Icon(Icons.shield_outlined),
+                        iconColor: Theme.of(context).colorScheme.onSurface,
+                    ),
+                ),
+                SizedBox(height: 4),
+                ShapedMaterial(
+                    shapePosition: ShapePosition.end,
+                    color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    onTap: ()  {
+                        showLicensePage(context: context);
+                    },
+                    child: ListTile(
+                        title: Text(AppLocalizations.of(context)!.licenses_title, style: TextStyle(color: Theme.of(context).colorScheme.onSurface),),
+                        leading: Icon(Icons.verified_user_outlined),
+                        iconColor: Theme.of(context).colorScheme.onSurface,
                     ),
                 ),
                 Spacer(),
@@ -245,6 +246,17 @@ class NearbyPage extends StatelessWidget
 
   /// Zeigt eine Gitteransicht der gefundenen Geräte an.
   Widget _nearbyDevicesGrid(BuildContext context, List<Device> devices) {
+      if (Platform.isWindows || Platform.isWindows || Platform.isLinux) {
+          return SliverToBoxAdapter(
+              child: Wrap(
+                  children: [
+                      for (Device device in devices)
+                          _deviceItem(context, device).paddingOnly(right: 12, bottom: 12)
+                  ],
+              ),
+          );
+      }
+
     return SliverGrid(
         delegate: SliverChildBuilderDelegate(
             childCount: devices.length,
@@ -415,7 +427,7 @@ class NearbyPage extends StatelessWidget
               }
           }
     ),
-      )
+      ).sized(height: 88, width: (Platform.isWindows || Platform.isMacOS || Platform.isLinux) ? 190 : double.infinity)
     );
   }
 

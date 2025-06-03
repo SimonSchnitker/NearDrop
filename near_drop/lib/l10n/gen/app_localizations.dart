@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @app_name.
   ///
   /// In en, this message translates to:
-  /// **'Near Drop'**
+  /// **'Share Zone'**
   String get app_name;
 
   /// No description provided for @welcome_subtitle.
@@ -179,7 +179,7 @@ abstract class AppLocalizations {
   /// No description provided for @guest_login_title.
   ///
   /// In en, this message translates to:
-  /// **'Configure your device'**
+  /// **'Create profile'**
   String get guest_login_title;
 
   /// No description provided for @firstname_textfield_label.
@@ -645,6 +645,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get account_page_delete_account_dialog_delete_button;
+
+  /// No description provided for @account_page_delete_account_error_message.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while deleting your data. Check your internet connection or try again later.'**
+  String get account_page_delete_account_error_message;
 
   /// No description provided for @help_page_title.
   ///

@@ -1,5 +1,5 @@
 {
-	"app_name": "Near Drop",
+	"app_name": "Share Zone",
 	"welcome_subtitle": "Share files nearby",
 	"welcome_preview_info_text": "Preview version",
 	"app_info_button": "App information",
@@ -12,7 +12,7 @@
 	"licenses_title": "Licences",
 	"licenses_subtitle": "About used licenses",
 	"version_title": "Version",
-	"guest_login_title": "Configure your device",
+	"guest_login_title": "Create profile",
 	"firstname_textfield_label": "Firstname",
 	"firstname_textfield_helper_text": "Other devices nearby will see this name.",
 	"guest_login_error_message": "An error occurred while logging in. Please try again later.",
@@ -136,6 +136,7 @@
   "account_page_delete_account_dialog_title": "Delete all data",
   "account_page_delete_account_dialog_content": "Are you sure you want to delete all your data? This action cannot be undone.",
   "account_page_delete_account_dialog_delete_button": "Delete",
+  "account_page_delete_account_error_message": "An error occurred while deleting your data. Check your internet connection or try again later.",
   "help_page_title": "Help",
   "help_page_installation_title": "Installation",
   "help_page_installation_description": "Install Near Drop on other devices to send and receive files.",

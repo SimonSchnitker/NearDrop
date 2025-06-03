@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get app_name => 'Near Drop';
+  String get app_name => 'Share Zone';
 
   @override
   String get welcome_subtitle => 'Share files nearby';
@@ -48,7 +48,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get version_title => 'Version';
 
   @override
-  String get guest_login_title => 'Configure your device';
+  String get guest_login_title => 'Create profile';
 
   @override
   String get firstname_textfield_label => 'Firstname';
@@ -309,6 +309,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get account_page_delete_account_dialog_delete_button => 'Delete';
+
+  @override
+  String get account_page_delete_account_error_message =>
+      'An error occurred while deleting your data. Check your internet connection or try again later.';
 
   @override
   String get help_page_title => 'Help';

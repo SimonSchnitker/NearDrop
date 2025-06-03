@@ -20,6 +20,7 @@ import 'package:near_drop/transport/data/TransportGateway.dart';
 import 'package:near_drop/transport/domain/SignalingController.dart';
 import 'package:near_drop/transport/domain/TransportController.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:window_manager/window_manager.dart';
 import 'Routes.dart';
 import 'auth/data/AuthGateway.dart';
 import 'auth/presentation/pages/GuestLoginPage.dart';
@@ -55,6 +56,22 @@ void main() async
     if (Supabase.instance.client.auth.currentUser != null)
     {
         await KiwiContainer().resolve<AuthController>().loadUserData();
+    }
+
+    // Fenster-Manager initialisieren, wenn auf Desktop-Plattformen
+    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux)
+    {
+        await windowManager.ensureInitialized();
+        WindowOptions windowOptions = WindowOptions(
+            title: "Share Zone",
+            minimumSize: Size(900, 700),
+            size: Size(900, 700),
+            center: true,
+        );
+        windowManager.waitUntilReadyToShow(windowOptions, () async {
+            await windowManager.show();
+            await windowManager.focus();
+        });
     }
 
     runApp(const MyApp());
@@ -114,16 +131,26 @@ class MyApp extends StatelessWidget {
                       Locale('de'), // Deutsch
                   ],
                   theme: ThemeData(
+                      colorScheme: lightDynamic ?? ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.light),
                       tooltipTheme: TooltipThemeData(
+                          waitDuration: Platform.isWindows || Platform.isMacOS || Platform.isLinux ? Duration(milliseconds: 800) : null,
                           decoration: BoxDecoration(
                               color: Theme.of(context).colorScheme.inverseSurface,
                               borderRadius: BorderRadius.circular(4),
                           ),
                       ),
-                      colorScheme: lightDynamic ?? ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.light),
+                      progressIndicatorTheme: ProgressIndicatorThemeData(
+                          strokeCap: StrokeCap.round
+                      )
                   ),
                   darkTheme: ThemeData(
                       colorScheme: darkDynamic ?? ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark),
+                      progressIndicatorTheme: ProgressIndicatorThemeData(
+                          strokeCap: StrokeCap.round
+                      ),
+                      tooltipTheme: TooltipThemeData(
+                          waitDuration: Platform.isWindows || Platform.isMacOS || Platform.isLinux ? Duration(milliseconds: 800) : null
+                      )
                   ),
                   routes: {
                       Routes.welcome: (context) => WelcomePage(),

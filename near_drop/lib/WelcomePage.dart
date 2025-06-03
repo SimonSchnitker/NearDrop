@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:near_drop/Runtime.dart';
+import 'package:near_drop/tools/ui/ShapedMaterial.dart';
 import 'package:near_drop/tools/ui/WidgetModifier.dart';
 
 import 'Routes.dart';
@@ -14,13 +15,14 @@ class WelcomePage extends StatelessWidget
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
                 Material(
-                    color: Theme.of(context).colorScheme.primaryContainer,
+                    color: Theme.of(context).colorScheme.surfaceContainer,
                     borderRadius: BorderRadius.circular(24),
                     child: Text(
                         AppLocalizations.of(context)!.welcome_preview_info_text,
-                    ).paddingSymmetric(horizontal: 16, vertical: 12),
+                        style: Theme.of(context).textTheme.labelLarge,
+                    ).paddingSymmetric(horizontal: 24, vertical: 12),
                 ),
-                SizedBox(height: 24),
+                SizedBox(height: 32),
                 Text(
                     AppLocalizations.of(context)!.app_name,
                     style: Theme.of(context).textTheme.displayMedium!.copyWith(fontWeight: FontWeight.w500),
@@ -79,46 +81,45 @@ Widget _appInfoDialog(BuildContext context) {
         children: [
             Text(
                 AppLocalizations.of(context)!.app_info_title,
-                style: Theme.of(context).textTheme.headlineSmall
+                style: Theme.of(context).textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.w500)
             )
                 .align(Alignment.center),
             SizedBox(height: 16),
-            Material(
-                color: Theme.of(context).colorScheme.surfaceContainerHigh.withOpacity(0.5),
-                borderRadius: BorderRadius.all(Radius.circular(24)),
-                clipBehavior: Clip.hardEdge,
-                child: Column(
-                    children: [
-                        ListTile(
-                            title: Text(AppLocalizations.of(context)!.imprint_title),
-                            subtitle: Text(AppLocalizations.of(context)!.imprint_subtitle),
-                            leading: Icon(Icons.info_outline),
-                            onTap: () {
-
-                            },
-                        ),
-                        ListTile(
-                            title: Text(AppLocalizations.of(context)!.data_privacy_title),
-                            subtitle: Text(AppLocalizations.of(context)!.data_privacy_subtitle),
-                            leading: Icon(Icons.shield_outlined),
-                            onTap: () {
-
-                            },
-                        ),
-                        ListTile(
-                            title: Text(AppLocalizations.of(context)!.licenses_title),
-                            subtitle: Text(AppLocalizations.of(context)!.licenses_subtitle),
-                            leading: Icon(Icons.verified_user_outlined),
-                            onTap: () {
-
-                            },
-                        )
-                    ],
+            ShapedMaterial(
+                shapePosition: ShapePosition.start,
+                color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                child: ListTile(
+                    title: Text(AppLocalizations.of(context)!.imprint_title),
+                    subtitle: Text(AppLocalizations.of(context)!.imprint_subtitle),
+                    leading: Icon(Icons.info_outline),
+                ),
+            ),
+            SizedBox(height: 4),
+            ShapedMaterial(
+                shapePosition: ShapePosition.middle,
+                color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                child: ListTile(
+                    title: Text(AppLocalizations.of(context)!.data_privacy_title),
+                    subtitle: Text(AppLocalizations.of(context)!.data_privacy_subtitle),
+                    leading: Icon(Icons.shield_outlined),
+                ),
+            ),
+            SizedBox(height: 4),
+            ShapedMaterial(
+                shapePosition: ShapePosition.end,
+                color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                onTap: () {
+                    showLicensePage(context: context);
+                },
+                child: ListTile(
+                    title: Text(AppLocalizations.of(context)!.licenses_title),
+                    subtitle: Text(AppLocalizations.of(context)!.licenses_subtitle),
+                    leading: Icon(Icons.verified_user_outlined),
                 ),
             ),
             SizedBox(height: 16),
             Material(
-                color: Theme.of(context).colorScheme.surfaceContainerHigh.withOpacity(0.5),
+                color: Theme.of(context).colorScheme.surfaceContainerHigh,
                 borderRadius: BorderRadius.all(Radius.circular(24)),
                 child: ListTile(
                     title: Text(AppLocalizations.of(context)!.version_title),

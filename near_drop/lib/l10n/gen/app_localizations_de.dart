@@ -9,7 +9,7 @@ class AppLocalizationsDe extends AppLocalizations {
   AppLocalizationsDe([String locale = 'de']) : super(locale);
 
   @override
-  String get app_name => 'Near Drop';
+  String get app_name => 'Share Zone';
 
   @override
   String get welcome_subtitle =>
@@ -49,7 +49,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get version_title => 'Version';
 
   @override
-  String get guest_login_title => 'Dein Gerät konfigurieren';
+  String get guest_login_title => 'Profil anlegen';
 
   @override
   String get firstname_textfield_label => 'Vorname';
@@ -312,6 +312,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get account_page_delete_account_dialog_delete_button => 'Löschen';
+
+  @override
+  String get account_page_delete_account_error_message =>
+      'Beim Löschen deiner Daten ist ein Fehler aufgetreten. Prüfe deine Internetverbindung oder versuche es später erneut.';
 
   @override
   String get help_page_title => 'Hilfe';
