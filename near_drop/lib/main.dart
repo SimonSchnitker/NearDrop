@@ -47,6 +47,9 @@ void main() async
     await Runtime.initializeDeviceData();
     initializeDIContainer();
 
+    // Zielordner initialisieren, indem empfangene Dateien gespeichert werden
+    await KiwiContainer().resolve<TransportController>().initialize();
+
     await Supabase.initialize(
         url: "https://cjqgfozwhdrakszcnxkj.supabase.co",
         anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqcWdmb3p3aGRyYWtzemNueGtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg5MzYzNDcsImV4cCI6MjA1NDUxMjM0N30.r2aXQ47Q6fl5suHv5tv6B-w1d52hyD-Pwi0Xi6ICpxk"

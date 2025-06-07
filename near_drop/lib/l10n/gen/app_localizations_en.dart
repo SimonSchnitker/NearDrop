@@ -450,4 +450,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get grant_permission_skip_button => 'Skip';
+
+  @override
+  String get files_directory_initializing_failed_title =>
+      'No file reception possible';
+
+  @override
+  String get files_directory_initializing_failed_content =>
+      'We cannot access the Downloads folder of your device.';
 }

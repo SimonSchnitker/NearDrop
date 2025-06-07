@@ -885,6 +885,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Skip'**
   String get grant_permission_skip_button;
+
+  /// No description provided for @files_directory_initializing_failed_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No file reception possible'**
+  String get files_directory_initializing_failed_title;
+
+  /// No description provided for @files_directory_initializing_failed_content.
+  ///
+  /// In en, this message translates to:
+  /// **'We cannot access the Downloads folder of your device.'**
+  String get files_directory_initializing_failed_content;
 }
 
 class _AppLocalizationsDelegate

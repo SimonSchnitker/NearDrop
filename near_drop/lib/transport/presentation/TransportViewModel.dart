@@ -14,11 +14,12 @@ class TransportViewModel extends ChangeNotifier
 {
     final _transportController = KiwiContainer().resolve<TransportController>();
     static final _cancelTimeout = Duration(seconds: 8);
-    bool _isFilesDirectoryInitialized = false;
+    bool isFilesDirectoryInitialized = false;
 
     TransportViewModel()
     {
-        _isFilesDirectoryInitialized = _transportController.filesDirectory != null;
+        isFilesDirectoryInitialized = _transportController.filesDirectory != null;
+        print("TransportViewModel: isFilesDirectoryInitialized: $isFilesDirectoryInitialized");
     }
 
     /// Sendet Dateien an ein Gerät.

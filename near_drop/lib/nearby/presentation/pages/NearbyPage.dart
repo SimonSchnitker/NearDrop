@@ -141,6 +141,9 @@ class NearbyPage extends StatelessWidget
                       .paddingOnly(top: 4)
                       .visible(false),
                       //.visible(context.watch<NearbyViewModel>().isInfoMessagesButtonVisible),
+                  _infoBar(context, AppLocalizations.of(context)!.files_directory_initializing_failed_title, AppLocalizations.of(context)!.files_directory_initializing_failed_content, Icons.file_download_off_outlined)
+                      .paddingOnly(top: 4)
+                      .visible(!context.watch<TransportViewModel>().isFilesDirectoryInitialized),
               ],
           ).align(Alignment.bottomCenter),
         ),
@@ -616,7 +619,7 @@ class NearbyPage extends StatelessWidget
           })
       )
         .sized(height: 56, width: 56),
-    ).paddingOnly(left: 8).visible(context.watch<NearbyViewModel>().isInfoMessagesButtonVisible)
+    ).paddingOnly(left: 8).visible(context.watch<NearbyViewModel>().isInfoMessagesButtonVisible || context.watch<TransportViewModel>().isFilesDirectoryInitialized == false)
     ]);
   }
 

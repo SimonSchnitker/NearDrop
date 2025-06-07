@@ -456,4 +456,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get grant_permission_skip_button => 'Überspringen';
+
+  @override
+  String get files_directory_initializing_failed_title =>
+      'Kein Dateiempfang möglich';
+
+  @override
+  String get files_directory_initializing_failed_content =>
+      'Wir können nicht auf den Downloads-Ordner deines Geräts zugreifen.';
 }

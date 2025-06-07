@@ -43,13 +43,10 @@ class TransportController
     final TransportGateway _transportGateway;
     final SettingsController _settingsController;
 
-    TransportController(this._signalingController, this._transportGateway, this._settingsController)
-    {
-        initFilesDirectory();
-    }
+    TransportController(this._signalingController, this._transportGateway, this._settingsController);
 
     /// Initialisiert den Zielordner, in den empfangene Dateien gespeichert werden sollen.
-    Future<void> initFilesDirectory() async
+    Future<void> initialize() async
     {
         try
         {
