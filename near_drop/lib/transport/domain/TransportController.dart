@@ -35,7 +35,7 @@ import 'event_args/ConnectionCreatedEventArgs.dart';
 class TransportController
 {
     static final Setting _isFirstTimeReceivingFilesSetting = Setting("isFirstTimeReceivingFiles", bool);
-    static const String FOLDER_NAME = "Near Drop";
+    static const String FOLDER_NAME = "Share Zone";
     static const int MIN_BYTES_FOR_DATA_VOLUME_WARNING = 20000000; // 20 MB
     Directory? filesDirectory;
 

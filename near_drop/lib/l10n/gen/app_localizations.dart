@@ -221,7 +221,7 @@ abstract class AppLocalizations {
   /// No description provided for @nearby_page_menu_icon_tooltip.
   ///
   /// In en, this message translates to:
-  /// **'Menu'**
+  /// **'App information'**
   String get nearby_page_menu_icon_tooltip;
 
   /// No description provided for @nearby_page_account_icon_tooltip.
@@ -673,31 +673,31 @@ abstract class AppLocalizations {
   /// No description provided for @help_page_install_on_android_title.
   ///
   /// In en, this message translates to:
-  /// **'Near Drop for Android'**
+  /// **'Share Zone for Android'**
   String get help_page_install_on_android_title;
 
   /// No description provided for @help_page_install_on_android_content.
   ///
   /// In en, this message translates to:
-  /// **'Available on Google Play Store'**
+  /// **'Available on Play Store'**
   String get help_page_install_on_android_content;
 
   /// No description provided for @help_page_install_on_apple_title.
   ///
   /// In en, this message translates to:
-  /// **'Near Drop for iOS and macOS'**
+  /// **'Share Zone for iOS and macOS'**
   String get help_page_install_on_apple_title;
 
   /// No description provided for @help_page_install_on_apple_content.
   ///
   /// In en, this message translates to:
-  /// **'Available on Apple App Store'**
+  /// **'Available on App Store'**
   String get help_page_install_on_apple_content;
 
   /// No description provided for @help_page_install_on_windows_title.
   ///
   /// In en, this message translates to:
-  /// **'Near Drop for Windows'**
+  /// **'Share Zone for Windows'**
   String get help_page_install_on_windows_title;
 
   /// No description provided for @help_page_install_on_windows_content.
@@ -733,7 +733,7 @@ abstract class AppLocalizations {
   /// No description provided for @help_page_received_files_bottom_sheet_media_content.
   ///
   /// In en, this message translates to:
-  /// **'Received photos and videos can be found in your Photos app in the album \'Near Drop\'.'**
+  /// **'Received photos and videos can be found in your Photos app in the album \'Share Zone\'.'**
   String get help_page_received_files_bottom_sheet_media_content;
 
   /// No description provided for @help_page_received_files_bottom_sheet_files_label.

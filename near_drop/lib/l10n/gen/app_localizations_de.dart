@@ -72,7 +72,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get data_protection_info_text_3 => ' gelesen und akzeptiere diese.';
 
   @override
-  String get nearby_page_menu_icon_tooltip => 'Menü';
+  String get nearby_page_menu_icon_tooltip => 'App-Info';
 
   @override
   String get nearby_page_account_icon_tooltip => 'Mein Account';
@@ -328,21 +328,20 @@ class AppLocalizationsDe extends AppLocalizations {
       'Installiere Near Drop auf anderen Geräten, um Dateien zu senden und zu empfangen.';
 
   @override
-  String get help_page_install_on_android_title => 'Near Drop für Android';
+  String get help_page_install_on_android_title => 'Share Zone für Android';
 
   @override
   String get help_page_install_on_android_content =>
-      'Im Google Play Store herunterladen';
+      'Im Play Store herunterladen';
 
   @override
-  String get help_page_install_on_apple_title => 'Near Drop für iOS & macOS';
+  String get help_page_install_on_apple_title => 'Share Zone für iOS & macOS';
 
   @override
-  String get help_page_install_on_apple_content =>
-      'Im Apple App Store herunterladen';
+  String get help_page_install_on_apple_content => 'Im App Store herunterladen';
 
   @override
-  String get help_page_install_on_windows_title => 'Near Drop für Windows';
+  String get help_page_install_on_windows_title => 'Share Zone für Windows';
 
   @override
   String get help_page_install_on_windows_content =>
@@ -365,7 +364,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get help_page_received_files_bottom_sheet_media_content =>
-      'Empfangene Fotos & Videos findest du in deiner Fotos-App im Album \'Near Drop\'.';
+      'Empfangene Fotos & Videos findest du in deiner Fotos-App im Album \'Share Zone\'.';
 
   @override
   String get help_page_received_files_bottom_sheet_files_label =>
