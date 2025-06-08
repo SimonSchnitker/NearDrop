@@ -133,6 +133,14 @@ class MyApp extends StatelessWidget {
                   ],
                   theme: ThemeData(
                       colorScheme: lightDynamic ?? ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.light),
+                      pageTransitionsTheme: PageTransitionsTheme(
+                          builders: {
+                              TargetPlatform.android:
+                                CupertinoPageTransitionsBuilder(),
+                              TargetPlatform.windows:
+                                CupertinoPageTransitionsBuilder(),
+                          }
+                      ),
                       tooltipTheme: TooltipThemeData(
                           waitDuration: Platform.isWindows || Platform.isMacOS || Platform.isLinux ? Duration(milliseconds: 800) : null,
                           decoration: BoxDecoration(
@@ -146,6 +154,14 @@ class MyApp extends StatelessWidget {
                   ),
                   darkTheme: ThemeData(
                       colorScheme: darkDynamic ?? ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark),
+                      pageTransitionsTheme: PageTransitionsTheme(
+                          builders: {
+                              TargetPlatform.android:
+                                CupertinoPageTransitionsBuilder(),
+                              TargetPlatform.windows:
+                                CupertinoPageTransitionsBuilder(),
+                          }
+                      ),
                       progressIndicatorTheme: ProgressIndicatorThemeData(
                           strokeCap: StrokeCap.round
                       ),
