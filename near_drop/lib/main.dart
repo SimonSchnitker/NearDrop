@@ -41,8 +41,8 @@ void main() async
         await windowManager.ensureInitialized();
         WindowOptions windowOptions = WindowOptions(
             title: "Share Zone",
-            minimumSize: Size(900, 700),
-            size: Size(900, 700),
+            minimumSize: Size(500, 500),
+            size: Size(800, 650),
             center: true,
         );
         windowManager.waitUntilReadyToShow(windowOptions, () async {
