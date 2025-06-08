@@ -249,7 +249,7 @@ class NearbyPage extends StatelessWidget
 
   /// Zeigt eine Gitteransicht der gefundenen Geräte an.
   Widget _nearbyDevicesGrid(BuildContext context, List<Device> devices) {
-      if (Platform.isWindows || Platform.isWindows || Platform.isLinux) {
+      if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
           return SliverToBoxAdapter(
               child: Wrap(
                   children: [

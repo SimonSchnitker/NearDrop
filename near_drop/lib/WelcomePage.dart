@@ -52,6 +52,7 @@ class WelcomePage extends StatelessWidget
                                 context: context,
                                 builder: (context) => _appInfoDialog(context),
                                 showDragHandle: true,
+                                isScrollControlled: true,
                                 sheetAnimationStyle: AnimationStyle(
                                     duration: Duration(milliseconds: 350),
                                     reverseDuration: Duration(milliseconds: 250),

@@ -102,15 +102,45 @@ class NearbyController
     /// Startet die BLE-Scanner- und Werbeträgerdienste.
     Future<void> startBleServices() async
     {
-        await _bleScanner.start();
-        await _bleAdvertiser.start();
+        try
+        {
+            await _bleScanner.start();
+        }
+        catch (e)
+        {
+            print("BLE-Scanner konnte nicht gestartet werden: $e");
+        }
+
+        try
+        {
+            await _bleAdvertiser.start();
+        }
+        catch (e)
+        {
+            print("BLE-Advertiser konnte nicht gestartet werden: $e");
+        }
     }
 
     /// Stoppt die BLE-Scanner- und Werbeträgerdienste.
     Future<void> stopBleServices() async
     {
-        await _bleScanner.stop();
-        await _bleAdvertiser.stop();
+        try
+        {
+            await _bleScanner.stop();
+        }
+        catch (e)
+        {
+            print("BLE-Scanner konnte nicht gestoppt werden: $e");
+        }
+
+        try
+        {
+            await _bleAdvertiser.stop();
+        }
+        catch (e)
+        {
+            print("BLE-Advertiser konnte nicht gestoppt werden: $e");
+        }
     }
 
     /// Startet das Lauschen auf Gerätedaten.
