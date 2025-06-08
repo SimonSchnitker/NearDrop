@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:dynamic_system_colors/dynamic_system_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -10,7 +9,6 @@ import 'package:near_drop/auth/domain/AuthController.dart';
 import 'package:near_drop/auth/presentation/pages/GuestSettingsPage.dart';
 import 'package:near_drop/core/data/CoreGateway.dart';
 import 'package:near_drop/help/presentation/HelpPage.dart';
-import 'package:near_drop/help/presentation/ReceivedFilesLocationInfoView.dart';
 import 'package:near_drop/nearby/data/scan/ble/BleAdvertiser.dart';
 import 'package:near_drop/onboarding/presentation/OnboardingPage.dart';
 import 'package:near_drop/settings/data/SettingsGateway.dart';
@@ -37,6 +35,22 @@ void main() async
 {
     WidgetsFlutterBinding.ensureInitialized();
 
+    // Fenster-Manager initialisieren, wenn auf Desktop-Plattformen
+    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux)
+    {
+        await windowManager.ensureInitialized();
+        WindowOptions windowOptions = WindowOptions(
+            title: "Share Zone",
+            minimumSize: Size(900, 700),
+            size: Size(900, 700),
+            center: true,
+        );
+        windowManager.waitUntilReadyToShow(windowOptions, () async {
+            await windowManager.show();
+            await windowManager.focus();
+        });
+    }
+
     // Neuen Foto-Picker unter Android aktivieren
     final ImagePickerPlatform imagePickerImplementation = ImagePickerPlatform.instance;
     if (imagePickerImplementation is ImagePickerAndroid)
@@ -59,22 +73,6 @@ void main() async
     if (Supabase.instance.client.auth.currentUser != null)
     {
         await KiwiContainer().resolve<AuthController>().loadUserData();
-    }
-
-    // Fenster-Manager initialisieren, wenn auf Desktop-Plattformen
-    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux)
-    {
-        await windowManager.ensureInitialized();
-        WindowOptions windowOptions = WindowOptions(
-            title: "Share Zone",
-            minimumSize: Size(900, 700),
-            size: Size(900, 700),
-            center: true,
-        );
-        windowManager.waitUntilReadyToShow(windowOptions, () async {
-            await windowManager.show();
-            await windowManager.focus();
-        });
     }
 
     runApp(const MyApp());
@@ -122,7 +120,7 @@ class MyApp extends StatelessWidget {
           builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
               return MaterialApp(
                   debugShowCheckedModeBanner: false,
-                  title: 'Near Drop',
+                  title: 'Share Zone',
                   localizationsDelegates: [
                       AppLocalizations.delegate,
                       GlobalMaterialLocalizations.delegate,
