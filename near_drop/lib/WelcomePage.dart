@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:near_drop/Runtime.dart';
 import 'package:near_drop/tools/ui/ShapedMaterial.dart';
 import 'package:near_drop/tools/ui/WidgetModifier.dart';
@@ -14,6 +15,12 @@ class WelcomePage extends StatelessWidget
         body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+                Icon(
+                    Icons.sensors_rounded,
+                    size: 48,
+                    color: Theme.of(context).colorScheme.primary,
+                ),
+                /*
                 Material(
                     color: Theme.of(context).colorScheme.surfaceContainer,
                     borderRadius: BorderRadius.circular(24),
@@ -22,7 +29,8 @@ class WelcomePage extends StatelessWidget
                         style: Theme.of(context).textTheme.labelLarge,
                     ).paddingSymmetric(horizontal: 24, vertical: 12),
                 ),
-                SizedBox(height: 32),
+                 */
+                SizedBox(height: 40),
                 Text(
                     AppLocalizations.of(context)!.app_name,
                     style: Theme.of(context).textTheme.displayMedium!.copyWith(fontWeight: FontWeight.w500),
@@ -34,14 +42,12 @@ class WelcomePage extends StatelessWidget
                 ),
                 SizedBox(height: 16),
                 Expanded(
-                    child: Center(
-                        child: Container(
-                            decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surfaceContainer,
-                                borderRadius: BorderRadius.circular(24),
-                            ),
-                            child: Container(),
+                    child: Container(
+                        decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surfaceContainer,
+                            borderRadius: BorderRadius.circular(24),
                         ),
+                        child: Lottie.asset(Theme.of(context).brightness == Brightness.light ? "assets/lottie/welcome_animation_light.json" : "assets/lottie/welcome_animation_dark.json")
                     )
                 ),
                 SizedBox(height: 16),
