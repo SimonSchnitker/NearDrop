@@ -73,6 +73,7 @@ Widget _showQrCodeView(BuildContext context) {
                 ),
                 child: QrImageView(
                     data: Runtime.nearbyUuid,
+                    //data: "https://www.youtube.com/watch?v=xvFZjo5PgG0", // Für Store-Screenshots
                     size: 210,
                     padding: EdgeInsets.all(16),
                     dataModuleStyle: QrDataModuleStyle(

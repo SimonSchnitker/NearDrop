@@ -133,6 +133,7 @@ class MyApp extends StatelessWidget {
                   ],
                   theme: ThemeData(
                       colorScheme: lightDynamic ?? ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.light),
+                      //colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.light),
                       pageTransitionsTheme: PageTransitionsTheme(
                           builders: {
                               TargetPlatform.android:
@@ -154,6 +155,7 @@ class MyApp extends StatelessWidget {
                   ),
                   darkTheme: ThemeData(
                       colorScheme: darkDynamic ?? ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark),
+                      //colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark),
                       pageTransitionsTheme: PageTransitionsTheme(
                           builders: {
                               TargetPlatform.android:

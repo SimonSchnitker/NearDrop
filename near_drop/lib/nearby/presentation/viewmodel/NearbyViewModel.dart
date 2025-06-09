@@ -46,6 +46,9 @@ class NearbyViewModel extends ChangeNotifier
 
     NearbyViewModel()
     {
+        // Für Store Screenshots
+        //addTestDevices();
+
         // Auf Änderungen des Vornamens lauschen
         Runtime.onFirstnameChanged.stream.listen((newFirstname) {
             firstname = newFirstname;
@@ -81,6 +84,19 @@ class NearbyViewModel extends ChangeNotifier
 
         _listenNetworkStateChanges();
         initializeCore();
+    }
+
+    void addTestDevices()
+    {
+        Device device1 = Device("Finn", "iPhone 16 Pro", DeviceType.phone, OS.android, 1, "");
+        device1.communicationInfo.setSending(0.7);
+        nearbyDevices.add(device1);
+
+        Device device2 = Device("Hannah", "Pixel 9 Pro", DeviceType.phone, OS.android, 1, "");
+        device2.communicationInfo.setReceiving(0.3);
+        nearbyDevices.add(device2);
+
+        nearbyDevices.add(Device("Max", "Windows 11", DeviceType.pc, OS.windows, 1, ""));
     }
 
     /// Initialisiert die Core-Funktionen der App.
