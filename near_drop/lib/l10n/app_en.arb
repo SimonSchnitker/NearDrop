@@ -188,6 +188,8 @@
   "onboarding_title": "First steps",
   "nearby_permission_title": "Nearby devices",
   "nearby_permission_content": "Grant the app permission to find nearby devices and determine their relative position. This allows us to detect nearby devices and establish a connection with them.",
+  "bluetooth_devices_permission_title": "Bluetooth devices",
+  "bluetooth_devices_permission_content": "Grant the app permission to find and connect to Bluetooth devices. This allows us to establish a connection with nearby devices.",
   "grant_permission_button": "Grant permission",
   "grant_permission_skip_button": "Skip",
   "files_directory_initializing_failed_title": "No file reception possible",

@@ -444,6 +444,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Grant the app permission to find nearby devices and determine their relative position. This allows us to detect nearby devices and establish a connection with them.';
 
   @override
+  String get bluetooth_devices_permission_title => 'Bluetooth devices';
+
+  @override
+  String get bluetooth_devices_permission_content =>
+      'Grant the app permission to find and connect to Bluetooth devices. This allows us to establish a connection with nearby devices.';
+
+  @override
   String get grant_permission_button => 'Grant permission';
 
   @override

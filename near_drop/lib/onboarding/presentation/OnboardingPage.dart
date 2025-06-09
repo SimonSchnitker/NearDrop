@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:near_drop/onboarding/presentation/OnboardingViewModel.dart';
 import 'package:near_drop/tools/PermissionHelper.dart';
@@ -28,20 +30,20 @@ class OnboardingPage extends StatelessWidget
                             color: Theme.of(context).colorScheme.surfaceContainer,
                             borderRadius: BorderRadius.circular(60),
                             child: Icon(
-                                Icons.nearby_error_rounded,
+                                Platform.isAndroid ? Icons.nearby_error_rounded : Icons.bluetooth_connected_rounded,
                                 size: 60,
                             ),
                         ).sized(width: 120, height: 120).align(Alignment.center),
                         SizedBox(height: 32),
                         Text(
-                            AppLocalizations.of(context)!.nearby_permission_title,
+                            Platform.isAndroid ? AppLocalizations.of(context)!.nearby_permission_title : AppLocalizations.of(context)!.bluetooth_devices_permission_title,
                             style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                                 fontWeight: FontWeight.bold,
                             )
                         ).align(Alignment.center),
                         SizedBox(height: 12),
                         Text(
-                            AppLocalizations.of(context)!.nearby_permission_content,
+                            Platform.isAndroid ? AppLocalizations.of(context)!.nearby_permission_content : AppLocalizations.of(context)!.bluetooth_devices_permission_content,
                             textAlign: TextAlign.center,
                         ).opacity(0.7),
                         Spacer(),

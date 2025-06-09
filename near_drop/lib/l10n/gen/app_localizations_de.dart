@@ -451,6 +451,13 @@ class AppLocalizationsDe extends AppLocalizations {
       'Erteile der App die Berechtigung, Geräte in der Nähe zu finden und ihre relative Position zu bestimmen. Dadurch können wir Geräte in der Nähe erkennen und eine Verbindung zu ihnen herstellen.';
 
   @override
+  String get bluetooth_devices_permission_title => 'Bluetooth-Geräte';
+
+  @override
+  String get bluetooth_devices_permission_content =>
+      'Erteile der App die Berechtigung, Bluetooth-Geräte zu erkennen und eine Verbindung zu ihnen herzustellen. Dadurch können wir Geräte in der Nähe finden und eine Verbindung zu ihnen herstellen.';
+
+  @override
   String get grant_permission_button => 'Berechtigung erteilen';
 
   @override
