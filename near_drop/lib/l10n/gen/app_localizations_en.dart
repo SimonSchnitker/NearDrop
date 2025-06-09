@@ -463,4 +463,23 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get files_directory_initializing_failed_content =>
       'We cannot access the Downloads folder of your device.';
+
+  @override
+  String get saved_data_page_title => 'Saved data';
+
+  @override
+  String get saved_data_page_description =>
+      'In the following you can see all your personal data that is stored on our server. For more information, see our privacy policy.';
+
+  @override
+  String get saved_data_page_login_data_label => 'Login data';
+
+  @override
+  String get saved_data_page_created_at_label => 'Profile created at';
+
+  @override
+  String get saved_data_page_updated_at_label => 'Profile updated at';
+
+  @override
+  String get saved_data_page_last_sign_in_at_label => 'Last sign in at';
 }

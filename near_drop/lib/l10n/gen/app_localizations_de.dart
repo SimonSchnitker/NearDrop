@@ -470,4 +470,23 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get files_directory_initializing_failed_content =>
       'Wir können nicht auf den Downloads-Ordner deines Geräts zugreifen.';
+
+  @override
+  String get saved_data_page_title => 'Gespeicherte Daten';
+
+  @override
+  String get saved_data_page_description =>
+      'Im Folgenden siehst du alle deine personenbezogenen Daten, die auf unserem Server gespeichert sind. Für weitere Informationen, schaue in unsere Datenschutzerklärung.';
+
+  @override
+  String get saved_data_page_login_data_label => 'Anmeldedaten';
+
+  @override
+  String get saved_data_page_created_at_label => 'Profil erstellt am';
+
+  @override
+  String get saved_data_page_updated_at_label => 'Profil aktualisiert am';
+
+  @override
+  String get saved_data_page_last_sign_in_at_label => 'Zuletzt angemeldet am';
 }

@@ -6,4 +6,5 @@ class Routes
     static String guestSettings = "/guestSettings";
     static String help = "/help";
     static String onboarding = "/onboarding";
+    static String savedUserData = "/savedUserData";
 }

@@ -193,5 +193,11 @@
   "grant_permission_button": "Grant permission",
   "grant_permission_skip_button": "Skip",
   "files_directory_initializing_failed_title": "No file reception possible",
-  "files_directory_initializing_failed_content": "We cannot access the Downloads folder of your device."
+  "files_directory_initializing_failed_content": "We cannot access the Downloads folder of your device.",
+  "saved_data_page_title": "Saved data",
+  "saved_data_page_description": "In the following you can see all your personal data that is stored on our server. For more information, see our privacy policy.",
+  "saved_data_page_login_data_label": "Login data",
+  "saved_data_page_created_at_label": "Profile created at",
+  "saved_data_page_updated_at_label": "Profile updated at",
+  "saved_data_page_last_sign_in_at_label": "Last sign in at"
 }

@@ -909,6 +909,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We cannot access the Downloads folder of your device.'**
   String get files_directory_initializing_failed_content;
+
+  /// No description provided for @saved_data_page_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved data'**
+  String get saved_data_page_title;
+
+  /// No description provided for @saved_data_page_description.
+  ///
+  /// In en, this message translates to:
+  /// **'In the following you can see all your personal data that is stored on our server. For more information, see our privacy policy.'**
+  String get saved_data_page_description;
+
+  /// No description provided for @saved_data_page_login_data_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Login data'**
+  String get saved_data_page_login_data_label;
+
+  /// No description provided for @saved_data_page_created_at_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile created at'**
+  String get saved_data_page_created_at_label;
+
+  /// No description provided for @saved_data_page_updated_at_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated at'**
+  String get saved_data_page_updated_at_label;
+
+  /// No description provided for @saved_data_page_last_sign_in_at_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Last sign in at'**
+  String get saved_data_page_last_sign_in_at_label;
 }
 
 class _AppLocalizationsDelegate

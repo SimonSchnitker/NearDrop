@@ -22,6 +22,7 @@ import 'package:window_manager/window_manager.dart';
 import 'Routes.dart';
 import 'auth/data/AuthGateway.dart';
 import 'auth/presentation/pages/GuestLoginPage.dart';
+import 'auth/presentation/pages/SavedUserDataPage.dart';
 import 'core/domain/CoreController.dart';
 import 'l10n/gen/app_localizations.dart';
 import 'nearby/data/NearbyGateway.dart';
@@ -177,7 +178,8 @@ class MyApp extends StatelessWidget {
                       Routes.nearby: (context) => NearbyPage(),
                       Routes.guestSettings: (context) => GuestSettingsPage(),
                       Routes.help: (context) => HelpPage(),
-                      Routes.onboarding: (context) => OnboardingPage()
+                      Routes.onboarding: (context) => OnboardingPage(),
+                      Routes.savedUserData: (context) => SavedUserDataPage(),
                   },
                   initialRoute: Supabase.instance.client.auth.currentUser == null ? Routes.welcome : Routes.nearby,
               );

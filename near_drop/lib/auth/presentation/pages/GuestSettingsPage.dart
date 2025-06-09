@@ -68,7 +68,7 @@ class GuestSettingsPage extends StatelessWidget {
                 trailing: Icon(Icons.chevron_right),
                 title: Text(AppLocalizations.of(context)!.account_page_show_my_data_label),
                 onTap: () {
-
+                    Navigator.pushNamed(context, Routes.savedUserData);
                 },
             )
         );
