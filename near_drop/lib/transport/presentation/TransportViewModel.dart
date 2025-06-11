@@ -44,11 +44,11 @@ class TransportViewModel extends ChangeNotifier
             await device.closeConnection(connection: connection, errorState: ErrorState.userCanceled);
             return;
         }
-        // Im Status "Verbinden" reicht es das Flag zu setzen, da das Verbinden nicht direkt abgebrochen werden sollte.
-        // Das Verbinden stopp nämlich in jedem Fall nach einiger Zeit.
+        // Im Status "Verbinden" wird der connectingCompleter abgeschlossen, um den Verbindungsprozess zu beenden.
         else if (device.communicationInfo.communicationState == CommunicationState.connecting)
         {
             device.communicationInfo.setCanceling();
+            device.communicationInfo.connectingCompleter.complete(null);
         }
         // In allen anderen Zuständen wird das Flag gesetzt. Interne Methoden prüfen dieses Flag regelmäßig.
         // Ein Timeout wird eingestellt, sollte das Abbrechen "feststecken".

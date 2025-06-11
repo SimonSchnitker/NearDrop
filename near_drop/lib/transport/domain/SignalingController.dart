@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:mutex/mutex.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
+import 'package:near_drop/transport/data/IceCandidateBatcher.dart';
 import 'package:near_drop/transport/data/SignalingGateway.dart';
 import 'package:near_drop/transport/domain/event_args/ConnectionCreatedEventArgs.dart';
 import 'package:near_drop/transport/domain/models/RTCNetworkStream.dart';
@@ -13,7 +15,7 @@ class SignalingController
 {
     static const sendRetryCount = 3;
     static const sendRetryDelay = Duration(seconds: 3);
-    static const connectTimeout = Duration(seconds: 12);
+    static const connectTimeoutSeconds = 10;
     static const dataChannelName = "data";
     static const configuration = {
         "iceServers": [
@@ -22,6 +24,12 @@ class SignalingController
             },
         ]
     };
+
+    // Hier werden ICE-Kandidaten gespeichert, die empfangen wurden, bevor die Verbindung hergestellt wurde. Diese werden später hinzugefügt.
+    // Der Key ist die ConnectionId, der Verbindung, die später erzeugt wird.
+    // Dies dient dazu, dass später nur die ICE-Kandidaten der Verbindung hinzugefügt werden, die auch tatsächlich zu dieser Verbindung gehören.
+    final Map<int, List<RTCIceCandidate>> _earlyIceCandidates = {};
+    final Mutex _earlyIceCandidatesMutex = Mutex();
 
     final SignalingGateway _signalingGateway;
     StreamController<ConnectionCreatedEventArgs> onConnectionCreated = StreamController<ConnectionCreatedEventArgs>.broadcast();
@@ -37,6 +45,26 @@ class SignalingController
     void startListening()
     {
         _signalingGateway.startListening();
+    }
+
+    /// Fügt alle zu früh empfangenen ICE-Kandidaten zu einer Verbindung hinzu.
+    Future<void> _addEarlyIceCandidatesToConnection(int connectionId, RTCPeerConnection peerConnection) async
+    {
+        await _earlyIceCandidatesMutex.protect(() async {
+            List<RTCIceCandidate> candidates = _earlyIceCandidates[connectionId] ?? [];
+            if (candidates.isEmpty)
+            {
+                print("No early ICE candidates to add for connection $connectionId");
+                return;
+            }
+
+            print("Adding ${candidates.length} early ICE candidates to connection $connectionId");
+            for (RTCIceCandidate candidate in candidates)
+            {
+                await peerConnection.addCandidate(candidate);
+            }
+            _earlyIceCandidates.remove(connectionId); // Entfernen, da sie jetzt hinzugefügt wurden
+        });
     }
 
     /// Wird aufgerufen, wenn ein Angebot empfangen wurde.
@@ -69,30 +97,20 @@ class SignalingController
         Connection connection = Connection(peerConnection: peerConnection, connectionId: connectionId);
         device.communicationInfo.connection = connection;
 
+        // ICE-Kandidaten an Peer senden, wenn sie erstellt wurden
+        final IceCandidateBatcher iceCandidateBatcher = IceCandidateBatcher(_signalingGateway, device, connectionId);
+        peerConnection.onIceCandidate = (candidate) async {
+            await iceCandidateBatcher.add(candidate);
+        };
+
         // Verbindungsstatus zum Peer überwachen
         peerConnection.onConnectionState = (state) async {
             print("Verbindungsstatus zu ${device.firstname} (ConnectionId: $connectionId): $state");
 
             if (state == RTCPeerConnectionState.RTCPeerConnectionStateClosed || state == RTCPeerConnectionState.RTCPeerConnectionStateFailed)
             {
+                iceCandidateBatcher.dispose();
                 await device.closeConnection(connection: connection);
-            }
-        };
-
-        // ICE-Kandidaten an Peer senden, wenn sie erstellt wurden
-        peerConnection.onIceCandidate = (candidate) async {
-            sendIceCandidateFunction() async {
-                return await _signalingGateway.sendIceCandidate(device, candidate, connectionId);
-            }
-
-            bool sent = await _retrySendFunction(sendIceCandidateFunction, peerConnection);
-            if (sent)
-            {
-                print("ICE-Kandidat gesendet: $connectionId");
-            }
-            else
-            {
-                print("ICE-Kandidat konnte nicht gesendet werden.");
             }
         };
 
@@ -127,10 +145,14 @@ class SignalingController
 
         // Angebot annehmen
         await peerConnection.setRemoteDescription(sessionDescription);
+
+        // ICE-Kandidaten hinzufügen, die vor der Verbindung empfangen wurden
+        await _addEarlyIceCandidatesToConnection(connectionId, peerConnection);
+
+        // Antwort erstellen und senden
         RTCSessionDescription answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
 
-        // Antwort an das Gerät senden
         sendAnswerFunction() async {
             return await _signalingGateway.sendAnswer(device, answer, connectionId);
         }
@@ -209,35 +231,41 @@ class SignalingController
             return;
         }
 
-        // Prüfen, ob die Verbindung existiert
-        Connection? connection = device.communicationInfo.connection;
-        if (connection == null)
-        {
-            print("Verbindung nicht gefunden: ${candidate["sender"]}");
-            return;
-        }
-        else if (connection.connectionId != candidate["connectionId"])
-        {
-            print("Alte Verbindung, daher ignorieren: ${candidate["sender"]}");
-            return;
-        }
-
+        int connectionId = candidate["connectionId"];
         RTCIceCandidate iceCandidate = RTCIceCandidate(
             candidate["candidate"],
             candidate["sdpMid"],
             candidate["sdpMLineIndex"],
         );
 
+        Connection? connection = device.communicationInfo.connection;
+
+        // Falls die Verbindung nicht existiert, wird der ICE-Kandidat gespeichert, um später hinzugefügt zu werden
+        if (connection == null || connection.peerConnection.getRemoteDescription() == null)
+        {
+            print("Puffere ICE-Kandidat für zukünftige Connection: $connectionId");
+            await _earlyIceCandidatesMutex.protect(() async {
+                _earlyIceCandidates.putIfAbsent(connectionId, () => []).add(iceCandidate);
+            });
+            return;
+        }
+        else if (connection.connectionId != connectionId)
+        {
+            print("Alte Verbindung, daher ignorieren: ${candidate["sender"]}");
+            return;
+        }
+
         await connection.peerConnection.addCandidate(iceCandidate);
     }
 
     /// Stellt eine Verbindung zu einem Gerät her.
-    Future<Connection?> connect(Device device) async
+    Future<Connection?> connect(Device device, int connectionTryCount) async
     {
         Completer<Connection?> completer = Completer<Connection?>();
+        device.communicationInfo.connectingCompleter = completer;
 
         // Verbinden wird abgebrochen, wenn die Verbindung nicht innerhalb des Timeouts hergestellt werden konnte
-        Future.delayed(connectTimeout, () {
+        Future.delayed(Duration(seconds: connectTimeoutSeconds * connectionTryCount), () {
             if (!completer.isCompleted)
             {
                 completer.complete(null);
@@ -257,12 +285,19 @@ class SignalingController
         Connection connection = Connection(peerConnection: peerConnection, connectionId: connectionId, dataChannel: dataChannel, networkStream: RTCNetworkStream(dataChannel));
         device.communicationInfo.connection = connection;
 
+        // ICE-Kandidaten an Peer senden, wenn sie erstellt wurden
+        final IceCandidateBatcher iceCandidateBatcher = IceCandidateBatcher(_signalingGateway, device, connectionId);
+        peerConnection.onIceCandidate = (candidate) async {
+            await iceCandidateBatcher.add(candidate);
+        };
+
         // Verbindungsstatus zum Peer überwachen
         peerConnection.onConnectionState = (state) async {
             print("Verbindungsstatus zu ${device.firstname} (ConnectionId: $connectionId): $state");
 
             if (state == RTCPeerConnectionState.RTCPeerConnectionStateClosed || state == RTCPeerConnectionState.RTCPeerConnectionStateFailed)
             {
+                iceCandidateBatcher.dispose();
                 await device.closeConnection(connection: connection);
             }
         };
@@ -288,27 +323,6 @@ class SignalingController
                     //device.closeOpenDialogs();
                 }
             }
-        };
-
-        // ICE-Kandidaten an Peer senden, wenn sie erstellt wurden
-        peerConnection.onIceCandidate = (candidate) async {
-            sendIceCandidateFunction() async {
-                return await _signalingGateway.sendIceCandidate(device, candidate, connectionId);
-            }
-
-            bool sent = await _retrySendFunction(sendIceCandidateFunction, peerConnection);
-            if (sent)
-            {
-                print("ICE-Kandidat gesendet: $connectionId");
-            }
-            else
-            {
-                print("ICE-Kandidat konnte nicht gesendet werden.");
-            }
-        };
-
-        peerConnection.onSignalingState = (state) {
-            print("Signalisierungsstatus ($connectionId): $state");
         };
 
         // Angebot erstellen

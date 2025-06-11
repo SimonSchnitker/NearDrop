@@ -9,6 +9,7 @@ import '../enums/SuccessState.dart';
 class CommunicationInfo extends ChangeNotifier
 {
     Connection? connection;
+    Completer connectingCompleter = Completer(); // Wird verwendet, damit von überall aus das Verbinden abgebrochen werden kann.
     CommunicationState communicationState = CommunicationState.none;
     SuccessState successState = SuccessState.none;
     ErrorState errorState = ErrorState.none;

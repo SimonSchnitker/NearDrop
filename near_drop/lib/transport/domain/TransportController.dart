@@ -37,6 +37,7 @@ class TransportController
     static final Setting _isFirstTimeReceivingFilesSetting = Setting("isFirstTimeReceivingFiles", bool);
     static const String FOLDER_NAME = "Share Zone";
     static const int MIN_BYTES_FOR_DATA_VOLUME_WARNING = 20000000; // 20 MB
+    static const int MAX_CONNECTING_TRIES = 3;
     Directory? filesDirectory;
 
     final SignalingController _signalingController;
@@ -402,30 +403,44 @@ class TransportController
 
         // Verbindung zum Gerät herstellen
         Connection? connection;
-        try
+        for (int i = 1; i <= MAX_CONNECTING_TRIES; i++)
         {
-             connection = await _signalingController.connect(device);
-        }
-        on Exception catch (e)
-        {
-            print("Verbindungsaufbau zu ${device.firstname} fehlgeschlagen: $e");
-            device.communicationInfo.setErrorState(ErrorState.error);
-            return SendResponse.connectionError;
+            try
+            {
+                connection = await _signalingController.connect(device, i);
+            }
+            on Exception catch (e)
+            {
+                print("Verbindungsaufbau zu ${device.firstname} fehlgeschlagen: $e");
+                device.communicationInfo.setErrorState(ErrorState.error);
+                return SendResponse.connectionError;
+            }
+
+            // Prüfen, ob der Benutzer das Abbrechen angefordert hat
+            if (device.communicationInfo.cancelationRequested)
+            {
+                device.communicationInfo.setErrorState(ErrorState.userCanceled);
+                return SendResponse.userCanceled;
+            }
+
+            if (connection == null)
+            {
+                print("Verbindungsaufbau zu ${device.firstname} fehlgeschlagen. Versuch $i von $MAX_CONNECTING_TRIES.");
+            }
+            else
+            {
+                print("Verbindung zu ${device.firstname} erfolgreich hergestellt.");
+                device.communicationInfo.connection = connection;
+                break;
+            }
         }
 
+        // Wenn nach den maximalen Versuchen keine Verbindung hergestellt werden konnte, wird der Vorgang abgebrochen
         if (connection == null)
         {
             print("Verbindungsaufbau zu ${device.firstname} fehlgeschlagen.");
             device.communicationInfo.setErrorState(ErrorState.error);
             return SendResponse.timeout;
-        }
-
-        // Prüfen, ob der Benutzer das Abbrechen angefordert hat
-        if (device.communicationInfo.cancelationRequested)
-        {
-            await device.closeConnection(connection: connection, errorState: ErrorState.userCanceled);
-            device.communicationInfo.onCanceledCompleted.add(connection.connectionId); // Mitteilen, dass das Bearbeiten des Abbruchs abgeschlossen ist (Wird im TransportViewModel benötigt)
-            return SendResponse.userCanceled;
         }
 
         // Sendeanfrage senden

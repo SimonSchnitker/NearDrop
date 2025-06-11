@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:mutex/mutex.dart';
 import 'package:near_drop/Runtime.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -55,6 +56,25 @@ class SignalingGateway
         return result == ChannelResponse.ok;
     }
 
+    /// Sendet eine Batch von ICE-Kandidaten an ein Gerät.
+    Future<bool> sendIceCandidateBatch(Device device, List<RTCIceCandidate> candidates, int connectionId) async
+    {
+        final channel = Supabase.instance.client.channel(device.nearbyUuid);
+
+        final Map<String, dynamic> payload = {
+            "sender": Runtime.nearbyUuid,
+            "connectionId": connectionId,
+            "candidates": candidates.map((candidate) => {
+                "candidate": candidate.candidate,
+                "sdpMid": candidate.sdpMid,
+                "sdpMLineIndex": candidate.sdpMLineIndex,
+            }).toList(),
+        };
+
+        final result = await channel.sendBroadcastMessage(event: "webrtc-ice-batch", payload: payload);
+        return result == ChannelResponse.ok;
+    }
+
     /// Wartet auf WebRTC-Events an unserem Channel von anderen Geräten.
     void startListening()
     {
@@ -69,6 +89,22 @@ class SignalingGateway
         Runtime.realtimeChannel.onBroadcast(event: "webrtc-ice", callback: (data) async {
             final candidate = data["payload"];
             onIceCandidateReceived.add(candidate);
+        });
+        Runtime.realtimeChannel.onBroadcast(event: "webrtc-ice-batch", callback: (data) async {
+            final payload = data["payload"];
+            String sender = payload["sender"];
+            int connectionId = payload["connectionId"];
+
+            for (final candidate in payload["candidates"])
+            {
+                onIceCandidateReceived.add({
+                    "sender": sender,
+                    "connectionId": connectionId,
+                    "candidate": candidate["candidate"],
+                    "sdpMid": candidate["sdpMid"],
+                    "sdpMLineIndex": candidate["sdpMLineIndex"],
+                });
+            }
         });
     }
 }
