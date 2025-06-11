@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Share Zone</string>
+	<string>Arc Drop</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -29,15 +29,15 @@
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Required to discover local network devices</string>
+	<string>Required to discover local network devices.</string>
 	<key>NSBonjourServices</key>
     <array>
-        <string>_sharezone._tcp</string>
+        <string>_arcdrop._tcp</string>
     </array>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>Bluetooth LE is used for scanning devices nearby.</string>
+	<string>Bluetooth is used for scanning devices nearby.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>Bluetooth LE is used for scanning devices nearby.</string>
+	<string>Bluetooth is used for scanning devices nearby.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs camera access to scan QR codes.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

@@ -43,7 +43,7 @@ void main() async
     {
         await windowManager.ensureInitialized();
         WindowOptions windowOptions = WindowOptions(
-            title: "Share Zone",
+            title: Runtime.appName,
             minimumSize: Size(500, 500),
             size: Size(800, 650),
             center: true,
@@ -125,7 +125,7 @@ class MyApp extends StatelessWidget {
           builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
               return MaterialApp(
                   debugShowCheckedModeBanner: false,
-                  title: 'Share Zone',
+                  title: Runtime.appName,
                   localizationsDelegates: [
                       AppLocalizations.delegate,
                       GlobalMaterialLocalizations.delegate,

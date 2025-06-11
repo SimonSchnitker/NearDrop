@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get app_name => 'Share Zone';
+  String get app_name => 'Arc Drop';
 
   @override
   String get welcome_subtitle => 'Share files nearby';
@@ -280,7 +280,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get drawer_close => 'Close';
 
   @override
-  String get account_page_title => 'My data';
+  String get account_page_title => 'My profile';
 
   @override
   String get account_page_change_firstname_label => 'Change firstname';
@@ -295,7 +295,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get account_page_change_firstname_dialog_save_button => 'Save';
 
   @override
-  String get account_page_show_my_data_label => 'Show my data';
+  String get account_page_show_my_data_label => 'Saved data';
 
   @override
   String get account_page_delete_account_label => 'Delete all data';
@@ -322,22 +322,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get help_page_installation_description =>
-      'Install Near Drop on other devices to send and receive files.';
+      'Install Arc Drop on other devices to send and receive files.';
 
   @override
-  String get help_page_install_on_android_title => 'Share Zone for Android';
+  String get help_page_install_on_android_title => 'Arc Drop for Android';
 
   @override
   String get help_page_install_on_android_content => 'Available on Play Store';
 
   @override
-  String get help_page_install_on_apple_title => 'Share Zone for iOS and macOS';
+  String get help_page_install_on_apple_title => 'Arc Drop for iOS and macOS';
 
   @override
   String get help_page_install_on_apple_content => 'Available on App Store';
 
   @override
-  String get help_page_install_on_windows_title => 'Share Zone for Windows';
+  String get help_page_install_on_windows_title => 'Arc Drop for Windows';
 
   @override
   String get help_page_install_on_windows_content =>
@@ -359,7 +359,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get help_page_received_files_bottom_sheet_media_content =>
-      'Received photos and videos can be found in your Photos app in the album \'Share Zone\'.';
+      'Received photos and videos can be found in your Photos app in the album \'Arc Drop\'.';
 
   @override
   String get help_page_received_files_bottom_sheet_files_label => 'Other files';

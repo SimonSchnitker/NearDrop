@@ -1,5 +1,7 @@
+import '../../../../Runtime.dart';
+
 /// Basisklasse für die NSD-Implementierung (Network Service Discovery).
 abstract class NsdBase
 {
-    static const String serviceType = "_sharezone._tcp";
+    static final String serviceType = "_${Runtime.appName.toLowerCase()}._tcp";
 }

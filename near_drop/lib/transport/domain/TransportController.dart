@@ -7,6 +7,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:gal/gal.dart';
 import 'package:media_scanner/media_scanner.dart';
 import 'package:mime/mime.dart';
+import 'package:near_drop/Runtime.dart';
 import 'package:near_drop/help/presentation/ReceivedFilesLocationInfoView.dart';
 import 'package:near_drop/nearby/presentation/pages/NearbyPage.dart';
 import 'package:near_drop/settings/domain/Setting.dart';
@@ -35,7 +36,7 @@ import 'event_args/ConnectionCreatedEventArgs.dart';
 class TransportController
 {
     static final Setting _isFirstTimeReceivingFilesSetting = Setting("isFirstTimeReceivingFiles", bool);
-    static const String FOLDER_NAME = "Share Zone";
+    static const String FOLDER_NAME = Runtime.appName;
     static const int MIN_BYTES_FOR_DATA_VOLUME_WARNING = 20000000; // 20 MB
     static const int MAX_CONNECTING_TRIES = 3;
     Directory? filesDirectory;
