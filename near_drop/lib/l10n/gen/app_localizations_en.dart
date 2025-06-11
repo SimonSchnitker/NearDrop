@@ -451,6 +451,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Grant the app permission to find and connect to Bluetooth devices. This allows us to establish a connection with nearby devices.';
 
   @override
+  String get ios_local_network_permission_title => 'Local network';
+
+  @override
+  String get ios_local_network_permission_content =>
+      'Grant the app permission to access the local network. This allows us to find other devices in the network.';
+
+  @override
   String get grant_permission_button => 'Grant permission';
 
   @override

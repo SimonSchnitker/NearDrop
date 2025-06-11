@@ -458,6 +458,13 @@ class AppLocalizationsDe extends AppLocalizations {
       'Erteile der App die Berechtigung, Bluetooth-Geräte zu erkennen und eine Verbindung zu ihnen herzustellen. Dadurch können wir Geräte in der Nähe finden und eine Verbindung zu ihnen herstellen.';
 
   @override
+  String get ios_local_network_permission_title => 'Lokales Netzwerk';
+
+  @override
+  String get ios_local_network_permission_content =>
+      'Erteile der App die Berechtigung auf das lokale Netzwerk zuzugreifen. Dadurch können wir andere Geräte im Netzwerk finden.';
+
+  @override
   String get grant_permission_button => 'Berechtigung erteilen';
 
   @override

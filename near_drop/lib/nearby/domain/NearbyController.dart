@@ -2,8 +2,11 @@ import 'dart:async';
 import 'package:near_drop/nearby/data/NearbyGateway.dart';
 import 'package:near_drop/nearby/data/scan/ble/BleAdvertiser.dart';
 import 'package:near_drop/nearby/data/scan/ble/BleScanner.dart';
+import 'package:near_drop/nearby/data/scan/nsd/NsdAdvertiser.dart';
+import 'package:near_drop/nearby/data/scan/nsd/NsdScanner.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
 
+import '../../Runtime.dart';
 import '../../core/domain/entity/Device.dart';
 
 /// Steuert das Suchen nach Geräten in der Nähe und den Austausch von Gerätedaten.
@@ -11,6 +14,8 @@ class NearbyController
 {
     final BleScanner _bleScanner;
     final BleAdvertiser _bleAdvertiser;
+    final NsdScanner _nsdScanner;
+    final NsdAdvertiser _nsdAdvertiser;
     final NearbyGateway _nearbyGateway;
 
     final StreamController<bool> onBleAdvertiserStatusChanged = StreamController.broadcast();
@@ -19,11 +24,13 @@ class NearbyController
     final Duration waitingForDeviceDataTimeout = Duration(seconds: 4);
     final Map<String, DateTime> _requestingDevices = {};
 
-    NearbyController(this._bleScanner, this._bleAdvertiser, this._nearbyGateway)
+    NearbyController(this._bleScanner, this._bleAdvertiser, this._nsdScanner, this._nsdAdvertiser, this._nearbyGateway)
     {
-        _bleScanner.onDeviceSpotted.stream.listen(onBleDeviceSpotted);
         _nearbyGateway.onDeviceDataReceived.stream.listen(onDeviceDataReceived);
         _nearbyGateway.onDeviceRequestReceived.stream.listen(onDeviceRequestReceived);
+
+        _nsdScanner.onDeviceFound.stream.listen(_onNsdDeviceFound);
+        _bleScanner.onDeviceSpotted.stream.listen(onBleDeviceSpotted);
 
         // Events vom BleAdvertiser und BleScanner zum ViewModel weiterleiten
         _bleAdvertiser.onAdvertisingStatusChanged.stream.listen((status) {
@@ -32,6 +39,19 @@ class NearbyController
         _bleScanner.onScanningStatusChanged.stream.listen((status) {
             onBleScannerStatusChanged.add(status);
         });
+    }
+
+    /// Wird aufgerufen, wenn ein Gerät über NSD gefunden wurde.
+    Future<void> _onNsdDeviceFound(Device device) async
+    {
+        // Wenn wir uns selbst gefunden haben, dann abbrechen.
+        // Diest kann bei NSD vorkommen, wenn wir uns selbst als Gerät bewerben.
+        if (device.nearbyUuid == Runtime.nearbyUuid)
+        {
+            return;
+        }
+
+        await NearbyDevicesContainer.addIfNotContains(device);
     }
 
     /// Überprüft, ob auf die Gerätedaten eines Geräts gewartet wird.
@@ -140,6 +160,54 @@ class NearbyController
         catch (e)
         {
             print("BLE-Advertiser konnte nicht gestoppt werden: $e");
+        }
+    }
+
+    /// Startet das Lauschen auf NSD-Geräte.
+    Future<void> startNsdServices() async
+    {
+        try
+        {
+            await _nsdScanner.start();
+            print("NSD-Scanner gestartet.");
+        }
+        catch (e)
+        {
+            print("NSD-Scanner konnte nicht gestartet werden: $e");
+        }
+
+        try
+        {
+            await _nsdAdvertiser.start();
+            print("NSD-Advertiser gestartet.");
+        }
+        catch (e)
+        {
+            print("NSD-Advertiser konnte nicht gestartet werden: $e");
+        }
+    }
+
+    /// Stoppt das Lauschen auf NSD-Geräte.
+    Future<void> stopNsdServices() async
+    {
+        try
+        {
+            await _nsdScanner.stop();
+            print("NSD-Scanner gestoppt.");
+        }
+        catch (e)
+        {
+            print("NSD-Scanner konnte nicht gestoppt werden: $e");
+        }
+
+        try
+        {
+            await _nsdAdvertiser.stop();
+            print("NSD-Advertiser gestoppt.");
+        }
+        catch (e)
+        {
+            print("NSD-Advertiser konnte nicht gestoppt werden: $e");
         }
     }
 

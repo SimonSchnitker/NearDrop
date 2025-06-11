@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:near_drop/nearby/data/scan/nsd/NsdBase.dart';
+import 'package:nsd/nsd.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 /// Hilfsklasse zur Verwaltung von Berechtigungen.
@@ -67,5 +69,24 @@ class PermissionHelper
         }
 
         return true; // Für Windows und macOS ist keine Berechtigung erforderlich
+    }
+
+    /// Fordert die Berechtigung für den Zugriff auf das lokale Netzwerk auf iOS an.
+    static Future<void> requestIOSLocalNetworkPermission() async
+    {
+        if (Platform.isIOS)
+        {
+            try
+            {
+                // Damit der Berechtigungsdialog angezeigt wird, muss eine Netzwerkentdeckung gestartet werden
+                // Daher wird sie hier temporär gestartet und danach wieder gestoppt.
+                final discovery = await startDiscovery(NsdBase.serviceType);
+                await stopDiscovery(discovery);
+            }
+            catch (e)
+            {
+                // Ignorieren
+            }
+        }
     }
 }

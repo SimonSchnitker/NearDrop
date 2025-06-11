@@ -28,6 +28,12 @@
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Required to discover local network devices</string>
+	<key>NSBonjourServices</key>
+    <array>
+        <string>_sharezone._tcp</string>
+    </array>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Bluetooth LE is used for scanning devices nearby.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>

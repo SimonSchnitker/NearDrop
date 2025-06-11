@@ -886,6 +886,18 @@ abstract class AppLocalizations {
   /// **'Grant the app permission to find and connect to Bluetooth devices. This allows us to establish a connection with nearby devices.'**
   String get bluetooth_devices_permission_content;
 
+  /// No description provided for @ios_local_network_permission_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Local network'**
+  String get ios_local_network_permission_title;
+
+  /// No description provided for @ios_local_network_permission_content.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant the app permission to access the local network. This allows us to find other devices in the network.'**
+  String get ios_local_network_permission_content;
+
   /// No description provided for @grant_permission_button.
   ///
   /// In en, this message translates to:

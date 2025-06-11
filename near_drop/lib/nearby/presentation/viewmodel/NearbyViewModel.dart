@@ -9,6 +9,7 @@ import 'package:near_drop/nearby/domain/NearbyController.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
 import 'package:near_drop/tools/PermissionHelper.dart';
 import 'package:near_drop/transport/domain/TransportController.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../Runtime.dart';
 import '../../../core/domain/entity/Device.dart';
 
@@ -127,6 +128,7 @@ class NearbyViewModel extends ChangeNotifier
         // Wenn erfolgreich, alle notwendigen Dienste starten
         _nearbyController.startListeningForDeviceData();
         _transportController.startSignaling();
+        _nearbyController.startNsdServices();
         _listenForBluetoothStateChanges();
     }
 
