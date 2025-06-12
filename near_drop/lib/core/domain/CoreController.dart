@@ -8,6 +8,8 @@ import '../../settings/domain/SettingsController.dart';
 class CoreController
 {
     static const int UUID_VALIDITY_MINUTES = 10;
+    static const int CHANNEL_INITIALIZATION_RETRY_COUNT = 3;
+    static const Duration CHANNEL_INITIALIZATION_RETRY_DELAY = Duration(seconds: 2);
 
     final CoreGateway _coreGateway;
     final SettingsController _settingsController;
@@ -18,7 +20,7 @@ class CoreController
     static final nearbyUuidCreationSetting = Setting("nearby_uuid_creation", String);
 
     /// Initialisiert die Nearby-UUID und den Realtime-Kanal.
-    Future<void> inizialize() async
+    Future<void> initialize() async
     {
         String? nearbyUuid = await _settingsController.get(nearbyUuidSetting);
         String? nearbyUuidCreation = await _settingsController.get(nearbyUuidCreationSetting);
@@ -43,11 +45,32 @@ class CoreController
             }
         }
 
-        bool realtimeChannelInitialized = await Runtime.initializeChannel();
-        if (!realtimeChannelInitialized)
+        // Realtime-Kanal initialisieren
+        // Dies wird mehrmals versucht, falls die Initialisierung fehlschlägt.
+        for (int i = 0; i < CHANNEL_INITIALIZATION_RETRY_COUNT; i++)
         {
-            throw Exception("RealtimeChannel konnte nicht initialisiert werden.");
+            try
+            {
+                bool initialized = await Runtime.initializeChannel();
+                if (initialized)
+                {
+                    print("Realtime-Channel erfolgreich initialisiert.");
+                    return;
+                }
+                else
+                {
+                    print("Realtime-Channel konnte nicht initialisiert werden. Versuch ${i + 1} von $CHANNEL_INITIALIZATION_RETRY_COUNT.");
+                }
+            }
+            catch (e)
+            {
+                print("Realtime-Channel konnte nicht initialisiert werden. Versuch ${i + 1} von $CHANNEL_INITIALIZATION_RETRY_COUNT.");
+            }
+
+            await Future.delayed(CHANNEL_INITIALIZATION_RETRY_DELAY);
         }
+
+        throw Exception("Realtime-Channel konnte nicht initialisiert werden. Bitte überprüfen Sie Ihre Internetverbindung.");
     }
 
     /// Aktualisiert die Nearby-UUID in der Supabase-Datenbank und speichert sie in den SharedPreferences.

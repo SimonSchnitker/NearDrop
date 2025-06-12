@@ -109,7 +109,7 @@ class NearbyViewModel extends ChangeNotifier
 
         try
         {
-            await _coreController.inizialize();
+            await _coreController.initialize();
         }
         catch (e)
         {
