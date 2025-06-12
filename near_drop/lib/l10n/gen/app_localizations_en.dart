@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get app_name => 'Arc Drop';
+  String get app_name => 'Near Drop';
 
   @override
   String get welcome_subtitle => 'Share files nearby';
@@ -322,22 +322,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get help_page_installation_description =>
-      'Install Arc Drop on other devices to send and receive files.';
+      'Install Near Drop on other devices to send and receive files.';
 
   @override
-  String get help_page_install_on_android_title => 'Arc Drop for Android';
+  String get help_page_install_on_android_title => 'Near Drop for Android';
 
   @override
   String get help_page_install_on_android_content => 'Available on Play Store';
 
   @override
-  String get help_page_install_on_apple_title => 'Arc Drop for iOS and macOS';
+  String get help_page_install_on_apple_title => 'Near Drop for iOS and macOS';
 
   @override
   String get help_page_install_on_apple_content => 'Available on App Store';
 
   @override
-  String get help_page_install_on_windows_title => 'Arc Drop for Windows';
+  String get help_page_install_on_windows_title => 'Near Drop for Windows';
 
   @override
   String get help_page_install_on_windows_content =>
@@ -359,7 +359,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get help_page_received_files_bottom_sheet_media_content =>
-      'Received photos and videos can be found in your Photos app in the album \'Arc Drop\'.';
+      'Received photos and videos can be found in your Photos app in the album \'Near Drop\'.';
 
   @override
   String get help_page_received_files_bottom_sheet_files_label => 'Other files';

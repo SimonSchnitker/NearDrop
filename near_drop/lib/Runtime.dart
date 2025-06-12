@@ -7,7 +7,7 @@ import 'core/domain/enums/OS.dart';
 /// Stellt Laufzeit-Daten bereit.
 class Runtime
 {
-    static const String appName = "Arc Drop";
+    static const String appName = "Near Drop";
     static const int version = 1;
     static const Map<int, String> versionMap = {
         1: "1.0.0",

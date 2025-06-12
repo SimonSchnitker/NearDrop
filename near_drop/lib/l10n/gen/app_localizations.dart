@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @app_name.
   ///
   /// In en, this message translates to:
-  /// **'Arc Drop'**
+  /// **'Near Drop'**
   String get app_name;
 
   /// No description provided for @welcome_subtitle.
@@ -667,13 +667,13 @@ abstract class AppLocalizations {
   /// No description provided for @help_page_installation_description.
   ///
   /// In en, this message translates to:
-  /// **'Install Arc Drop on other devices to send and receive files.'**
+  /// **'Install Near Drop on other devices to send and receive files.'**
   String get help_page_installation_description;
 
   /// No description provided for @help_page_install_on_android_title.
   ///
   /// In en, this message translates to:
-  /// **'Arc Drop for Android'**
+  /// **'Near Drop for Android'**
   String get help_page_install_on_android_title;
 
   /// No description provided for @help_page_install_on_android_content.
@@ -685,7 +685,7 @@ abstract class AppLocalizations {
   /// No description provided for @help_page_install_on_apple_title.
   ///
   /// In en, this message translates to:
-  /// **'Arc Drop for iOS and macOS'**
+  /// **'Near Drop for iOS and macOS'**
   String get help_page_install_on_apple_title;
 
   /// No description provided for @help_page_install_on_apple_content.
@@ -697,7 +697,7 @@ abstract class AppLocalizations {
   /// No description provided for @help_page_install_on_windows_title.
   ///
   /// In en, this message translates to:
-  /// **'Arc Drop for Windows'**
+  /// **'Near Drop for Windows'**
   String get help_page_install_on_windows_title;
 
   /// No description provided for @help_page_install_on_windows_content.
@@ -733,7 +733,7 @@ abstract class AppLocalizations {
   /// No description provided for @help_page_received_files_bottom_sheet_media_content.
   ///
   /// In en, this message translates to:
-  /// **'Received photos and videos can be found in your Photos app in the album \'Arc Drop\'.'**
+  /// **'Received photos and videos can be found in your Photos app in the album \'Near Drop\'.'**
   String get help_page_received_files_bottom_sheet_media_content;
 
   /// No description provided for @help_page_received_files_bottom_sheet_files_label.
