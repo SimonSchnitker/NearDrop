@@ -9,18 +9,13 @@ class NsdAdvertiser extends NsdBase
     Registration? registration;
 
     /// Registriert den Service bei NSD.
-    Future<void> start() async
+    Future<void> start(int port) async
     {
         registration = await register(Service(
             name: Runtime.appName,
             type: NsdBase.serviceType,
-            port: 56000,
+            port: port,
             txt: {
-                "firstname": Uint8List.fromList(Runtime.firstname.codeUnits),
-                "deviceName": Uint8List.fromList(Runtime.deviceName.codeUnits),
-                "deviceType": Uint8List.fromList(Runtime.deviceType.name.codeUnits),
-                "os": Uint8List.fromList(Runtime.os.name.codeUnits),
-                "version": Uint8List.fromList(Runtime.version.toString().codeUnits),
                 "nearbyUuid": Uint8List.fromList(Runtime.nearbyUuid.codeUnits),
             }
         ));

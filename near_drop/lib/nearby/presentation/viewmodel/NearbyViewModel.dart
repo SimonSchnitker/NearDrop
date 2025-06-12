@@ -126,7 +126,7 @@ class NearbyViewModel extends ChangeNotifier
         notifyListeners();
 
         // Wenn erfolgreich, alle notwendigen Dienste starten
-        _nearbyController.startListeningForDeviceData();
+        await _nearbyController.startListeningForDeviceData();
         _transportController.startSignaling();
         _nearbyController.startNsdServices();
         _listenForBluetoothStateChanges();

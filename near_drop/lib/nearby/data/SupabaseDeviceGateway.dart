@@ -6,7 +6,7 @@ import '../../core/domain/enums/DeviceType.dart';
 import '../../core/domain/enums/OS.dart';
 
 /// Gateway für die Kommunikation mit anderen Geräten in der Nähe.
-class NearbyGateway
+class SupabaseDeviceGateway
 {
     final StreamController<Device> onDeviceDataReceived = StreamController<Device>.broadcast();
     final StreamController<String> onDeviceRequestReceived = StreamController<String>.broadcast();

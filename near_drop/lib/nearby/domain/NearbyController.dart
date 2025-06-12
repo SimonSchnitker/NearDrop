@@ -1,11 +1,12 @@
 import 'dart:async';
-import 'package:near_drop/nearby/data/NearbyGateway.dart';
+import 'package:near_drop/nearby/data/LocalNetworkGateway.dart';
+import 'package:near_drop/nearby/data/SupabaseDeviceGateway.dart';
+import 'package:near_drop/nearby/data/event_args/NsdDeviceSpottedEventArgs.dart';
 import 'package:near_drop/nearby/data/scan/ble/BleAdvertiser.dart';
 import 'package:near_drop/nearby/data/scan/ble/BleScanner.dart';
 import 'package:near_drop/nearby/data/scan/nsd/NsdAdvertiser.dart';
 import 'package:near_drop/nearby/data/scan/nsd/NsdScanner.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
-
 import '../../Runtime.dart';
 import '../../core/domain/entity/Device.dart';
 
@@ -16,20 +17,27 @@ class NearbyController
     final BleAdvertiser _bleAdvertiser;
     final NsdScanner _nsdScanner;
     final NsdAdvertiser _nsdAdvertiser;
-    final NearbyGateway _nearbyGateway;
+    final SupabaseDeviceGateway _supabaseDeviceGateway;
+    final LocalNetworkGateway _localNetworkGateway;
 
     final StreamController<bool> onBleAdvertiserStatusChanged = StreamController.broadcast();
     final StreamController<bool> onBleScannerStatusChanged = StreamController.broadcast();
 
     final Duration waitingForDeviceDataTimeout = Duration(seconds: 4);
     final Map<String, DateTime> _requestingDevices = {};
+    int _localNetworkPort = -1;
 
-    NearbyController(this._bleScanner, this._bleAdvertiser, this._nsdScanner, this._nsdAdvertiser, this._nearbyGateway)
+    NearbyController(this._bleScanner, this._bleAdvertiser, this._nsdScanner, this._nsdAdvertiser, this._supabaseDeviceGateway, this._localNetworkGateway)
     {
-        _nearbyGateway.onDeviceDataReceived.stream.listen(onDeviceDataReceived);
-        _nearbyGateway.onDeviceRequestReceived.stream.listen(onDeviceRequestReceived);
+        // Warten auf Ereignisse über Supabase
+        _supabaseDeviceGateway.onDeviceDataReceived.stream.listen(onDeviceDataReceived);
+        _supabaseDeviceGateway.onDeviceRequestReceived.stream.listen(onDeviceRequestReceived);
 
-        _nsdScanner.onDeviceFound.stream.listen(_onNsdDeviceFound);
+        // Warten auf Ereignisse über den lokalen Netzwerk-Gateway
+        _localNetworkGateway.onDeviceResolved.stream.listen(_onNetworkDeviceResolved);
+
+        // Warten auf Ereignisse über den NSD-Scanner und den BLE-Scanner
+        _nsdScanner.onDeviceSpotted.stream.listen(_onNsdDeviceSpotted);
         _bleScanner.onDeviceSpotted.stream.listen(onBleDeviceSpotted);
 
         // Events vom BleAdvertiser und BleScanner zum ViewModel weiterleiten
@@ -42,15 +50,28 @@ class NearbyController
     }
 
     /// Wird aufgerufen, wenn ein Gerät über NSD gefunden wurde.
-    Future<void> _onNsdDeviceFound(Device device) async
+    Future<void> _onNsdDeviceSpotted(NsdDeviceSpottedEventArgs args) async
     {
         // Wenn wir uns selbst gefunden haben, dann abbrechen.
         // Diest kann bei NSD vorkommen, wenn wir uns selbst als Gerät bewerben.
-        if (device.nearbyUuid == Runtime.nearbyUuid)
+        if (args.nearbyUuid == Runtime.nearbyUuid)
         {
             return;
         }
 
+        // Wenn wir das Gerät bereits kennen, abbrechen
+        if (await NearbyDevicesContainer.containsUuid(args.nearbyUuid))
+        {
+            return;
+        }
+
+        // Ansonsten Gerätetaten austauschen
+        await _localNetworkGateway.exchangeDeviceData(args);
+    }
+
+    /// Wird aufgerufen, wenn ein Gerät über das lokale Netzwerk aufgelöst wurde.
+    Future<void> _onNetworkDeviceResolved(Device device) async
+    {
         await NearbyDevicesContainer.addIfNotContains(device);
     }
 
@@ -89,7 +110,7 @@ class NearbyController
     Future<void> requestDeviceData(String nearbyUuid) async
     {
         _requestingDevices[nearbyUuid] = DateTime.now();
-        await _nearbyGateway.sendDeviceDataRequest(nearbyUuid);
+        await _supabaseDeviceGateway.sendDeviceDataRequest(nearbyUuid);
     }
 
     /// Wird aufgerufen, wenn Gerätedaten empfangen wurden.
@@ -107,7 +128,7 @@ class NearbyController
     /// Wird aufgerufen, wenn eine Anfrage für Gerätedaten empfangen wird.
     Future<void> onDeviceRequestReceived(String nearbyUuid) async
     {
-        await _nearbyGateway.sendDeviceData(nearbyUuid);
+        await _supabaseDeviceGateway.sendDeviceData(nearbyUuid);
 
         // Wenn wir das Gerät bereits kennen oder seine Gerätedaten gerade anfordern, dann abbrechen.
         if (await NearbyDevicesContainer.containsUuid(nearbyUuid) || _isWaitingForDeviceData(nearbyUuid))
@@ -178,7 +199,13 @@ class NearbyController
 
         try
         {
-            await _nsdAdvertiser.start();
+            if (_localNetworkPort == -1)
+            {
+                print("Lokaler Netzwerk-Gateway-Port ist nicht gesetzt. NSD-Advertiser kann nicht gestartet werden.");
+                return;
+            }
+
+            await _nsdAdvertiser.start(_localNetworkPort);
             print("NSD-Advertiser gestartet.");
         }
         catch (e)
@@ -211,9 +238,25 @@ class NearbyController
         }
     }
 
-    /// Startet das Lauschen auf Gerätedaten.
-    void startListeningForDeviceData()
+    /// Startet das Lauschen auf Gerätedaten im lokalen Netzwerk und unserem Supabase-Channel.
+    Future<void> startListeningForDeviceData() async
     {
-        _nearbyGateway.startListeningForDeviceData();
+        try
+        {
+            _supabaseDeviceGateway.startListeningForDeviceData();
+        }
+        catch (e)
+        {
+            print("Fehler beim Starten des Lauschens auf Gerätedaten im Supabase-Channel: $e");
+        }
+
+        try
+        {
+            _localNetworkPort = await _localNetworkGateway.startListening();
+        }
+        catch (e)
+        {
+            print("Fehler beim Starten des Lauschens auf Gerätedaten im lokalen Netzwerk: $e");
+        }
     }
 }
