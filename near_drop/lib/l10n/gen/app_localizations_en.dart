@@ -54,12 +54,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get firstname_textfield_label => 'Firstname';
 
   @override
-  String get firstname_textfield_helper_text =>
-      'Other devices nearby will see this name.';
+  String get firstname_textfield_helper_text => 'Other devices nearby will see this name.';
 
   @override
-  String get guest_login_error_message =>
-      'An error occurred while logging in. Please try again later.';
+  String get guest_login_error_message => 'An error occurred while logging in. Please try again later.';
 
   @override
   String get data_protection_info_text_1 => 'I have read and accept the ';
@@ -89,8 +87,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nearby_page_no_devices_found_balloon_title => 'Device not found?';
 
   @override
-  String get nearby_page_no_devices_found_balloon_subtitle =>
-      'Connect you device via qr code.';
+  String get nearby_page_no_devices_found_balloon_subtitle => 'Connect you device via qr code.';
 
   @override
   String send_dialog_title(String firstname) {
@@ -110,11 +107,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get send_request_dialog_title => 'Send request';
 
   @override
-  String send_request_dialog_content(
-    String firstname,
-    int filesCount,
-    String mimeType,
-  ) {
+  String send_request_dialog_content(String firstname, int filesCount, String mimeType) {
     return '$firstname wants to send you $filesCount $mimeType.';
   }
 
@@ -188,11 +181,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get received_files_dialog_show_files_button => 'Show';
 
   @override
-  String received_files_dialog_title(
-    int filesCount,
-    String mimeType,
-    String firstname,
-  ) {
+  String received_files_dialog_title(int filesCount, String mimeType, String firstname) {
     return '$filesCount $mimeType received from $firstname';
   }
 
@@ -219,15 +208,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manually_connecting_sheet_scan_button => 'Scan';
 
   @override
-  String get qr_code_text =>
-      'Tell an other person to scan this QR code with their device.';
+  String get qr_code_text => 'Tell an other person to scan this QR code with their device.';
 
   @override
   String get scan_qr_code => 'Scan the QR code of another device.';
 
   @override
-  String get qr_code_error_no_permission =>
-      'Grant camera permission in settings.';
+  String get qr_code_error_no_permission => 'Grant camera permission in settings.';
 
   @override
   String get qr_code_error_invalid => 'Invalid QR code';
@@ -236,45 +223,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get qr_code_error_device_already_added => 'Device already found';
 
   @override
-  String get qr_code_error_device_request =>
-      'Device could not be contacted. Check your internet connection.';
+  String get qr_code_error_device_request => 'Device could not be contacted. Check your internet connection.';
 
   @override
   String get no_internet_connection_info_bar_title => 'No internet connection';
 
   @override
-  String get no_internet_connection_info_bar_subtitle =>
-      'Connect to a network to send and receive files.';
+  String get no_internet_connection_info_bar_subtitle => 'Connect to a network to send and receive files.';
 
   @override
-  String get bluetooth_not_supported_info_bar_title =>
-      'Bluetooth not supported';
+  String get bluetooth_not_supported_info_bar_title => 'Bluetooth not supported';
 
   @override
-  String get bluetooth_not_supported_info_bar_subtitle =>
-      'Your device does not have a Bluetooth component. Devices nearby cannot be found.';
+  String get bluetooth_not_supported_info_bar_subtitle => 'Your device does not have a Bluetooth component. Devices nearby cannot be found.';
 
   @override
-  String get bluetooth_no_permission_info_bar_title =>
-      'Bluetooth permission missing';
+  String get bluetooth_no_permission_info_bar_title => 'Bluetooth permission missing';
 
   @override
-  String get bluetooth_no_permission_info_bar_subtitle =>
-      'Grant the app access to Bluetooth in the settings to find devices nearby.';
+  String get bluetooth_no_permission_info_bar_subtitle => 'Grant the app access to Bluetooth in the settings to find devices nearby.';
 
   @override
   String get bluetooth_disabled_info_bar_title => 'Bluetooth disabled';
 
   @override
-  String get bluetooth_disabled_info_bar_subtitle =>
-      'Enable Bluetooth to find devices nearby.';
+  String get bluetooth_disabled_info_bar_subtitle => 'Enable Bluetooth to find devices nearby.';
 
   @override
   String get bluetooth_error_info_bar_title => 'Bluetooth error';
 
   @override
-  String get bluetooth_error_info_bar_subtitle =>
-      'Schaue in der Hilfe nach für Problemlösungen. Some Bluetooth processes have failed. Check the help for troubleshooting.';
+  String get bluetooth_error_info_bar_subtitle => 'Schaue in der Hilfe nach für Problemlösungen. Some Bluetooth processes have failed. Check the help for troubleshooting.';
 
   @override
   String get drawer_close => 'Close';
@@ -304,15 +283,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get account_page_delete_account_dialog_title => 'Delete all data';
 
   @override
-  String get account_page_delete_account_dialog_content =>
-      'Are you sure you want to delete all your data? This action cannot be undone.';
+  String get account_page_delete_account_dialog_content => 'Are you sure you want to delete all your data? This action cannot be undone.';
 
   @override
   String get account_page_delete_account_dialog_delete_button => 'Delete';
 
   @override
-  String get account_page_delete_account_error_message =>
-      'An error occurred while deleting your data. Check your internet connection or try again later.';
+  String get account_page_delete_account_error_message => 'An error occurred while deleting your data. Check your internet connection or try again later.';
 
   @override
   String get help_page_title => 'Help';
@@ -321,8 +298,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get help_page_installation_title => 'Installation';
 
   @override
-  String get help_page_installation_description =>
-      'Install Near Drop on other devices to send and receive files.';
+  String get help_page_installation_description => 'Install Near Drop on other devices to send and receive files.';
 
   @override
   String get help_page_install_on_android_title => 'Near Drop for Android';
@@ -340,60 +316,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get help_page_install_on_windows_title => 'Near Drop for Windows';
 
   @override
-  String get help_page_install_on_windows_content =>
-      'Available on Microsoft Store';
+  String get help_page_install_on_windows_content => 'Available on Microsoft Store';
 
   @override
   String get help_page_faq_title => 'Answered questions';
 
   @override
-  String get help_page_faq_received_files_question =>
-      'Where can I find received files?';
+  String get help_page_faq_received_files_question => 'Where can I find received files?';
 
   @override
   String get help_page_received_files_bottom_sheet_title => 'Received files';
 
   @override
-  String get help_page_received_files_bottom_sheet_media_label =>
-      'Photos & Videos';
+  String get help_page_received_files_bottom_sheet_media_label => 'Photos & Videos';
 
   @override
-  String get help_page_received_files_bottom_sheet_media_content =>
-      'Received photos and videos can be found in your Photos app in the album \'Near Drop\'.';
+  String get help_page_received_files_bottom_sheet_media_content => 'Received photos and videos can be found in your Photos app in the album \'Near Drop\'.';
 
   @override
   String get help_page_received_files_bottom_sheet_files_label => 'Other files';
 
   @override
-  String get help_page_received_files_bottom_sheet_files_content =>
-      'All other received files can be found in the Downloads folder of your device.';
+  String get help_page_received_files_bottom_sheet_files_content => 'All other received files can be found in the Downloads folder of your device.';
 
   @override
-  String get help_page_received_files_bottom_sheet_files_title_desktop =>
-      'Files';
+  String get help_page_received_files_bottom_sheet_files_title_desktop => 'Files';
 
   @override
-  String get help_page_received_files_bottom_sheet_files_content_desktop =>
-      'All received files can be found in the Downloads folder.';
+  String get help_page_received_files_bottom_sheet_files_content_desktop => 'All received files can be found in the Downloads folder.';
 
   @override
   String get nearby_page_help_button_tooltip => 'Help';
 
   @override
-  String get snackbar_message_connection_error =>
-      'An connection error occurred during the transfer.';
+  String get snackbar_message_connection_error => 'An connection error occurred during the transfer.';
 
   @override
-  String get snackbar_message_timeout =>
-      'The connection to the device could not be established.';
+  String get snackbar_message_timeout => 'The connection to the device could not be established.';
 
   @override
-  String get snackbar_message_file_access_error =>
-      'It was not possible to access at least one file.';
+  String get snackbar_message_file_access_error => 'It was not possible to access at least one file.';
 
   @override
-  String get snackbar_message_receiver_error =>
-      'An error occurred at the receiver.';
+  String get snackbar_message_receiver_error => 'An error occurred at the receiver.';
 
   @override
   String get snackbar_retry_action => 'Retry';
@@ -427,8 +392,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get core_initializing_loading_text => 'Initializing...';
 
   @override
-  String get core_initializing_error_text =>
-      'The initialization process has failed. Check your internet connection and try again.';
+  String get core_initializing_error_text => 'The initialization process has failed. Check your internet connection and try again.';
 
   @override
   String get core_initializing_error_retry_button => 'Retry';
@@ -440,22 +404,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nearby_permission_title => 'Nearby devices';
 
   @override
-  String get nearby_permission_content =>
-      'Grant the app permission to find nearby devices and determine their relative position. This allows us to detect nearby devices and establish a connection with them.';
+  String get nearby_permission_content => 'Grant the app permission to find nearby devices and determine their relative position. This allows us to detect nearby devices and establish a connection with them.';
 
   @override
   String get bluetooth_devices_permission_title => 'Bluetooth devices';
 
   @override
-  String get bluetooth_devices_permission_content =>
-      'Grant the app permission to find and connect to Bluetooth devices. This allows us to establish a connection with nearby devices.';
+  String get bluetooth_devices_permission_content => 'Grant the app permission to find and connect to Bluetooth devices. This allows us to establish a connection with nearby devices.';
 
   @override
   String get ios_local_network_permission_title => 'Local network';
 
   @override
-  String get ios_local_network_permission_content =>
-      'Grant the app permission to access the local network. This allows us to find other devices in the network.';
+  String get ios_local_network_permission_content => 'Grant the app permission to access the local network. This allows us to find other devices in the network.';
 
   @override
   String get grant_permission_button => 'Grant permission';
@@ -464,19 +425,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get grant_permission_skip_button => 'Skip';
 
   @override
-  String get files_directory_initializing_failed_title =>
-      'No file reception possible';
+  String get files_directory_initializing_failed_title => 'No file reception possible';
 
   @override
-  String get files_directory_initializing_failed_content =>
-      'We cannot access the Downloads folder of your device.';
+  String get files_directory_initializing_failed_content => 'We cannot access the Downloads folder of your device.';
 
   @override
   String get saved_data_page_title => 'Saved data';
 
   @override
-  String get saved_data_page_description =>
-      'In the following you can see all your personal data that is stored on our server. For more information, see our privacy policy.';
+  String get saved_data_page_description => 'In the following you can see all your personal data that is stored on our server. For more information, see our privacy policy.';
 
   @override
   String get saved_data_page_login_data_label => 'Login data';
