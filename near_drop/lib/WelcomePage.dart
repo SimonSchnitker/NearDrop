@@ -130,7 +130,7 @@ Widget _appInfoDialog(BuildContext context) {
                 borderRadius: BorderRadius.all(Radius.circular(24)),
                 child: ListTile(
                     title: Text(AppLocalizations.of(context)!.version_title),
-                    subtitle: Text(Runtime.getVersionString()),
+                    subtitle: Text(Runtime.appVersion.toString()),
                     leading: Icon(Icons.install_mobile_outlined),
                 ),
             )

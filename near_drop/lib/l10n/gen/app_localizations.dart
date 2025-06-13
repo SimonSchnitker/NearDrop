@@ -946,6 +946,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Last sign in at'**
   String get saved_data_page_last_sign_in_at_label;
+
+  /// No description provided for @incompatible_app_version_snackbar_content.
+  ///
+  /// In en, this message translates to:
+  /// **'Your device is not compatible with the device of {firstname}. Please update both Near Drop to the latest version.'**
+  String incompatible_app_version_snackbar_content(String firstname);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

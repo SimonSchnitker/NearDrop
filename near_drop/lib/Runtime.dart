@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:near_drop/core/AppVersion.dart';
 import 'package:near_drop/tools/DeviceHelper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/domain/enums/DeviceType.dart';
@@ -8,10 +9,7 @@ import 'core/domain/enums/OS.dart';
 class Runtime
 {
     static const String appName = "Near Drop";
-    static const int version = 1;
-    static const Map<int, String> versionMap = {
-        1: "1.0.0",
-    };
+    static final appVersion = AppVersion(1, 0, 0);
 
     static StreamController<String> onFirstnameChanged = StreamController<String>.broadcast();
 
@@ -24,16 +22,6 @@ class Runtime
 
     // Unser Supabase-Channel, auf dem wir Nachrichten empfangen.
     static late RealtimeChannel realtimeChannel;
-
-    static String getVersionString()
-    {
-        if (versionMap.containsKey(version))
-        {
-            return versionMap[version]!;
-        }
-
-        return version.toString();
-    }
 
     /// Lädt die statischen Laufzeitdaten des Geräts.
     static Future<void> initializeDeviceData() async

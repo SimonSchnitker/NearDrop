@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/widgets.dart';
+import 'package:near_drop/core/AppVersion.dart';
 import 'package:near_drop/transport/domain/models/Connection.dart';
 import '../enums/DeviceType.dart';
 import '../enums/ErrorState.dart';
@@ -20,7 +21,7 @@ class Device extends ChangeNotifier
     String name;
     DeviceType type;
     OS os;
-    int version;
+    AppVersion version;
     String nearbyUuid;
     final communicationInfo = CommunicationInfo();
 
@@ -95,8 +96,8 @@ class Device extends ChangeNotifier
     {
         return {
             "firstname": firstname,
-            "name": name,
-            "type": type.name,
+            "deviceName": name,
+            "deviceType": type.name,
             "os": os.name,
             "version": version,
             "nearby_uuid": nearbyUuid,
@@ -107,10 +108,10 @@ class Device extends ChangeNotifier
     {
         return Device(
             json["firstname"],
-            json["name"],
-            DeviceType.values.byName(json["type"]),
+            json["deviceName"],
+            DeviceType.values.byName(json["deviceType"]),
             OS.values.byName(json["os"]),
-            json["version"],
+            AppVersion.fromString(json["version"]),
             json["nearby_uuid"],
         );
     }

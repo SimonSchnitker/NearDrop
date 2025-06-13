@@ -235,7 +235,7 @@ class NearbyPage extends StatelessWidget
                     borderRadius: BorderRadius.all(Radius.circular(24)),
                     child: ListTile(
                         title: Text(AppLocalizations.of(context)!.version_title, style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
-                        subtitle: Text(Runtime.getVersionString()),
+                        subtitle: Text(Runtime.appVersion.toString()),
                         iconColor: Theme.of(context).colorScheme.onSurface,
                         leading: Icon(Icons.install_mobile_outlined),
                     ),
@@ -304,64 +304,69 @@ class NearbyPage extends StatelessWidget
             builder: (context, child) => Row(
               spacing: 12,
               children: [
-                Stack(
-                    alignment: Alignment.center,
-                    children: [
-                        CircleAvatar(
-                            radius: 32,
-                            backgroundColor: Theme.of(context).colorScheme.surface,
-                            child: Icon(
-                                _getDeviceIcon(device.type),
-                                size: 28,
-                            ),
-                        ),
-                        SizedBox(
-                            width: 58,
-                            height: 58,
-                            child: context.watch<CommunicationInfo>().progress == null ?
-                            CircularProgressIndicator(
-                                value: null,
-                                strokeWidth: 6,
-                                strokeCap: StrokeCap.round,
-                            ) :
-                            TweenAnimationBuilder(
-                                tween: Tween<double>(end: context.watch<CommunicationInfo>().progress == null ? 0.0 : context.watch<CommunicationInfo>().progress!),
-                                duration: Duration(milliseconds: 400),
-                                curve: Curves.linearToEaseOut,
-                                builder: (context, double value, child) => CircularProgressIndicator(
-                                    value: value,
-                                    strokeCap: StrokeCap.round,
-                                    strokeWidth: 6,
-                                ),
-                            ),
-                        ),
-                        Builder(builder: (context) {
-                            if (context.watch<CommunicationInfo>().successState != SuccessState.none) {
-                                return CircleAvatar(
-                                    backgroundColor: Theme.of(context).colorScheme.primary,
-                                    radius: 32,
-                                    child: Icon(
-                                        Icons.check,
-                                        size: 28,
-                                        color: Theme.of(context).colorScheme.onPrimary,
-                                    ),
-                                );
-                            }
-                            else if (context.watch<CommunicationInfo>().errorState != ErrorState.none) {
-                                return CircleAvatar(
-                                    backgroundColor: Theme.of(context).colorScheme.error,
-                                    radius: 32,
-                                    child: Icon(
-                                        Icons.error_outline,
-                                        size: 28,
-                                        color: Theme.of(context).colorScheme.onError,
-                                    ),
-                                );
-                            }
-                            return SizedBox();
-                        },
-                        ),
-                    ],
+                Badge(
+                  isLabelVisible: !Runtime.appVersion.isCompatibleWith(device.version),
+                  label: Text("!"),
+                  offset: Offset(0, 0),
+                  child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                          CircleAvatar(
+                              radius: 32,
+                              backgroundColor: Theme.of(context).colorScheme.surface,
+                              child: Icon(
+                                  _getDeviceIcon(device.type),
+                                  size: 28,
+                              ),
+                          ),
+                          SizedBox(
+                              width: 58,
+                              height: 58,
+                              child: context.watch<CommunicationInfo>().progress == null ?
+                              CircularProgressIndicator(
+                                  value: null,
+                                  strokeWidth: 6,
+                                  strokeCap: StrokeCap.round,
+                              ) :
+                              TweenAnimationBuilder(
+                                  tween: Tween<double>(end: context.watch<CommunicationInfo>().progress == null ? 0.0 : context.watch<CommunicationInfo>().progress!),
+                                  duration: Duration(milliseconds: 400),
+                                  curve: Curves.linearToEaseOut,
+                                  builder: (context, double value, child) => CircularProgressIndicator(
+                                      value: value,
+                                      strokeCap: StrokeCap.round,
+                                      strokeWidth: 6,
+                                  ),
+                              ),
+                          ),
+                          Builder(builder: (context) {
+                              if (context.watch<CommunicationInfo>().successState != SuccessState.none) {
+                                  return CircleAvatar(
+                                      backgroundColor: Theme.of(context).colorScheme.primary,
+                                      radius: 32,
+                                      child: Icon(
+                                          Icons.check,
+                                          size: 28,
+                                          color: Theme.of(context).colorScheme.onPrimary,
+                                      ),
+                                  );
+                              }
+                              else if (context.watch<CommunicationInfo>().errorState != ErrorState.none) {
+                                  return CircleAvatar(
+                                      backgroundColor: Theme.of(context).colorScheme.error,
+                                      radius: 32,
+                                      child: Icon(
+                                          Icons.error_outline,
+                                          size: 28,
+                                          color: Theme.of(context).colorScheme.onError,
+                                      ),
+                                  );
+                              }
+                              return SizedBox();
+                          },
+                          ),
+                      ],
+                  ),
                 ),
                   Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -407,6 +412,16 @@ class NearbyPage extends StatelessWidget
         .clickable(
           borderRadius: BorderRadius.circular(44),
           onTap: () async {
+              if (!Runtime.appVersion.isCompatibleWith(device.version)) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text(AppLocalizations.of(context)!.incompatible_app_version_snackbar_content(device.firstname)),
+                          duration: Duration(seconds: 8),
+                      )
+                  );
+                  return;
+              }
+
               if (device.communicationInfo.communicationState == CommunicationState.none) {
                   if (!context.read<NearbyViewModel>().isConnectedWithNetwork) {
                       return;

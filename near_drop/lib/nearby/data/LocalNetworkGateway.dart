@@ -57,8 +57,9 @@ class LocalNetworkGateway
             try
             {
                 // Gerätedaten des anfragenden Geräts empfangen und dekodieren.
-                String jsonString = String.fromCharCodes(data);
-                Device remoteDevice = _deviceFromJson(jsonString);
+                String json = String.fromCharCodes(data);
+                final Map<String, dynamic> deviceMap = jsonDecode(json);
+                Device remoteDevice = Device.fromMap(deviceMap);
 
                 // Eigene Gerätedaten als Antwort zurücksenden.
                 final ownDeviceJson = _getOwnDeviceJson();
@@ -141,7 +142,8 @@ class LocalNetworkGateway
             // Auf die Antwort des anderen Geräts warten.
             final remoteData = await socket.first.timeout(_timeoutDuration);
             final remoteString = String.fromCharCodes(remoteData);
-            final remoteDevice = _deviceFromJson(remoteString);
+            final Map<String, dynamic> deviceMap = jsonDecode(remoteString);
+            final remoteDevice = Device.fromMap(deviceMap);
             print("Antwort von '${remoteDevice.firstname}' erhalten.");
 
             // Event auslösen, dass ein Gerät erfolgreich aufgelöst wurde.
@@ -165,36 +167,10 @@ class LocalNetworkGateway
             "deviceName": Runtime.deviceName,
             "deviceType": Runtime.deviceType.name,
             "os": Runtime.os.name,
-            "version": Runtime.version,
+            "version": Runtime.appVersion.toString(),
             "nearbyUuid": Runtime.nearbyUuid,
         };
 
         return jsonEncode(deviceMap);
-    }
-
-    /// Hilfsmethode zur Deserialisierung von JSON-Bytes in ein Device-Objekt.
-    Device _deviceFromJson(String json)
-    {
-        final Map<String, dynamic> data = jsonDecode(json);
-        String? firstname = data["firstname"];
-        String? deviceName = data["deviceName"];
-        DeviceType? deviceType = DeviceType.values.firstWhere((e) => e.name == data["deviceType"], orElse: () => DeviceType.unknown);
-        OS? os = OS.values.firstWhere((e) => e.name == data["os"], orElse: () => OS.unknown);
-        int? version = data["version"];
-        String? nearbyUuid = data["nearbyUuid"];
-
-        if (firstname == null || deviceName == null || version == null || nearbyUuid == null)
-        {
-            throw FormatException("Ungültige Gerätedaten: $data");
-        }
-
-        return Device(
-            firstname,
-            deviceName,
-            deviceType,
-            os,
-            version,
-            nearbyUuid,
-        );
     }
 }

@@ -201,5 +201,13 @@
   "saved_data_page_login_data_label": "Login data",
   "saved_data_page_created_at_label": "Profile created at",
   "saved_data_page_updated_at_label": "Profile updated at",
-  "saved_data_page_last_sign_in_at_label": "Last sign in at"
+  "saved_data_page_last_sign_in_at_label": "Last sign in at",
+  "incompatible_app_version_snackbar_content": "Your device is not compatible with the device of {firstname}. Please update both Near Drop to the latest version.",
+  "@incompatible_app_version_snackbar_content": {
+    "placeholders": {
+      "firstname": {
+        "type": "String"
+      }
+    }
+  }
 }

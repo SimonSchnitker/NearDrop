@@ -447,4 +447,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saved_data_page_last_sign_in_at_label => 'Last sign in at';
+
+  @override
+  String incompatible_app_version_snackbar_content(String firstname) {
+    return 'Your device is not compatible with the device of $firstname. Please update both Near Drop to the latest version.';
+  }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:near_drop/Runtime.dart';
+import 'package:near_drop/core/AppVersion.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/domain/entity/Device.dart';
 import '../../core/domain/enums/DeviceType.dart';
@@ -32,7 +33,7 @@ class SupabaseDeviceGateway
             "name": Runtime.deviceName,
             "device_type": Runtime.deviceType.index, // Der Name "type" ist von Supabase reserviert, daher "device_type" verwenden
             "os": Runtime.os.index,
-            "version": Runtime.version,
+            "version": Runtime.appVersion.toString(),
         });
 
         return response == ChannelResponse.ok;
@@ -56,14 +57,14 @@ class SupabaseDeviceGateway
             String name = data["name"];
             int type = data["device_type"]; // Der Name "type" ist von Supabase reserviert, daher "device_type" verwenden
             int os = data["os"];
-            int version = data["version"];
+            String version = data["version"];
 
             Device device = Device(
                 firstname,
                 name,
                 DeviceType.values[type],
                 OS.values[os],
-                version,
+                AppVersion.fromString(version),
                 nearbyUuid
             );
 
