@@ -32,7 +32,7 @@
 	<string>Required to discover local network devices.</string>
 	<key>NSBonjourServices</key>
     <array>
-        <string>_arcdrop._tcp</string>
+        <string>_neardrop._tcp</string>
     </array>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Bluetooth is used for scanning devices nearby.</string>
