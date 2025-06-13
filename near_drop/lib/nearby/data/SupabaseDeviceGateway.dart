@@ -30,9 +30,9 @@ class SupabaseDeviceGateway
         ChannelResponse response = await channel.sendBroadcastMessage(event: "device", payload: {
             "sender": Runtime.nearbyUuid,
             "firstname": Runtime.firstname,
-            "deviceName": Runtime.deviceName,
-            "deviceType": Runtime.deviceType.name,
-            "os": Runtime.os.name,
+            "name": Runtime.deviceName,
+            "device_type": Runtime.deviceType.index, // Der Name "type" ist von Supabase reserviert, daher "device_type" verwenden
+            "os": Runtime.os.index,
             "version": Runtime.appVersion.toString(),
         });
 
@@ -54,16 +54,16 @@ class SupabaseDeviceGateway
             data = data["payload"];
             String nearbyUuid = data["sender"];
             String firstname = data["firstname"];
-            String name = data["deviceName"];
-            String type = data["deviceType"];
-            String os = data["os"];
+            String name = data["name"];
+            int type = data["device_type"]; // Der Name "type" ist von Supabase reserviert, daher "device_type" verwenden
+            int os = data["os"];
             String version = data["version"];
 
             Device device = Device(
                 firstname,
                 name,
-                DeviceType.values.byName(type),
-                OS.values.byName(os),
+                DeviceType.values[type],
+                OS.values[os],
                 AppVersion.fromString(version),
                 nearbyUuid
             );

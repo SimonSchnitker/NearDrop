@@ -102,7 +102,16 @@ class GuestLoginPage extends StatelessWidget
         try
         {
             await showLoadingOverlay(context, context.read<GuestLoginViewModel>().createGuestUser);
-            Navigator.pushNamedAndRemoveUntil(context, Routes.onboarding, (Route<dynamic> route) => false);
+
+            // Wenn die Berechtigung für Geräte in der Nähe bereits erteilt wurde, direkt zur Nearby-Seite navigieren.
+            if (await PermissionHelper.hasNearbyPermission())
+            {
+                Navigator.pushNamedAndRemoveUntil(context, Routes.nearby, (Route<dynamic> route) => false);
+            }
+            else
+            {
+                Navigator.pushNamedAndRemoveUntil(context, Routes.onboarding, (Route<dynamic> route) => false);
+            }
         }
         catch (e)
         {

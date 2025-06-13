@@ -49,7 +49,7 @@ class NearbyViewModel extends ChangeNotifier
     NearbyViewModel()
     {
         // Für Store Screenshots
-        //addTestDevices();
+        addTestDevices();
 
         // Auf Änderungen des Vornamens lauschen
         Runtime.onFirstnameChanged.stream.listen((newFirstname) {

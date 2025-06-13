@@ -56,8 +56,6 @@ PODS:
   - image_picker_ios (0.0.1):
     - Flutter
   - MTBBarcodeScanner (5.0.11)
-  - nsd_ios (0.0.1):
-    - Flutter
   - open_app_file (3.2.2):
     - Flutter
   - path_provider_foundation (0.0.1):
@@ -91,7 +89,6 @@ DEPENDENCIES:
   - flutter_webrtc (from `.symlinks/plugins/flutter_webrtc/ios`)
   - gal (from `.symlinks/plugins/gal/darwin`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
-  - nsd_ios (from `.symlinks/plugins/nsd_ios/ios`)
   - open_app_file (from `.symlinks/plugins/open_app_file/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
@@ -131,8 +128,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/gal/darwin"
   image_picker_ios:
     :path: ".symlinks/plugins/image_picker_ios/ios"
-  nsd_ios:
-    :path: ".symlinks/plugins/nsd_ios/ios"
   open_app_file:
     :path: ".symlinks/plugins/open_app_file/ios"
   path_provider_foundation:
@@ -161,7 +156,6 @@ SPEC CHECKSUMS:
   gal: baecd024ebfd13c441269ca7404792a7152fde89
   image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
-  nsd_ios: 596ad79109ddd3e52d665f650f36428049e3653e
   open_app_file: ba67d2bf6cdddfb654b13b713d66bea4974a5adb
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
