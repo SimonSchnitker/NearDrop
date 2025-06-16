@@ -83,7 +83,7 @@ class GuestLoginPage extends StatelessWidget
                         SliverFillRemaining(
                             hasScrollBody: false,
                             child: FilledButton(
-                                onPressed: context.watch<GuestLoginViewModel>().isTermsAccepted && context.watch<GuestLoginViewModel>().firstnameController.text.isNotEmpty ? () => _handleLogin(context) : null,
+                                onPressed: context.watch<GuestLoginViewModel>().isTermsAccepted && context.watch<GuestLoginViewModel>().firstnameController.text.trim().isNotEmpty ? () => _handleLogin(context) : null,
                                 child: Text(AppLocalizations.of(context)!.continue_button),
                             )
                             .align(Alignment.bottomRight)

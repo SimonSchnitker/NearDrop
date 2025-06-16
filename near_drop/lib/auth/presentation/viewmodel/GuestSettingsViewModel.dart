@@ -17,11 +17,12 @@ class GuestSettingsViewModel extends ChangeNotifier
 
     Future<void> updateFirstname() async
     {
-        if (firstnameController.text.isEmpty)
+        if (firstnameController.text.trim().isEmpty)
         {
             return;
         }
 
+        firstnameController.text = firstnameController.text.trim();
         await _settingsController.set(firstnameSetting, firstnameController.text);
 
         firstname = firstnameController.text;
