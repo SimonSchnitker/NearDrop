@@ -40,7 +40,8 @@ class GuestLoginPage extends StatelessWidget
                                         autofillHints: [AutofillHints.name],
                                         controller: context.read<GuestLoginViewModel>().firstnameController,
                                         textInputAction: TextInputAction.next,
-                                        keyboardType: TextInputType.text,
+                                        keyboardType: TextInputType.name,
+                                        textCapitalization: TextCapitalization.sentences,
                                     ),
                                     SizedBox(height: 32),
                                     Material(

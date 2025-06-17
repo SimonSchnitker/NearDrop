@@ -104,7 +104,8 @@ class GuestSettingsPage extends StatelessWidget {
                 controller: context.read<GuestSettingsViewModel>().firstnameController,
                 autofillHints: [AutofillHints.name],
                 textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.text,
+                keyboardType: TextInputType.name,
+                textCapitalization: TextCapitalization.sentences,
             ),
             actions: [
                 TextButton(
