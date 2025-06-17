@@ -8,6 +8,8 @@ import 'core/domain/enums/OS.dart';
 /// Stellt Laufzeit-Daten bereit.
 class Runtime
 {
+    static const String privacyPolicyUrl = "https://neardrop.app/privacy";
+    static const String imprintUrl = "https://neardrop.app/imprint";
     static const String appName = "Near Drop";
     static final appVersion = AppVersion(1, 0, 0);
 

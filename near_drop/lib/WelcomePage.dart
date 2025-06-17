@@ -3,6 +3,7 @@ import 'package:lottie/lottie.dart';
 import 'package:near_drop/Runtime.dart';
 import 'package:near_drop/tools/ui/ShapedMaterial.dart';
 import 'package:near_drop/tools/ui/WidgetModifier.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import 'Routes.dart';
 import 'l10n/gen/app_localizations.dart';
@@ -95,6 +96,9 @@ Widget _appInfoDialog(BuildContext context) {
             ShapedMaterial(
                 shapePosition: ShapePosition.start,
                 color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                onTap: () async {
+                    await launchUrlString(Runtime.imprintUrl, mode: LaunchMode.externalApplication);
+                },
                 child: ListTile(
                     title: Text(AppLocalizations.of(context)!.imprint_title),
                     subtitle: Text(AppLocalizations.of(context)!.imprint_subtitle),
@@ -105,6 +109,9 @@ Widget _appInfoDialog(BuildContext context) {
             ShapedMaterial(
                 shapePosition: ShapePosition.middle,
                 color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                onTap: () async {
+                    await launchUrlString(Runtime.privacyPolicyUrl, mode: LaunchMode.externalApplication);
+                },
                 child: ListTile(
                     title: Text(AppLocalizations.of(context)!.data_privacy_title),
                     subtitle: Text(AppLocalizations.of(context)!.data_privacy_subtitle),

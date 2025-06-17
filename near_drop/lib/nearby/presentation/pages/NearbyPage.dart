@@ -14,6 +14,7 @@ import 'package:near_drop/tools/ui/WidgetModifier.dart';
 import 'package:near_drop/transport/domain/enums/SendResponse.dart';
 import 'package:near_drop/transport/presentation/TransportViewModel.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import '../../../Routes.dart';
 import '../../../Runtime.dart';
 import '../../../core/domain/entity/CommunicationInfo.dart';
@@ -200,6 +201,9 @@ class NearbyPage extends StatelessWidget
                 ShapedMaterial(
                     shapePosition: ShapePosition.start,
                     color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    onTap: () async {
+                        await launchUrlString(Runtime.imprintUrl, mode: LaunchMode.externalApplication);
+                    },
                     child: ListTile(
                         title: Text(AppLocalizations.of(context)!.imprint_title, style: TextStyle(color: Theme.of(context).colorScheme.onSurface),),
                         leading: Icon(Icons.info_outline),
@@ -210,6 +214,9 @@ class NearbyPage extends StatelessWidget
                 ShapedMaterial(
                     shapePosition: ShapePosition.middle,
                     color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    onTap: () async {
+                        await launchUrlString(Runtime.privacyPolicyUrl, mode: LaunchMode.externalApplication);
+                    },
                     child: ListTile(
                         title: Text(AppLocalizations.of(context)!.data_privacy_title, style: TextStyle(color: Theme.of(context).colorScheme.onSurface),),
                         leading: Icon(Icons.shield_outlined),
@@ -509,7 +516,7 @@ class NearbyPage extends StatelessWidget
       }, icon: Icon(Icons.person_outline), tooltip: AppLocalizations.of(context)!.nearby_page_account_icon_tooltip)
       ],
     );
-  } 
+  }
 
   /// Erstellt die Leiste mit Informationen am unteren Rand der Seite.
   Widget _bottomBar(BuildContext context) {

@@ -1,10 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:near_drop/Runtime.dart';
 import 'package:near_drop/tools/PermissionHelper.dart';
 import 'package:near_drop/tools/ui/FlexibleAppBar.dart';
 import 'package:near_drop/tools/ui/WidgetModifier.dart';
 import 'package:provider/provider.dart';
 import 'package:near_drop/auth/presentation/viewmodel/GuestLoginViewModel.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import '../../../Routes.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../../tools/ui/LoadingOverlay.dart';
@@ -61,8 +63,8 @@ class GuestLoginPage extends StatelessWidget
                                                                 fontWeight: FontWeight.bold
                                                             ),
                                                             recognizer: TapGestureRecognizer()
-                                                                ..onTap = () {
-                                                                    //Navigator.pushNamed(context, Routes.terms);
+                                                                ..onTap = () async {
+                                                                    await launchUrlString(Runtime.privacyPolicyUrl, mode: LaunchMode.externalApplication);
                                                                 }
                                                         ),
                                                         TextSpan(
