@@ -1,7 +1,10 @@
 import 'package:near_drop/core/data/CoreGateway.dart';
+import 'package:near_drop/core/domain/entity/AppVersionResponse.dart';
 import '../../Runtime.dart';
 import '../../settings/domain/Setting.dart';
 import '../../settings/domain/SettingsController.dart';
+import '../AppVersion.dart';
+import '../data/dto/AppVersionDTO.dart';
 
 /// Steuert Core-Funktionen der App wie die Initialisierung der Nearby-UUID und des Realtime-Kanals.
 /// Ohne diese Initialisierung kann die App nicht richtig funktionieren, da sie auf die Nearby-UUID und den Realtime-Kanal angewiesen ist.
@@ -80,5 +83,15 @@ class CoreController
         await _settingsController.set(nearbyUuidSetting, uuid);
         await _settingsController.set(nearbyUuidCreationSetting, DateTime.now().toString());
         Runtime.nearbyUuid = uuid;
+    }
+
+    /// Ruft die Versionsinformationen der App ab.
+    Future<AppVersionResponse> getVersionInfo() async
+    {
+        AppVersionDTO dto = await _coreGateway.getVersionInfo();
+        return AppVersionResponse(
+            latestVersion: AppVersion.fromString(dto.latestVersion),
+            requiredVersion: AppVersion.fromString(dto.requiredVersion),
+        );
     }
 }

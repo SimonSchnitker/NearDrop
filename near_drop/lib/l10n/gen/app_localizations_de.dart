@@ -501,4 +501,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String incompatible_app_version_snackbar_content(String firstname) {
     return 'Dein Gerät ist nicht kompatibel mit dem Gerät von $firstname. Bitte aktualisiert beide Near Drop auf die neueste Version.';
   }
+
+  @override
+  String get required_update_page_title => 'Update erforderlich';
+
+  @override
+  String get required_update_page_content =>
+      'Ein Update ist erforderlich, um die App weiterhin zu nutzen. Bitte aktualisiere die App auf die neueste Version.';
+
+  @override
+  String get required_update_page_button => 'Jetzt aktualisieren';
 }

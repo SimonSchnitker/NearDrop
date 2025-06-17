@@ -963,6 +963,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your device is not compatible with the device of {firstname}. Please update both Near Drop to the latest version.'**
   String incompatible_app_version_snackbar_content(String firstname);
+
+  /// No description provided for @required_update_page_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Update required'**
+  String get required_update_page_title;
+
+  /// No description provided for @required_update_page_content.
+  ///
+  /// In en, this message translates to:
+  /// **'An update is required to continue using the app. Please update the app to the latest version.'**
+  String get required_update_page_content;
+
+  /// No description provided for @required_update_page_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Update now'**
+  String get required_update_page_button;
 }
 
 class _AppLocalizationsDelegate

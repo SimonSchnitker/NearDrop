@@ -22,6 +22,26 @@ class AppVersion
     return '$major.$minor.$patch';
   }
 
+  bool operator >(AppVersion other) {
+    if (this.major != other.major) {
+      return this.major > other.major;
+    }
+    if (this.minor != other.minor) {
+      return this.minor > other.minor;
+    }
+    return this.patch > other.patch;
+  }
+
+    bool operator <(AppVersion other) {
+      if (this.major != other.major) {
+        return this.major < other.major;
+        }
+      if (this.minor != other.minor) {
+        return this.minor < other.minor;
+        }
+      return this.patch < other.patch;
+    }
+
   static AppVersion fromString(String version) {
     final parts = version.split('.');
     if (parts.length != 3) {

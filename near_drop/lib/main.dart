@@ -8,6 +8,7 @@ import 'package:near_drop/WelcomePage.dart';
 import 'package:near_drop/auth/domain/AuthController.dart';
 import 'package:near_drop/auth/presentation/pages/GuestSettingsPage.dart';
 import 'package:near_drop/core/data/CoreGateway.dart';
+import 'package:near_drop/core/presentation/UpdateRequiredPage.dart';
 import 'package:near_drop/help/presentation/HelpPage.dart';
 import 'package:near_drop/nearby/data/scan/ble/BleAdvertiser.dart';
 import 'package:near_drop/nearby/data/scan/nsd/NsdAdvertiser.dart';
@@ -186,6 +187,7 @@ class MyApp extends StatelessWidget {
                       Routes.help: (context) => HelpPage(),
                       Routes.onboarding: (context) => OnboardingPage(),
                       Routes.savedUserData: (context) => SavedUserDataPage(),
+                      Routes.requiredUpdate: (context) => UpdateRequiredPage(),
                   },
                   initialRoute: Supabase.instance.client.auth.currentUser == null ? Routes.welcome : Routes.nearby,
               );

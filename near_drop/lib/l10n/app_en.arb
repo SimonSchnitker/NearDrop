@@ -209,5 +209,8 @@
         "type": "String"
       }
     }
-  }
+  },
+  "required_update_page_title": "Update required",
+  "required_update_page_content": "An update is required to continue using the app. Please update the app to the latest version.",
+  "required_update_page_button": "Update now"
 }

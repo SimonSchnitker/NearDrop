@@ -27,6 +27,7 @@ class GuestLoginViewModel extends ChangeNotifier
 
     Future<void> createGuestUser() async
     {
+        firstnameController.text = firstnameController.text.trim();
         await _authController.signInAnonymous(firstnameController.text);
 
         firstnameController.clear();

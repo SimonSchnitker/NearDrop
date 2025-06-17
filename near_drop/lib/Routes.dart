@@ -7,4 +7,5 @@ class Routes
     static String help = "/help";
     static String onboarding = "/onboarding";
     static String savedUserData = "/savedUserData";
+    static String requiredUpdate = "/requiredUpdate";
 }

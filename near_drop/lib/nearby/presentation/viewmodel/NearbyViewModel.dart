@@ -4,13 +4,15 @@ import 'package:flutter_blue_plus_windows/flutter_blue_plus_windows.dart';
 import 'package:kiwi/kiwi.dart';
 import 'package:near_drop/core/AppVersion.dart';
 import 'package:near_drop/core/domain/CoreController.dart';
+import 'package:near_drop/core/domain/entity/AppVersionResponse.dart';
 import 'package:near_drop/core/domain/enums/DeviceType.dart';
 import 'package:near_drop/core/domain/enums/OS.dart';
 import 'package:near_drop/nearby/domain/NearbyController.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
+import 'package:near_drop/nearby/presentation/pages/NearbyPage.dart';
 import 'package:near_drop/tools/PermissionHelper.dart';
 import 'package:near_drop/transport/domain/TransportController.dart';
-import 'package:permission_handler/permission_handler.dart';
+import '../../../Routes.dart';
 import '../../../Runtime.dart';
 import '../../../core/domain/entity/Device.dart';
 
@@ -20,6 +22,9 @@ class NearbyViewModel extends ChangeNotifier
     final NearbyController _nearbyController = KiwiContainer().resolve<NearbyController>();
     final TransportController _transportController = KiwiContainer().resolve<TransportController>();
     final CoreController _coreController = KiwiContainer().resolve<CoreController>();
+
+    bool isUpdateAvailable = false;
+    bool isRequiredUpdateAvailable = false;
 
     final List<Device> nearbyDevices = [];
     String firstname = Runtime.firstname;
@@ -86,6 +91,9 @@ class NearbyViewModel extends ChangeNotifier
 
         _listenNetworkStateChanges();
         initializeCore();
+
+        // Auf Updates prüfen
+        _getVersionInfo();
     }
 
     void addTestDevices()
@@ -131,6 +139,30 @@ class NearbyViewModel extends ChangeNotifier
         _transportController.startSignaling();
         _nearbyController.startNsdServices();
         _listenForBluetoothStateChanges();
+    }
+
+    Future<void> _getVersionInfo() async
+    {
+        try
+        {
+            AppVersionResponse response = await _coreController.getVersionInfo();
+            isUpdateAvailable = response.latestVersion > Runtime.appVersion;
+            isRequiredUpdateAvailable = response.requiredVersion > Runtime.appVersion;
+            notifyListeners();
+        }
+        catch (e)
+        {
+            print("Fehler beim Abrufen der Version: $e");
+            return;
+        }
+
+        // Wenn eine wichtige Aktualisierung verfügbar ist, den Nutzer informieren und alle Projekte stoppen.
+        if (isRequiredUpdateAvailable)
+        {
+            await Navigator.of(NearbyPage.scaffoldKey.currentContext!).pushNamedAndRemoveUntil(Routes.requiredUpdate, (route) => false);
+            await _nearbyController.stopBleServices();
+            await _nearbyController.startNsdServices();
+        }
     }
 
     /// Zeigt die Info-Nachrichten an oder blendet sie aus.

@@ -509,7 +509,7 @@ class NearbyPage extends StatelessWidget
       }, icon: Icon(Icons.person_outline), tooltip: AppLocalizations.of(context)!.nearby_page_account_icon_tooltip)
       ],
     );
-  }
+  } 
 
   /// Erstellt die Leiste mit Informationen am unteren Rand der Seite.
   Widget _bottomBar(BuildContext context) {

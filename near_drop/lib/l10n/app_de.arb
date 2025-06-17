@@ -209,5 +209,8 @@
           "type": "String"
         }
       }
-    }
+    },
+    "required_update_page_title": "Update erforderlich",
+    "required_update_page_content": "Ein Update ist erforderlich, um die App weiterhin zu nutzen. Bitte aktualisiere die App auf die neueste Version.",
+    "required_update_page_button": "Jetzt aktualisieren"
 }
