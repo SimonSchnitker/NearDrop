@@ -5,6 +5,8 @@ import 'package:near_drop/tools/ui/FlexibleAppBar.dart';
 import 'package:near_drop/tools/ui/ShapedMaterial.dart';
 import 'package:near_drop/tools/ui/WidgetModifier.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+import '../../Runtime.dart';
 import 'HelpViewModel.dart';
 import '../../../l10n/gen/app_localizations.dart';
 
@@ -80,8 +82,8 @@ class HelpPage extends StatelessWidget {
                 trailing: Icon(Icons.open_in_new),
                 title: Text(AppLocalizations.of(context)!.help_page_install_on_android_title),
                 subtitle: Text(AppLocalizations.of(context)!.help_page_install_on_android_content),
-                onTap: () {
-
+                onTap: () async {
+                    await launchUrlString(Runtime.androidAppUrl, mode: LaunchMode.externalApplication);
                 },
             )
         );
@@ -97,8 +99,8 @@ class HelpPage extends StatelessWidget {
                 trailing: Icon(Icons.open_in_new),
                 title: Text(AppLocalizations.of(context)!.help_page_install_on_apple_title),
                 subtitle: Text(AppLocalizations.of(context)!.help_page_install_on_apple_content),
-                onTap: () {
-
+                onTap: () async {
+                    await launchUrlString(Runtime.iosAppUrl, mode: LaunchMode.externalApplication);
                 },
             )
         );
@@ -114,8 +116,8 @@ class HelpPage extends StatelessWidget {
                 trailing: Icon(Icons.open_in_new),
                 title: Text(AppLocalizations.of(context)!.help_page_install_on_windows_title),
                 subtitle: Text(AppLocalizations.of(context)!.help_page_install_on_windows_content),
-                onTap: () {
-
+                onTap: () async {
+                    await launchUrlString(Runtime.windowsAppUrl, mode: LaunchMode.externalApplication);
                 },
             )
         );

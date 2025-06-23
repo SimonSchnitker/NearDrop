@@ -11,6 +11,9 @@ class Runtime
     static const String privacyPolicyUrl = "https://neardrop.app/privacy";
     static const String imprintUrl = "https://neardrop.app/imprint";
     static const String termsOfUsetUrl = "https://neardrop.app/termsofuse";
+    static const String androidAppUrl = "https://play.google.com/";
+    static const String iosAppUrl = "https://www.apple.com/app-store/";
+    static const String windowsAppUrl = "https://apps.microsoft.com/home";
     static const String appName = "Near Drop";
     static final appVersion = Version(1, 0, 0);
     static final int privacyPolicyVersion = 1;
