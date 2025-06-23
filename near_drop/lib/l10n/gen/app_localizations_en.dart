@@ -559,4 +559,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get account_delete_error_snackbar_content =>
       'An error occurred while deleting your account. Check your internet connection or try again later.';
+
+  @override
+  String get open_website_button => 'Visit website';
 }

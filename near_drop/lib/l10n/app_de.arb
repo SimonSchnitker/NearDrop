@@ -240,5 +240,6 @@
     "required_update_page_content": "Ein Update ist erforderlich, um die App weiterhin zu nutzen. Bitte aktualisiere die App auf die neueste Version.",
     "required_update_page_button": "Jetzt aktualisieren",
     "account_deleted_snackbar_content": "Dein Account wurde erfolgreich gelöscht.",
-    "account_delete_error_snackbar_content": "Beim Löschen deines Accounts ist ein Fehler aufgetreten. Prüfe deine Internetverdingung und versuche es später erneut."
+    "account_delete_error_snackbar_content": "Beim Löschen deines Accounts ist ein Fehler aufgetreten. Prüfe deine Internetverbindung oder versuche es später erneut.",
+    "open_website_button": "Website besuchen"
 }

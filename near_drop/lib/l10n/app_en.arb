@@ -240,6 +240,6 @@
   "required_update_page_content": "An update is required to continue using the app. Please update the app to the latest version.",
   "required_update_page_button": "Update now",
   "account_deleted_snackbar_content": "Your account has been successfully deleted.",
-  "account_delete_error_snackbar_content": "An error occurred while deleting your account. Check your internet connection or try again later."
-
+  "account_delete_error_snackbar_content": "An error occurred while deleting your account. Check your internet connection or try again later.",
+  "open_website_button": "Visit website"
 }

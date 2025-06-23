@@ -565,5 +565,8 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get account_delete_error_snackbar_content =>
-      'Beim Löschen deines Accounts ist ein Fehler aufgetreten. Prüfe deine Internetverdingung und versuche es später erneut.';
+      'Beim Löschen deines Accounts ist ein Fehler aufgetreten. Prüfe deine Internetverbindung oder versuche es später erneut.';
+
+  @override
+  String get open_website_button => 'Website besuchen';
 }

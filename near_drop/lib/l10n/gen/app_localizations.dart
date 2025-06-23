@@ -1069,6 +1069,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An error occurred while deleting your account. Check your internet connection or try again later.'**
   String get account_delete_error_snackbar_content;
+
+  /// No description provided for @open_website_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit website'**
+  String get open_website_button;
 }
 
 class _AppLocalizationsDelegate

@@ -236,6 +236,18 @@ class NearbyPage extends StatelessWidget
                         iconColor: Theme.of(context).colorScheme.onSurface,
                     ),
                 ),
+                SizedBox(height: 16,),
+                ShapedMaterial(
+                    onTap: () async {
+                        await launchUrlString(Runtime.nearDropWebsiteUrl, mode: LaunchMode.externalApplication);
+                    },
+                    shapePosition: ShapePosition.only,
+                    color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    child: ListTile(
+                        leading: Icon(Icons.open_in_new),
+                        title: Text(AppLocalizations.of(context)!.open_website_button),
+                    ),
+                ),
                 Spacer(),
                 Material(
                     color: Theme.of(context).colorScheme.surfaceContainerHigh,
