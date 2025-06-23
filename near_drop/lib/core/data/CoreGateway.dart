@@ -31,7 +31,7 @@ class CoreGateway
         }
 
         final response = await Supabase.instance.client
-            .from("version")
+            .from("app_version")
             .select("latest, required")
             .eq("os", os)
             .single();

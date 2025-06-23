@@ -150,7 +150,19 @@ class GuestSettingsPage extends StatelessWidget {
     Future<void> _handleLogout(BuildContext context) async
     {
         Navigator.of(context).pop(); // Dialog schließen
-        await showLoadingOverlay(context, context.read<GuestSettingsViewModel>().deleteAccount);
-        Navigator.of(context).pushNamedAndRemoveUntil(Routes.welcome, (route) => false); // Zurück zur Willkommensseite
+        try
+        {
+            await showLoadingOverlay(context, context.read<GuestSettingsViewModel>().deleteAccount);
+            Navigator.of(context).pushNamedAndRemoveUntil(Routes.welcome, (route) => false); // Zurück zur Willkommensseite
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(AppLocalizations.of(context)!.account_deleted_snackbar_content)
+                ));
+        }
+        catch (e)
+        {
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(AppLocalizations.of(context)!.account_delete_error_snackbar_content)
+            ));
+        }
     }
 }

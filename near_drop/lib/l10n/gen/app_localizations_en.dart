@@ -71,6 +71,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get data_protection_info_text_3 => '.';
 
   @override
+  String get terms_info_text_1 => 'I have read and accept the ';
+
+  @override
+  String get terms_info_text_2 => 'Terms of Use';
+
+  @override
+  String get terms_info_text_3 => '.';
+
+  @override
   String get nearby_page_menu_icon_tooltip => 'App information';
 
   @override
@@ -476,10 +485,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saved_data_page_description =>
-      'In the following you can see all your personal data that is stored on our server. For more information, see our privacy policy.';
+      'In the following you can fetch all your personal data that is stored on our server. For more information, see our privacy policy.';
+
+  @override
+  String get saved_data_page_fetch_data_button => 'Fetch data';
+
+  @override
+  String get saved_data_page_fetch_data_error_message =>
+      'An error occurred while fetching your data. Check your internet connection or try again later.';
 
   @override
   String get saved_data_page_login_data_label => 'Login data';
+
+  @override
+  String get saved_data_page_user_id_label => 'User ID';
 
   @override
   String get saved_data_page_created_at_label => 'Profile created at';
@@ -489,6 +508,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saved_data_page_last_sign_in_at_label => 'Last sign in at';
+
+  @override
+  String get saved_data_page_sessions_label => 'Sessions';
+
+  @override
+  String get saved_data_page_sessions_ip_label => 'IP address';
+
+  @override
+  String get saved_data_page_privacy_policy_consents_label =>
+      'Data policy consents';
+
+  @override
+  String saved_data_page_privacy_policy_consents_accepted_at_label(
+    String acceptedAt,
+  ) {
+    return 'Accepted at $acceptedAt';
+  }
+
+  @override
+  String get saved_data_page_terms_of_use_consents_label =>
+      'Terms of Use consents';
+
+  @override
+  String saved_data_page_terms_of_use_consents_accepted_at_label(
+    String acceptedAt,
+  ) {
+    return 'Accepted at $acceptedAt';
+  }
 
   @override
   String incompatible_app_version_snackbar_content(String firstname) {
@@ -504,4 +551,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get required_update_page_button => 'Update now';
+
+  @override
+  String get account_deleted_snackbar_content =>
+      'Your account has been successfully deleted.';
+
+  @override
+  String get account_delete_error_snackbar_content =>
+      'An error occurred while deleting your account. Check your internet connection or try again later.';
 }

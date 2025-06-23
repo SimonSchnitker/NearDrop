@@ -218,6 +218,24 @@ abstract class AppLocalizations {
   /// **'.'**
   String get data_protection_info_text_3;
 
+  /// No description provided for @terms_info_text_1.
+  ///
+  /// In en, this message translates to:
+  /// **'I have read and accept the '**
+  String get terms_info_text_1;
+
+  /// No description provided for @terms_info_text_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Use'**
+  String get terms_info_text_2;
+
+  /// No description provided for @terms_info_text_3.
+  ///
+  /// In en, this message translates to:
+  /// **'.'**
+  String get terms_info_text_3;
+
   /// No description provided for @nearby_page_menu_icon_tooltip.
   ///
   /// In en, this message translates to:
@@ -931,14 +949,32 @@ abstract class AppLocalizations {
   /// No description provided for @saved_data_page_description.
   ///
   /// In en, this message translates to:
-  /// **'In the following you can see all your personal data that is stored on our server. For more information, see our privacy policy.'**
+  /// **'In the following you can fetch all your personal data that is stored on our server. For more information, see our privacy policy.'**
   String get saved_data_page_description;
+
+  /// No description provided for @saved_data_page_fetch_data_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch data'**
+  String get saved_data_page_fetch_data_button;
+
+  /// No description provided for @saved_data_page_fetch_data_error_message.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while fetching your data. Check your internet connection or try again later.'**
+  String get saved_data_page_fetch_data_error_message;
 
   /// No description provided for @saved_data_page_login_data_label.
   ///
   /// In en, this message translates to:
   /// **'Login data'**
   String get saved_data_page_login_data_label;
+
+  /// No description provided for @saved_data_page_user_id_label.
+  ///
+  /// In en, this message translates to:
+  /// **'User ID'**
+  String get saved_data_page_user_id_label;
 
   /// No description provided for @saved_data_page_created_at_label.
   ///
@@ -957,6 +993,46 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Last sign in at'**
   String get saved_data_page_last_sign_in_at_label;
+
+  /// No description provided for @saved_data_page_sessions_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions'**
+  String get saved_data_page_sessions_label;
+
+  /// No description provided for @saved_data_page_sessions_ip_label.
+  ///
+  /// In en, this message translates to:
+  /// **'IP address'**
+  String get saved_data_page_sessions_ip_label;
+
+  /// No description provided for @saved_data_page_privacy_policy_consents_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Data policy consents'**
+  String get saved_data_page_privacy_policy_consents_label;
+
+  /// No description provided for @saved_data_page_privacy_policy_consents_accepted_at_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted at {acceptedAt}'**
+  String saved_data_page_privacy_policy_consents_accepted_at_label(
+    String acceptedAt,
+  );
+
+  /// No description provided for @saved_data_page_terms_of_use_consents_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Use consents'**
+  String get saved_data_page_terms_of_use_consents_label;
+
+  /// No description provided for @saved_data_page_terms_of_use_consents_accepted_at_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted at {acceptedAt}'**
+  String saved_data_page_terms_of_use_consents_accepted_at_label(
+    String acceptedAt,
+  );
 
   /// No description provided for @incompatible_app_version_snackbar_content.
   ///
@@ -981,6 +1057,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Update now'**
   String get required_update_page_button;
+
+  /// No description provided for @account_deleted_snackbar_content.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has been successfully deleted.'**
+  String get account_deleted_snackbar_content;
+
+  /// No description provided for @account_delete_error_snackbar_content.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while deleting your account. Check your internet connection or try again later.'**
+  String get account_delete_error_snackbar_content;
 }
 
 class _AppLocalizationsDelegate

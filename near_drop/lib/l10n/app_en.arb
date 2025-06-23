@@ -19,6 +19,9 @@
 	"data_protection_info_text_1": "I have read and accept the ",
 	"data_protection_info_text_2": "data protection regulations",
 	"data_protection_info_text_3": ".",
+    "terms_info_text_1": "I have read and accept the ",
+    "terms_info_text_2": "Terms of Use",
+    "terms_info_text_3": ".",
 	"nearby_page_menu_icon_tooltip": "App information",
 	"nearby_page_account_icon_tooltip": "My account",
 	"nearby_page_manual_connection_tooltip": "Connect manually",
@@ -197,11 +200,34 @@
   "files_directory_initializing_failed_title": "No file reception possible",
   "files_directory_initializing_failed_content": "We cannot access the Downloads folder of your device.",
   "saved_data_page_title": "Saved data",
-  "saved_data_page_description": "In the following you can see all your personal data that is stored on our server. For more information, see our privacy policy.",
+  "saved_data_page_description": "In the following you can fetch all your personal data that is stored on our server. For more information, see our privacy policy.",
+  "saved_data_page_fetch_data_button": "Fetch data",
+  "saved_data_page_fetch_data_error_message": "An error occurred while fetching your data. Check your internet connection or try again later.",
   "saved_data_page_login_data_label": "Login data",
+  "saved_data_page_user_id_label": "User ID",
   "saved_data_page_created_at_label": "Profile created at",
   "saved_data_page_updated_at_label": "Profile updated at",
   "saved_data_page_last_sign_in_at_label": "Last sign in at",
+  "saved_data_page_sessions_label": "Sessions",
+  "saved_data_page_sessions_ip_label": "IP address",
+  "saved_data_page_privacy_policy_consents_label": "Data policy consents",
+  "saved_data_page_privacy_policy_consents_accepted_at_label": "Accepted at {acceptedAt}",
+  "@saved_data_page_privacy_policy_consents_accepted_at_label": {
+    "placeholders": {
+      "acceptedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "saved_data_page_terms_of_use_consents_label": "Terms of Use consents",
+  "saved_data_page_terms_of_use_consents_accepted_at_label": "Accepted at {acceptedAt}",
+  "@saved_data_page_terms_of_use_consents_accepted_at_label": {
+    "placeholders": {
+      "acceptedAt": {
+        "type": "String"
+      }
+    }
+  },
   "incompatible_app_version_snackbar_content": "Your device is not compatible with the device of {firstname}. Please update both Near Drop to the latest version.",
   "@incompatible_app_version_snackbar_content": {
     "placeholders": {
@@ -212,5 +238,8 @@
   },
   "required_update_page_title": "Update required",
   "required_update_page_content": "An update is required to continue using the app. Please update the app to the latest version.",
-  "required_update_page_button": "Update now"
+  "required_update_page_button": "Update now",
+  "account_deleted_snackbar_content": "Your account has been successfully deleted.",
+  "account_delete_error_snackbar_content": "An error occurred while deleting your account. Check your internet connection or try again later."
+
 }

@@ -72,6 +72,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get data_protection_info_text_3 => ' gelesen und akzeptiere diese.';
 
   @override
+  String get terms_info_text_1 => 'Ich habe die ';
+
+  @override
+  String get terms_info_text_2 => 'Nutzungsbedingungen';
+
+  @override
+  String get terms_info_text_3 => ' gelesen und akzeptiere diese.';
+
+  @override
   String get nearby_page_menu_icon_tooltip => 'App-Info';
 
   @override
@@ -483,10 +492,20 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get saved_data_page_description =>
-      'Im Folgenden siehst du alle deine personenbezogenen Daten, die auf unserem Server gespeichert sind. Für weitere Informationen, schaue in unsere Datenschutzerklärung.';
+      'Im Folgenden kannst du alle deine personenbezogenen Daten, die auf unserem Server gespeichert sind, abrufen. Für weitere Informationen, schaue in unsere Datenschutzerklärung.';
+
+  @override
+  String get saved_data_page_fetch_data_button => 'Daten abrufen';
+
+  @override
+  String get saved_data_page_fetch_data_error_message =>
+      'Beim Abrufen deiner Daten ist ein Fehler aufgetreten. Prüfe deine Internetverbindung oder versuche es später erneut.';
 
   @override
   String get saved_data_page_login_data_label => 'Anmeldedaten';
+
+  @override
+  String get saved_data_page_user_id_label => 'Benutzer-ID';
 
   @override
   String get saved_data_page_created_at_label => 'Profil erstellt am';
@@ -496,6 +515,34 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get saved_data_page_last_sign_in_at_label => 'Zuletzt angemeldet am';
+
+  @override
+  String get saved_data_page_sessions_label => 'Sitzungen';
+
+  @override
+  String get saved_data_page_sessions_ip_label => 'IP-Adresse';
+
+  @override
+  String get saved_data_page_privacy_policy_consents_label =>
+      'Datenschutz-Einwilligungen';
+
+  @override
+  String saved_data_page_privacy_policy_consents_accepted_at_label(
+    String acceptedAt,
+  ) {
+    return 'Am $acceptedAt akzeptiert';
+  }
+
+  @override
+  String get saved_data_page_terms_of_use_consents_label =>
+      'Nutzungsbedingungen-Einwilligungen';
+
+  @override
+  String saved_data_page_terms_of_use_consents_accepted_at_label(
+    String acceptedAt,
+  ) {
+    return 'Am $acceptedAt akzeptiert';
+  }
 
   @override
   String incompatible_app_version_snackbar_content(String firstname) {
@@ -511,4 +558,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get required_update_page_button => 'Jetzt aktualisieren';
+
+  @override
+  String get account_deleted_snackbar_content =>
+      'Dein Account wurde erfolgreich gelöscht.';
+
+  @override
+  String get account_delete_error_snackbar_content =>
+      'Beim Löschen deines Accounts ist ein Fehler aufgetreten. Prüfe deine Internetverdingung und versuche es später erneut.';
 }

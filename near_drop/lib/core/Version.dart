@@ -1,14 +1,14 @@
 /// Definiert den Aufbau einer App-Version.
 /// Hiermit kann geprüft werden, ob Geräte miteinander kompatibel sind.
-class AppVersion
+class Version
 {
   final int major;
   final int minor;
   final int patch;
 
-  AppVersion(this.major, this.minor, this.patch);
+  Version(this.major, this.minor, this.patch);
 
-  bool isCompatibleWith(AppVersion other) {
+  bool isCompatibleWith(Version other) {
     // Major-Versionen müssen gleich sein, um kompatibel zu sein
     if (this.major != other.major) {
       return false;
@@ -22,7 +22,7 @@ class AppVersion
     return '$major.$minor.$patch';
   }
 
-  bool operator >(AppVersion other) {
+  bool operator >(Version other) {
     if (this.major != other.major) {
       return this.major > other.major;
     }
@@ -32,7 +32,7 @@ class AppVersion
     return this.patch > other.patch;
   }
 
-    bool operator <(AppVersion other) {
+    bool operator <(Version other) {
       if (this.major != other.major) {
         return this.major < other.major;
         }
@@ -42,11 +42,11 @@ class AppVersion
       return this.patch < other.patch;
     }
 
-  static AppVersion fromString(String version) {
+  static Version fromString(String version) {
     final parts = version.split('.');
     if (parts.length != 3) {
       throw FormatException('Invalid version format: $version');
     }
-    return AppVersion(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+    return Version(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
   }
 }

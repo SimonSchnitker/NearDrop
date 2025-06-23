@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:near_drop/core/AppVersion.dart';
+import 'package:near_drop/core/Version.dart';
 import 'package:near_drop/tools/DeviceHelper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/domain/enums/DeviceType.dart';
@@ -10,8 +10,11 @@ class Runtime
 {
     static const String privacyPolicyUrl = "https://neardrop.app/privacy";
     static const String imprintUrl = "https://neardrop.app/imprint";
+    static const String termsOfUsetUrl = "https://neardrop.app/termsofuse";
     static const String appName = "Near Drop";
-    static final appVersion = AppVersion(1, 0, 0);
+    static final appVersion = Version(1, 0, 0);
+    static final int privacyPolicyVersion = 1;
+    static final int termsOfUseVersion = 1;
 
     static StreamController<String> onFirstnameChanged = StreamController<String>.broadcast();
 

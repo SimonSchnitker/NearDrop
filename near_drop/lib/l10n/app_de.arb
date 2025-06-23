@@ -19,6 +19,9 @@
     "data_protection_info_text_1": "Ich habe die ",
     "data_protection_info_text_2": "Datenschutzrichtlinien",
     "data_protection_info_text_3": " gelesen und akzeptiere diese.",
+    "terms_info_text_1": "Ich habe die ",
+    "terms_info_text_2": "Nutzungsbedingungen",
+    "terms_info_text_3": " gelesen und akzeptiere diese.",
     "nearby_page_menu_icon_tooltip": "App-Info",
     "nearby_page_account_icon_tooltip": "Mein Account",
     "nearby_page_manual_connection_tooltip": "Manuell verbinden",
@@ -197,11 +200,34 @@
     "files_directory_initializing_failed_title": "Kein Dateiempfang möglich",
     "files_directory_initializing_failed_content": "Wir können nicht auf den Downloads-Ordner deines Geräts zugreifen.",
     "saved_data_page_title": "Gespeicherte Daten",
-    "saved_data_page_description": "Im Folgenden siehst du alle deine personenbezogenen Daten, die auf unserem Server gespeichert sind. Für weitere Informationen, schaue in unsere Datenschutzerklärung.",
+    "saved_data_page_description": "Im Folgenden kannst du alle deine personenbezogenen Daten, die auf unserem Server gespeichert sind, abrufen. Für weitere Informationen, schaue in unsere Datenschutzerklärung.",
+    "saved_data_page_fetch_data_button": "Daten abrufen",
+    "saved_data_page_fetch_data_error_message": "Beim Abrufen deiner Daten ist ein Fehler aufgetreten. Prüfe deine Internetverbindung oder versuche es später erneut.",
     "saved_data_page_login_data_label": "Anmeldedaten",
+    "saved_data_page_user_id_label": "Benutzer-ID",
     "saved_data_page_created_at_label": "Profil erstellt am",
     "saved_data_page_updated_at_label": "Profil aktualisiert am",
     "saved_data_page_last_sign_in_at_label": "Zuletzt angemeldet am",
+    "saved_data_page_sessions_label": "Sitzungen",
+    "saved_data_page_sessions_ip_label": "IP-Adresse",
+    "saved_data_page_privacy_policy_consents_label": "Datenschutz-Einwilligungen",
+    "saved_data_page_privacy_policy_consents_accepted_at_label": "Am {acceptedAt} akzeptiert",
+    "@saved_data_page_privacy_policy_consents_accepted_at_label": {
+      "placeholders": {
+        "acceptedAt": {
+          "type": "String"
+        }
+      }
+    },
+    "saved_data_page_terms_of_use_consents_label": "Nutzungsbedingungen-Einwilligungen",
+    "saved_data_page_terms_of_use_consents_accepted_at_label": "Am {acceptedAt} akzeptiert",
+    "@saved_data_page_terms_of_use_consents_accepted_at_label": {
+      "placeholders": {
+        "acceptedAt": {
+          "type": "String"
+        }
+      }
+    },
     "incompatible_app_version_snackbar_content": "Dein Gerät ist nicht kompatibel mit dem Gerät von {firstname}. Bitte aktualisiert beide Near Drop auf die neueste Version.",
     "@incompatible_app_version_snackbar_content": {
       "placeholders": {
@@ -212,5 +238,7 @@
     },
     "required_update_page_title": "Update erforderlich",
     "required_update_page_content": "Ein Update ist erforderlich, um die App weiterhin zu nutzen. Bitte aktualisiere die App auf die neueste Version.",
-    "required_update_page_button": "Jetzt aktualisieren"
+    "required_update_page_button": "Jetzt aktualisieren",
+    "account_deleted_snackbar_content": "Dein Account wurde erfolgreich gelöscht.",
+    "account_delete_error_snackbar_content": "Beim Löschen deines Accounts ist ein Fehler aufgetreten. Prüfe deine Internetverdingung und versuche es später erneut."
 }

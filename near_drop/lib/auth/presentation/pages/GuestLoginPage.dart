@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:near_drop/Runtime.dart';
 import 'package:near_drop/tools/PermissionHelper.dart';
 import 'package:near_drop/tools/ui/FlexibleAppBar.dart';
+import 'package:near_drop/tools/ui/ShapedMaterial.dart';
 import 'package:near_drop/tools/ui/WidgetModifier.dart';
 import 'package:provider/provider.dart';
 import 'package:near_drop/auth/presentation/viewmodel/GuestLoginViewModel.dart';
@@ -44,13 +45,13 @@ class GuestLoginPage extends StatelessWidget
                                         textCapitalization: TextCapitalization.sentences,
                                     ),
                                     SizedBox(height: 32),
-                                    Material(
-                                        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(24),
+                                    ShapedMaterial(
+                                        shapePosition: ShapePosition.start,
+                                        color: Theme.of(context).colorScheme.surfaceContainer,
                                         child: Row(
                                             children: [
-                                                Checkbox(value: context.watch<GuestLoginViewModel>().isTermsAccepted, onChanged: (value) {
-                                                    context.read<GuestLoginViewModel>().setTermsAccepted(value!);
+                                                Checkbox(value: context.watch<GuestLoginViewModel>().isPrivacyAccepted, onChanged: (value) {
+                                                    context.read<GuestLoginViewModel>().setPrivacyAccepted(value!);
                                                 }),
                                                 RichText(
                                                     text: TextSpan(
@@ -76,8 +77,42 @@ class GuestLoginPage extends StatelessWidget
                                                 )
                                                 .expanded(),
                                             ],
-                                        )
-                                        .paddingSymmetric(horizontal: 8, vertical: 16),
+                                        ).paddingSymmetric(horizontal: 8, vertical: 16),
+                                    ),
+                                    SizedBox(height: 4,),
+                                    ShapedMaterial(
+                                        shapePosition: ShapePosition.end,
+                                        color: Theme.of(context).colorScheme.surfaceContainer,
+                                        child: Row(
+                                            children: [
+                                                Checkbox(value: context.watch<GuestLoginViewModel>().isTermsOfUseAccepted, onChanged: (value) {
+                                                    context.read<GuestLoginViewModel>().setTermsOfUseAccepted(value!);
+                                                }),
+                                                RichText(
+                                                    text: TextSpan(
+                                                        text: AppLocalizations.of(context)!.terms_info_text_1,
+                                                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                                                        children: [
+                                                            TextSpan(
+                                                                text: AppLocalizations.of(context)!.terms_info_text_2,
+                                                                style: TextStyle(
+                                                                    color: Theme.of(context).colorScheme.primary,
+                                                                    fontWeight: FontWeight.bold
+                                                                ),
+                                                                recognizer: TapGestureRecognizer()
+                                                                    ..onTap = () async {
+                                                                        await launchUrlString(Runtime.termsOfUsetUrl, mode: LaunchMode.externalApplication);
+                                                                    }
+                                                            ),
+                                                            TextSpan(
+                                                                text: AppLocalizations.of(context)!.terms_info_text_3,
+                                                            ),
+                                                        ]
+                                                    )
+                                                )
+                                                    .expanded(),
+                                            ],
+                                        ).paddingSymmetric(horizontal: 8, vertical: 16),
                                     ),
                                 ],
                             )
@@ -86,7 +121,7 @@ class GuestLoginPage extends StatelessWidget
                         SliverFillRemaining(
                             hasScrollBody: false,
                             child: FilledButton(
-                                onPressed: context.watch<GuestLoginViewModel>().isTermsAccepted && context.watch<GuestLoginViewModel>().firstnameController.text.trim().isNotEmpty ? () => _handleLogin(context) : null,
+                                onPressed: context.watch<GuestLoginViewModel>().isPrivacyAccepted && context.watch<GuestLoginViewModel>().isTermsOfUseAccepted && context.watch<GuestLoginViewModel>().firstnameController.text.trim().isNotEmpty ? () => _handleLogin(context) : null,
                                 child: Text(AppLocalizations.of(context)!.continue_button),
                             )
                             .align(Alignment.bottomRight)

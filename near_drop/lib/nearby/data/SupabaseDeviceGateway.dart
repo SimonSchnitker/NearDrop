@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:near_drop/Runtime.dart';
-import 'package:near_drop/core/AppVersion.dart';
+import 'package:near_drop/core/Version.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/domain/entity/Device.dart';
 import '../../core/domain/enums/DeviceType.dart';
@@ -64,7 +64,7 @@ class SupabaseDeviceGateway
                 name,
                 DeviceType.values[type],
                 OS.values[os],
-                AppVersion.fromString(version),
+                Version.fromString(version),
                 nearbyUuid
             );
 

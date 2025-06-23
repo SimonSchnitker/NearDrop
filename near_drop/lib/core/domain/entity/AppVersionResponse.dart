@@ -1,10 +1,10 @@
-import 'package:near_drop/core/AppVersion.dart';
+import 'package:near_drop/core/Version.dart';
 
 /// Repräsentiert die Antwort auf eine Anfrage nach der App-Version.
 class AppVersionResponse
 {
-    AppVersion latestVersion;
-    AppVersion requiredVersion;
+    Version latestVersion;
+    Version requiredVersion;
 
     AppVersionResponse({
         required this.latestVersion,

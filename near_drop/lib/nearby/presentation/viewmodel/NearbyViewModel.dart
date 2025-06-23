@@ -2,7 +2,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus_windows/flutter_blue_plus_windows.dart';
 import 'package:kiwi/kiwi.dart';
-import 'package:near_drop/core/AppVersion.dart';
+import 'package:near_drop/core/Version.dart';
 import 'package:near_drop/core/domain/CoreController.dart';
 import 'package:near_drop/core/domain/entity/AppVersionResponse.dart';
 import 'package:near_drop/core/domain/enums/DeviceType.dart';
@@ -98,15 +98,15 @@ class NearbyViewModel extends ChangeNotifier
 
     void addTestDevices()
     {
-        Device device1 = Device("Finn", "iPhone 16 Pro", DeviceType.phone, OS.android, AppVersion(1, 0, 0), "");
+        Device device1 = Device("Finn", "iPhone 16 Pro", DeviceType.phone, OS.android, Version(1, 0, 0), "");
         device1.communicationInfo.setSending(0.7);
         nearbyDevices.add(device1);
 
-        Device device2 = Device("Hannah", "Pixel 9 Pro", DeviceType.phone, OS.android, AppVersion(1, 0, 0), "");
+        Device device2 = Device("Hannah", "Pixel 9 Pro", DeviceType.phone, OS.android, Version(1, 0, 0), "");
         device2.communicationInfo.setReceiving(0.3);
         nearbyDevices.add(device2);
 
-        nearbyDevices.add(Device("Max", "Windows 11", DeviceType.pc, OS.windows, AppVersion(2, 0, 0), ""));
+        nearbyDevices.add(Device("Max", "Windows 11", DeviceType.pc, OS.windows, Version(2, 0, 0), ""));
     }
 
     /// Initialisiert die Core-Funktionen der App.

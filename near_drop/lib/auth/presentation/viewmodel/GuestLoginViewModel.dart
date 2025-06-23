@@ -10,7 +10,8 @@ class GuestLoginViewModel extends ChangeNotifier
 {
     final AuthController _authController = KiwiContainer().resolve<AuthController>();
     final TextEditingController firstnameController = TextEditingController();
-    bool isTermsAccepted = false;
+    bool isPrivacyAccepted = false;
+    bool isTermsOfUseAccepted = false;
 
     GuestLoginViewModel()
     {
@@ -19,9 +20,15 @@ class GuestLoginViewModel extends ChangeNotifier
         });
     }
 
-    void setTermsAccepted(bool isChecked)
+    void setPrivacyAccepted(bool isChecked)
     {
-        isTermsAccepted = isChecked;
+        isPrivacyAccepted = isChecked;
+        notifyListeners();
+    }
+
+    void setTermsOfUseAccepted(bool isChecked)
+    {
+        isTermsOfUseAccepted = isChecked;
         notifyListeners();
     }
 
@@ -31,6 +38,7 @@ class GuestLoginViewModel extends ChangeNotifier
         await _authController.signInAnonymous(firstnameController.text);
 
         firstnameController.clear();
-        isTermsAccepted = false;
+        isPrivacyAccepted = false;
+        isTermsOfUseAccepted = false;
     }
 }
