@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:near_drop/Runtime.dart';
@@ -140,7 +142,16 @@ class GuestLoginPage extends StatelessWidget
         try
         {
             await showLoadingOverlay(context, context.read<GuestLoginViewModel>().createGuestUser);
-            Navigator.pushNamedAndRemoveUntil(context, Routes.onboarding, (Route<dynamic> route) => false);
+
+            // Berechtigungs-Seite anzeigen, wenn die App unter Android oder iOS läuft
+            if (Platform.isAndroid || Platform.isIOS)
+            {
+                Navigator.pushNamedAndRemoveUntil(context, Routes.onboarding, (Route<dynamic> route) => false);
+            }
+            else
+            {
+                Navigator.pushNamedAndRemoveUntil(context, Routes.nearby, (Route<dynamic> route) => false);
+            }
         }
         catch (e)
         {

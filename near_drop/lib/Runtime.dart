@@ -35,8 +35,24 @@ class Runtime
     /// Lädt die statischen Laufzeitdaten des Geräts.
     static Future<void> initializeDeviceData() async
     {
-        deviceName = await DeviceHelper.getDeviceName();
-        deviceType = await DeviceHelper.getDeviceType();
+        try
+        {
+            deviceName = await DeviceHelper.getDeviceName();
+        }
+        catch (e)
+        {
+            deviceName = "???";
+        }
+
+        try
+        {
+            deviceType = await DeviceHelper.getDeviceType();
+        }
+        catch (e)
+        {
+            deviceType = DeviceType.unknown;
+        }
+
         os = DeviceHelper.getOS();
     }
 
