@@ -162,6 +162,7 @@ class NearbyViewModel extends ChangeNotifier
             await Navigator.of(NearbyPage.scaffoldKey.currentContext!).pushNamedAndRemoveUntil(Routes.requiredUpdate, (route) => false);
             await _nearbyController.stopBleServices();
             await _nearbyController.startNsdServices();
+            await Runtime.unsubscribeChannel();
         }
     }
 

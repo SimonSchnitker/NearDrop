@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:near_drop/Runtime.dart';
 import 'package:near_drop/tools/ui/WidgetModifier.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import '../../../l10n/gen/app_localizations.dart';
 
 class UpdateRequiredPage extends StatelessWidget {
@@ -33,13 +37,26 @@ class UpdateRequiredPage extends StatelessWidget {
               ),
               Spacer(),
               FilledButton(
-                  onPressed: () async {
-
+                  onPressed: () {
+                    _handleUpdateClicked(context);
                   },
                   child: Text(AppLocalizations.of(context)!.required_update_page_button),
               ).sized(height: 60),
           ],
       ).paddingAll(16).safeArea(),
     );
+  }
+
+  Future<void> _handleUpdateClicked(BuildContext context) async {
+      String url = "";
+      if (Platform.isAndroid) {
+          url = Runtime.androidAppUrl;
+      } else if (Platform.isIOS || Platform.isMacOS) {
+          url = Runtime.iosAppUrl;
+      } else if (Platform.isWindows) {
+          url = Runtime.windowsAppUrl;
+      }
+
+      await launchUrlString(url, mode: LaunchMode.externalApplication);
   }
 }
