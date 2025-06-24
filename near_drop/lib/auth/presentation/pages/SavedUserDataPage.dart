@@ -71,17 +71,17 @@ class SavedUserDataPage extends StatelessWidget
                             ),
                             ListTile(
                                 title: Text(AppLocalizations.of(context)!.saved_data_page_created_at_label),
-                                subtitle: Text(DateFormat("dd.MM.yyyy HH:mm:ss").format(userData.createdAt)),
+                                subtitle: Text(userData.createdAt.toIso8601String()),
                             ),
                             if (userData.updatedAt != null)
                                 ListTile(
                                     title: Text(AppLocalizations.of(context)!.saved_data_page_updated_at_label),
-                                    subtitle: Text(DateFormat("dd.MM.yyyy HH:mm:ss").format(userData.updatedAt!)),
+                                    subtitle: Text(userData.updatedAt!.toIso8601String()),
                                 ),
                             if (userData.lastSignInAt != null)
                                 ListTile(
                                     title: Text(AppLocalizations.of(context)!.saved_data_page_last_sign_in_at_label),
-                                    subtitle: Text(DateFormat("dd.MM.yyyy HH:mm:ss").format(userData.lastSignInAt!)),
+                                    subtitle: Text(userData.lastSignInAt!.toIso8601String()),
                                 ),
                         ],
                     )
@@ -113,7 +113,7 @@ class SavedUserDataPage extends StatelessWidget
                             for (var consent in userData.privacyPolicyConsents)
                                 ListTile(
                                     title: Text("${AppLocalizations.of(context)!.version_title} ${consent.version}"),
-                                    subtitle: Text(AppLocalizations.of(context)!.saved_data_page_privacy_policy_consents_accepted_at_label(DateFormat("dd.MM.yyyy HH:mm:ss").format(consent.acceptedAt))),
+                                    subtitle: Text(AppLocalizations.of(context)!.saved_data_page_privacy_policy_consents_accepted_at_label(consent.acceptedAt.toIso8601String())),
                                 )
                         ],
                     ),
@@ -129,7 +129,7 @@ class SavedUserDataPage extends StatelessWidget
                             for (var consent in userData.termsOfUseConsents)
                                 ListTile(
                                     title: Text("${AppLocalizations.of(context)!.version_title} ${consent.version}"),
-                                    subtitle: Text(AppLocalizations.of(context)!.saved_data_page_terms_of_use_consents_accepted_at_label(DateFormat("dd.MM.yyyy HH:mm:ss").format(consent.acceptedAt))),
+                                    subtitle: Text(AppLocalizations.of(context)!.saved_data_page_terms_of_use_consents_accepted_at_label(consent.acceptedAt.toIso8601String())),
                                 )
                         ],
                     ),
