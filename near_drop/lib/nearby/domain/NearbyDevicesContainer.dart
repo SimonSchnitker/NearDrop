@@ -1,16 +1,44 @@
 import 'dart:async';
 import 'package:collection/collection.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:mutex/mutex.dart';
 import '../../core/domain/entity/Device.dart';
 
 /// Container für Geräte in der Nähe.
 class NearbyDevicesContainer
 {
+    final Duration _clearDevicesDelay = Duration(minutes: 10);
+    static DateTime _appPaused = DateTime.now();
+
     static final StreamController<Device> onAdded = StreamController.broadcast();
     static final StreamController<Device> onRemoved = StreamController.broadcast();
+    static final StreamController onCleared = StreamController.broadcast();
 
     static final List<Device> _nearbyDevices = [];
     static final _mutex = Mutex();
+
+    NearbyDevicesContainer()
+    {
+        initLifecycleListener();
+    }
+
+    /// Initialisiert einen Lifecycle-Listener, um die App-Pause zu überwachen.
+    void initLifecycleListener()
+    {
+        AppLifecycleListener(
+            onPause: () {
+                _appPaused = DateTime.now();
+            },
+            onResume: () {
+                // Wenn die App länger als _clearDevicesDelay pausiert war, leeren wir die Liste der Geräte.
+                if (DateTime.now().difference(_appPaused) > _clearDevicesDelay)
+                {
+                    _nearbyDevices.clear();
+                    onCleared.add(null);
+                }
+            }
+        );
+    }
 
     /// Gibt die Liste der Geräte zurück.
     static List<Device> getDevices()

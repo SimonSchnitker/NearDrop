@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:near_drop/core/data/CoreGateway.dart';
 import 'package:near_drop/core/domain/entity/AppVersionResponse.dart';
 import '../../Runtime.dart';
@@ -12,7 +11,7 @@ import '../data/dto/AppVersionDTO.dart';
 /// Ohne diese Initialisierung kann die App nicht richtig funktionieren, da sie auf die Nearby-UUID und den Realtime-Kanal angewiesen ist.
 class CoreController
 {
-    static const int UUID_VALIDITY_MINUTES = 10;
+    static const Duration UUID_VALIDITY = Duration(hours: 4);
     static const int CHANNEL_INITIALIZATION_RETRY_COUNT = 3;
     static const Duration CHANNEL_INITIALIZATION_RETRY_DELAY = Duration(seconds: 2);
 
@@ -22,7 +21,7 @@ class CoreController
     CoreController(this._coreGateway, this._settingsController);
 
     static final nearbyUuidSetting = Setting("nearby_uuid", String);
-    static final nearbyUuidCreationSetting = Setting("nearby_uuid_creation", String);
+    static final nearbyUuidCreationSetting = Setting("nearby_uuid_created_at", String);
 
     /// Initialisiert die Nearby-UUID und den Realtime-Kanal.
     Future<void> initialize() async
@@ -39,14 +38,16 @@ class CoreController
         {
             DateTime? creationDate = DateTime.tryParse(nearbyUuidCreation);
 
-            if (creationDate == null || DateTime.now().difference(creationDate).inMinutes > UUID_VALIDITY_MINUTES)
+            if (creationDate == null || DateTime.now().difference(creationDate) > UUID_VALIDITY)
             {
                 // Wenn die UUID null oder älter als eine bestimmte Zeitspanne ist, wird eine neue UUID generiert
                 await updateNearbyUuid();
             }
             else
             {
+                // Ansonsten wird die vorhandene UUID verwendet
                 Runtime.nearbyUuid = nearbyUuid;
+                await _settingsController.set(nearbyUuidCreationSetting, DateTime.now().toString()); // Erstellungsdatum aktualisieren
             }
         }
 

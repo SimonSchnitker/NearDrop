@@ -89,6 +89,10 @@ class NearbyViewModel extends ChangeNotifier
             nearbyDevices.remove(device);
             notifyListeners();
         });
+        NearbyDevicesContainer.onCleared.stream.listen((_) {
+            nearbyDevices.clear();
+            notifyListeners();
+        });
 
         _listenNetworkStateChanges();
         initializeCore();
@@ -138,7 +142,15 @@ class NearbyViewModel extends ChangeNotifier
         // Wenn erfolgreich, alle notwendigen Dienste starten
         await _nearbyController.startListeningForDeviceData();
         _transportController.startSignaling();
-        _nearbyController.startNsdServices();
+        _nearbyController.startNsdServices(); // Kein await, da das Starten von NSD manchmal etwas dauern kann.
+
+        // Wenn das Gerät eine WLAN-Verbindung hat, wird erstmal nur über NSD gesucht, um Supabase zu entlasten.
+        List<ConnectivityResult> connectivity = await Connectivity().checkConnectivity();
+        if (connectivity.contains(ConnectivityResult.wifi))
+        {
+            await Future.delayed(const Duration(seconds: 1));
+        }
+
         _listenForBluetoothStateChanges();
     }
 
@@ -171,6 +183,7 @@ class NearbyViewModel extends ChangeNotifier
     void toggleInfoMessagesVisibility()
     {
         isInfoAreaVisible = !isInfoAreaVisible;
+        isDeviceNotFoundBalloonVisible = false; // Ballon-Nachricht ausblenden, wenn Info-Nachrichten angezeigt werden
         notifyListeners();
     }
 

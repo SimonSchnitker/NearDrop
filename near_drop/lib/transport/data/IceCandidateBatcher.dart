@@ -7,7 +7,7 @@ import '../../core/domain/entity/Device.dart';
 /// Sammelt ICE-Kandidaten und sendet sie in Batches, um die Anzahl der Netzwerk-Nachrichten zu reduzieren.
 class IceCandidateBatcher
 {
-    static const int _maxBatchSize = 6;
+    static const int _maxBatchSize = 8;
     static const Duration _batchTimeout = Duration(milliseconds: 200);
 
     final SignalingGateway _signalingGateway;
