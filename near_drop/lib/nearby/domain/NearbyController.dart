@@ -9,6 +9,7 @@ import 'package:near_drop/nearby/data/scan/nsd/NsdScanner.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
 import '../../Runtime.dart';
 import '../../core/domain/entity/Device.dart';
+import '../../main.dart';
 
 /// Steuert das Suchen nach Geräten in der Nähe und den Austausch von Gerätedaten.
 class NearbyController
@@ -149,7 +150,7 @@ class NearbyController
         }
         catch (e)
         {
-            print("BLE-Scanner konnte nicht gestartet werden: $e");
+            dprint("BLE-Scanner konnte nicht gestartet werden: $e");
         }
 
         try
@@ -158,7 +159,7 @@ class NearbyController
         }
         catch (e)
         {
-            print("BLE-Advertiser konnte nicht gestartet werden: $e");
+            dprint("BLE-Advertiser konnte nicht gestartet werden: $e");
         }
     }
 
@@ -171,7 +172,7 @@ class NearbyController
         }
         catch (e)
         {
-            print("BLE-Scanner konnte nicht gestoppt werden: $e");
+            dprint("BLE-Scanner konnte nicht gestoppt werden: $e");
         }
 
         try
@@ -180,7 +181,7 @@ class NearbyController
         }
         catch (e)
         {
-            print("BLE-Advertiser konnte nicht gestoppt werden: $e");
+            dprint("BLE-Advertiser konnte nicht gestoppt werden: $e");
         }
     }
 
@@ -190,27 +191,27 @@ class NearbyController
         try
         {
             await _nsdScanner.start();
-            print("NSD-Scanner gestartet.");
+            dprint("NSD-Scanner gestartet.");
         }
         catch (e)
         {
-            print("NSD-Scanner konnte nicht gestartet werden: $e");
+            dprint("NSD-Scanner konnte nicht gestartet werden: $e");
         }
 
         try
         {
             if (_localNetworkPort == -1)
             {
-                print("Lokaler Netzwerk-Gateway-Port ist nicht gesetzt. NSD-Advertiser kann nicht gestartet werden.");
+                dprint("Lokaler Netzwerk-Gateway-Port ist nicht gesetzt. NSD-Advertiser kann nicht gestartet werden.");
                 return;
             }
 
             await _nsdAdvertiser.start(_localNetworkPort);
-            print("NSD-Advertiser gestartet.");
+            dprint("NSD-Advertiser gestartet.");
         }
         catch (e)
         {
-            print("NSD-Advertiser konnte nicht gestartet werden: $e");
+            dprint("NSD-Advertiser konnte nicht gestartet werden: $e");
         }
     }
 
@@ -220,21 +221,21 @@ class NearbyController
         try
         {
             await _nsdScanner.stop();
-            print("NSD-Scanner gestoppt.");
+            dprint("NSD-Scanner gestoppt.");
         }
         catch (e)
         {
-            print("NSD-Scanner konnte nicht gestoppt werden: $e");
+            dprint("NSD-Scanner konnte nicht gestoppt werden: $e");
         }
 
         try
         {
             await _nsdAdvertiser.stop();
-            print("NSD-Advertiser gestoppt.");
+            dprint("NSD-Advertiser gestoppt.");
         }
         catch (e)
         {
-            print("NSD-Advertiser konnte nicht gestoppt werden: $e");
+            dprint("NSD-Advertiser konnte nicht gestoppt werden: $e");
         }
     }
 
@@ -247,7 +248,7 @@ class NearbyController
         }
         catch (e)
         {
-            print("Fehler beim Starten des Lauschens auf Gerätedaten im Supabase-Channel: $e");
+            dprint("Fehler beim Starten des Lauschens auf Gerätedaten im Supabase-Channel: $e");
         }
 
         try
@@ -256,7 +257,7 @@ class NearbyController
         }
         catch (e)
         {
-            print("Fehler beim Starten des Lauschens auf Gerätedaten im lokalen Netzwerk: $e");
+            dprint("Fehler beim Starten des Lauschens auf Gerätedaten im lokalen Netzwerk: $e");
         }
     }
 }

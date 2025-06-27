@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dynamic_system_colors/dynamic_system_colors.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:kiwi/kiwi.dart';
@@ -35,6 +36,12 @@ import 'nearby/domain/NearbyController.dart';
 import 'nearby/presentation/pages/NearbyPage.dart';
 import 'package:image_picker_android/image_picker_android.dart';
 import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
+
+void dprint(String message) {
+    if (kDebugMode) {
+        print(message);
+    }
+}
 
 void main() async
 {

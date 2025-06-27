@@ -3,6 +3,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter_blue_plus_windows/flutter_blue_plus_windows.dart';
 import 'package:near_drop/tools/IdHelper.dart';
 
+import '../../../../main.dart';
+
 /// Diese Klasse ist verantwortlich für das Scannen von BLE-Geräten.
 class BleScanner
 {
@@ -14,7 +16,7 @@ class BleScanner
     Future<void> _initialize() async
     {
         FlutterBluePlus.isScanning.listen((isScanning) {
-            print("BleScanner isScanning: $isScanning");
+            dprint("BleScanner isScanning: $isScanning");
             onScanningStatusChanged.add(isScanning);
         });
 
@@ -29,7 +31,7 @@ class BleScanner
 
             if (nearbyUuid != null)
             {
-                //print("BleScanner: Found device with UUID: ${nearbyUuid.toString()}");
+                //dprint("BleScanner: Found device with UUID: ${nearbyUuid.toString()}");
                 onDeviceSpotted.add(nearbyUuid.toString());
             }
         });

@@ -30,6 +30,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../core/domain/entity/Device.dart';
 import '../../core/domain/enums/ErrorState.dart';
 import '../../core/domain/enums/SuccessState.dart';
+import '../../main.dart';
 import 'event_args/ConnectionCreatedEventArgs.dart';
 
 /// Steuert den Transportprozess zwischen Geräten.
@@ -56,7 +57,7 @@ class TransportController
         }
         catch (e)
         {
-            print("Fehler beim Erstellen des Zielordners: $e");
+            dprint("Fehler beim Erstellen des Zielordners: $e");
         }
     }
 
@@ -65,7 +66,7 @@ class TransportController
     {
         _signalingController.onConnectionCreated.stream.listen(_onConnectionCreated);
         _signalingController.startListening();
-        print("Signalisierung gestartet.");
+        dprint("Signalisierung gestartet.");
     }
 
     /// Wird aufgerufen, wenn sich ein Gerät mit uns verbunden hat.
@@ -82,14 +83,14 @@ class TransportController
         }
         on Exception catch (e)
         {
-            print("Fehler beim Empfangen der Sendeanfrage: $e");
+            dprint("Fehler beim Empfangen der Sendeanfrage: $e");
             await device.closeConnection(connection: connection);
             return;
         }
 
         if (sendRequest == null)
         {
-            print("Ungültige Sendeanfrage empfangen.");
+            dprint("Ungültige Sendeanfrage empfangen.");
             await device.closeConnection(connection: connection);
             return;
         }
@@ -112,7 +113,7 @@ class TransportController
         // Wenn der Zielordner null ist, kann der Transport nicht fortgesetzt werden
         if (filesDirectory == null)
         {
-            print("Zielordner ist null.");
+            dprint("Zielordner ist null.");
 
             try
             {
@@ -121,7 +122,7 @@ class TransportController
             }
             on Exception catch (e)
             {
-                print("Fehler beim Senden der Antwort: $e");
+                dprint("Fehler beim Senden der Antwort: $e");
             }
 
             await device.closeConnection(connection: connection);
@@ -145,7 +146,7 @@ class TransportController
         }
         on Exception catch (e)
         {
-            print("Fehler beim Senden der Antwort: $e");
+            dprint("Fehler beim Senden der Antwort: $e");
             await device.closeConnection(connection: connection, errorState: ErrorState.error);
             return;
         }
@@ -171,7 +172,7 @@ class TransportController
             }
             catch (e)
             {
-                print("Fehler beim Empfangen der Datei.");
+                dprint("Fehler beim Empfangen der Datei.");
                 await device.closeConnection(connection: connection, errorState: ErrorState.error);
                 await _deleteReceivedFile(receivedFile);
                 await _deleteAllReceivedFiles(receivedFiles); // Alle vorherigen Dateien löschen
@@ -180,7 +181,7 @@ class TransportController
 
             if (result == FileReceiveResult.ok)
             {
-                print("Datei empfangen: ${receivedFile.name}");
+                dprint("Datei empfangen: ${receivedFile.name}");
                 receivedFiles.add(receivedFile);
 
                 // Wenn die Datei ein Bild oder Video ist, soll es in der Galerie angezeigt werden
@@ -192,7 +193,7 @@ class TransportController
                     }
                     catch (e)
                     {
-                        print("Fehler beim Speichern der Datei in der Galerie: $e");
+                        dprint("Fehler beim Speichern der Datei in der Galerie: $e");
                     }
                 }
             }
@@ -206,11 +207,11 @@ class TransportController
             }
             else if (result == FileReceiveResult.skipped)
             {
-                print("Datei wurde übersprungen: ${receivedFile.name}");
+                dprint("Datei wurde übersprungen: ${receivedFile.name}");
             }
             else
             {
-                print("Fehler beim Empfangen der Datei.");
+                dprint("Fehler beim Empfangen der Datei.");
                 await device.closeConnection(connection: connection, errorState: ErrorState.error);
                 await _deleteReceivedFile(receivedFile);
                 await _deleteAllReceivedFiles(receivedFiles); // Alle vorherigen Dateien löschen
@@ -277,7 +278,7 @@ class TransportController
         }
         on Exception catch (e)
         {
-            print("Fehler beim Schließen der Datei: $e");
+            dprint("Fehler beim Schließen der Datei: $e");
         }
 
         try
@@ -286,7 +287,7 @@ class TransportController
         }
         catch (e)
         {
-            print("Fehler beim Löschen der Datei: $e");
+            dprint("Fehler beim Löschen der Datei: $e");
         }
     }
 
@@ -385,7 +386,7 @@ class TransportController
         }
         on FileSystemException catch (e)
         {
-            print("Zugriff auf Datei nicht möglich: $e");
+            dprint("Zugriff auf Datei nicht möglich: $e");
             device.communicationInfo.setErrorState(ErrorState.error);
             return SendResponse.fileAccessError;
         }
@@ -412,7 +413,7 @@ class TransportController
             }
             on Exception catch (e)
             {
-                print("Verbindungsaufbau zu ${device.firstname} fehlgeschlagen: $e");
+                dprint("Verbindungsaufbau zu ${device.firstname} fehlgeschlagen: $e");
                 device.communicationInfo.setErrorState(ErrorState.error);
                 return SendResponse.connectionError;
             }
@@ -426,11 +427,11 @@ class TransportController
 
             if (connection == null)
             {
-                print("Verbindungsaufbau zu ${device.firstname} fehlgeschlagen. Versuch $i von $MAX_CONNECTING_TRIES.");
+                dprint("Verbindungsaufbau zu ${device.firstname} fehlgeschlagen. Versuch $i von $MAX_CONNECTING_TRIES.");
             }
             else
             {
-                print("Verbindung zu ${device.firstname} erfolgreich hergestellt.");
+                dprint("Verbindung zu ${device.firstname} erfolgreich hergestellt.");
                 device.communicationInfo.connection = connection;
                 break;
             }

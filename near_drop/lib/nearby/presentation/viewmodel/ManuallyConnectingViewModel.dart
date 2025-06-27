@@ -6,6 +6,8 @@ import 'package:near_drop/nearby/presentation/pages/NearbyPage.dart';
 import 'package:near_drop/tools/IdHelper.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 
+import '../../../main.dart';
+
 /// Zustände die auf der UI angezeigt werden können, wenn ein QR-Code gescannt wird.
 enum QrState
 {
@@ -110,7 +112,7 @@ class ManuallyConnectingViewModel extends ChangeNotifier
         }
         catch (e)
         {
-            print("Fehler beim Anfordern der Gerätedaten: $e");
+            dprint("Fehler beim Anfordern der Gerätedaten: $e");
             _setErrorState(ScanResultError.requestDeviceDataError);
             setQrState(QrState.showingQr);
         }

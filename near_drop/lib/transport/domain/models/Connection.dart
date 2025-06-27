@@ -1,4 +1,5 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import '../../../main.dart';
 import 'RTCNetworkStream.dart';
 
 /// Speichert die Verbindungsinformationen zu eine Geräts über WebRTC.
@@ -21,7 +22,7 @@ class Connection
         }
         catch (e)
         {
-            print("Unbekannter Fehler beim Schließen der Verbindung: $e");
+            dprint("Unbekannter Fehler beim Schließen der Verbindung: $e");
         }
 
         try
@@ -30,7 +31,7 @@ class Connection
         }
         catch (e)
         {
-            print("Unbekannter Fehler beim Schließen der Verbindung: $e");
+            dprint("Unbekannter Fehler beim Schließen der Verbindung: $e");
         }
     }
 }

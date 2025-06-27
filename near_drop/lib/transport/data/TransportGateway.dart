@@ -14,6 +14,7 @@ import 'package:near_drop/transport/domain/models/ReceivedFile.dart';
 import 'package:path/path.dart';
 
 import '../../core/domain/entity/Device.dart';
+import '../../main.dart';
 import 'dto/SendRequestFilesDTO.dart';
 
 /// Diese Klasse ist für das Senden und Empfangen von Dateien über den Datenkanal verantwortlich.
@@ -49,20 +50,20 @@ class TransportGateway
 
         if (!requestInfo.containsKey("type"))
         {
-            print("Fehlende Parameter in der Anfrage: $requestInfo");
+            dprint("Fehlende Parameter in der Anfrage: $requestInfo");
             return null;
         }
 
         String type = requestInfo["type"];
         if (type != SendRequestType.files.name)
         {
-            print("Unbekannter SendRequestType: $type");
+            dprint("Unbekannter SendRequestType: $type");
             return null;
         }
 
         if (!requestInfo.containsKey("filesCount") || !requestInfo.containsKey("totalSize") || !requestInfo.containsKey("mimeTypeGroup"))
         {
-            print("Fehlende Parameter in der Anfrage: $requestInfo");
+            dprint("Fehlende Parameter in der Anfrage: $requestInfo");
             return null;
         }
 
@@ -128,7 +129,7 @@ class TransportGateway
         }
         on FileSystemException catch (e)
         {
-            print("Fehler beim Öffnen der Datei: $e");
+            dprint("Fehler beim Öffnen der Datei: $e");
             return FileSendResult.fileReadError;
         }
 
@@ -153,7 +154,7 @@ class TransportGateway
             // Prüfen, ob der Benutzer das Abbrechen angefordert hat
             if (device.communicationInfo.cancelationRequested)
             {
-                print("Dateiübertragung wird abgebrochen.");
+                dprint("Dateiübertragung wird abgebrochen.");
                 device.communicationInfo.setCanceling();
                 await raf.close();
                 await stream.writeString(CANCEL_FLAG);
@@ -172,13 +173,13 @@ class TransportGateway
             // Prüfen, ob der Empfänger das Senden abbrechen möchte
             if (response == CANCEL_FLAG)
             {
-                print("Empfänger möchte die Dateiübertragung abbrechen.");
+                dprint("Empfänger möchte die Dateiübertragung abbrechen.");
                 await raf.close();
                 return FileSendResult.userCanceled;
             }
             else if (response != ACK_FLAG)
             {
-                print("Unerwartetes Flag empfangen: $response");
+                dprint("Unerwartetes Flag empfangen: $response");
                 await raf.close();
                 return FileSendResult.wrongFlagOrParameter;
             }
@@ -200,7 +201,7 @@ class TransportGateway
 
         if (flag == CANCEL_FLAG)
         {
-            print("Sender möchte die Dateiübertragung abbrechen.");
+            dprint("Sender möchte die Dateiübertragung abbrechen.");
             return FileReceiveResult.userCanceled;
         }
         else if (flag == FILE_SKIP_FLAG)
@@ -209,7 +210,7 @@ class TransportGateway
             Map<String, dynamic> fileSkipMap = jsonDecode(payload);
             if (!fileSkipMap.containsKey("length"))
             {
-                print("Üngültige Parameter in der fileSkipMap: $fileSkipMap");
+                dprint("Üngültige Parameter in der fileSkipMap: $fileSkipMap");
                 return FileReceiveResult.wrongParameters;
             }
 
@@ -224,7 +225,7 @@ class TransportGateway
         }
         else if (flag != FILE_FLAG)
         {
-            print("Unbekanntes Flag empfangen: $flag");
+            dprint("Unbekanntes Flag empfangen: $flag");
             return FileReceiveResult.error;
         }
 
@@ -234,7 +235,7 @@ class TransportGateway
 
         if (!fileInfoMap.containsKey("length") || !fileInfoMap.containsKey("filename") || !fileInfoMap.containsKey("mimeType"))
         {
-            print("Üngültige Parameter in der fileInfoMap: $fileInfoMap");
+            dprint("Üngültige Parameter in der fileInfoMap: $fileInfoMap");
             return FileReceiveResult.wrongParameters;
         }
 
@@ -252,7 +253,7 @@ class TransportGateway
         }
         catch (e)
         {
-            print("Fehler beim Öffnen der Datei: $e");
+            dprint("Fehler beim Öffnen der Datei: $e");
             return FileReceiveResult.fileWriteError;
         }
 
@@ -271,13 +272,13 @@ class TransportGateway
             // Prüfen, ob der Sender das Senden abbrechen möchte
             if (flag == CANCEL_FLAG)
             {
-                print("Dateiübertragung wird abgebrochen.");
+                dprint("Dateiübertragung wird abgebrochen.");
                 await raf.close();
                 return FileReceiveResult.userCanceled;
             }
             else if (flag != CHUNK_FLAG)
             {
-                print("Unbekanntes Flag: $flag");
+                dprint("Unbekanntes Flag: $flag");
                 await raf.close();
                 return FileReceiveResult.error;
             }
@@ -291,7 +292,7 @@ class TransportGateway
             // Prüfen, ob der Benutzer das Abbrechen angefordert hat
             if (device.communicationInfo.cancelationRequested)
             {
-                print("Dateiübertragung wird abgebrochen.");
+                dprint("Dateiübertragung wird abgebrochen.");
                 await raf.close();
                 await stream.writeString(CANCEL_FLAG);
                 return FileReceiveResult.userCanceled;

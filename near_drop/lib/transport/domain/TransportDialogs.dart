@@ -7,6 +7,7 @@ import 'package:open_app_file/open_app_file.dart';
 import 'package:path/path.dart';
 import '../../core/domain/entity/Device.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../../main.dart';
 import '../../nearby/presentation/pages/NearbyPage.dart';
 import 'enums/MimeTypeGroup.dart';
 import 'enums/SendRequestAnswer.dart';
@@ -42,7 +43,7 @@ Future<bool> showAskSkipFileDialog(File file) async
 {
     if (NearbyPage.scaffoldKey.currentContext == null)
     {
-        print("Fehler: ScaffoldContext ist null.");
+        dprint("Fehler: ScaffoldContext ist null.");
         return false;
     }
 
@@ -77,7 +78,7 @@ Future<SendRequestAnswer> showSendRequestDialog(Device device, int filesCount, i
 {
     if (NearbyPage.scaffoldKey.currentContext == null)
     {
-        print("Fehler: ScaffoldContext ist null.");
+        dprint("Fehler: ScaffoldContext ist null.");
         return SendRequestAnswer.error;
     }
 
@@ -127,7 +128,7 @@ Future<bool> showVolumeDataWarningDialog(int totalSize) async
     BuildContext? context = NearbyPage.scaffoldKey.currentContext;
     if (context == null)
     {
-        print("Fehler: ScaffoldContext ist null.");
+        dprint("Fehler: ScaffoldContext ist null.");
         return false;
     }
 
@@ -316,7 +317,7 @@ Future<void> showImagePreviewDialog({
     // Hilfsfunktion zum Öffnen der Galerie (Platzhalter)
     Future<void> _openFilesLocation(Directory? directory) async {
         if (directory == null) {
-            print("Kein Zielverzeichnis für Galerie angegeben.");
+            dprint("Kein Zielverzeichnis für Galerie angegeben.");
             return;
         }
 

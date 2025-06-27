@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:near_drop/core/data/CoreGateway.dart';
 import 'package:near_drop/core/domain/entity/AppVersionResponse.dart';
 import '../../Runtime.dart';
+import '../../main.dart';
 import '../../settings/domain/Setting.dart';
 import '../../settings/domain/SettingsController.dart';
 import '../Version.dart';
@@ -57,17 +59,17 @@ class CoreController
                 bool initialized = await Runtime.initializeChannel();
                 if (initialized)
                 {
-                    print("Realtime-Channel erfolgreich initialisiert.");
+                    dprint("Realtime-Channel erfolgreich initialisiert.");
                     return;
                 }
                 else
                 {
-                    print("Realtime-Channel konnte nicht initialisiert werden. Versuch ${i + 1} von $CHANNEL_INITIALIZATION_RETRY_COUNT.");
+                    dprint("Realtime-Channel konnte nicht initialisiert werden. Versuch ${i + 1} von $CHANNEL_INITIALIZATION_RETRY_COUNT.");
                 }
             }
             catch (e)
             {
-                print("Realtime-Channel konnte nicht initialisiert werden. Versuch ${i + 1} von $CHANNEL_INITIALIZATION_RETRY_COUNT.");
+                dprint("Realtime-Channel konnte nicht initialisiert werden. Versuch ${i + 1} von $CHANNEL_INITIALIZATION_RETRY_COUNT.");
             }
 
             await Future.delayed(CHANNEL_INITIALIZATION_RETRY_DELAY);

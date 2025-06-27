@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:ble_peripheral/ble_peripheral.dart';
 import 'package:near_drop/Runtime.dart';
 
+import '../../../../main.dart';
+
 /// Diese Klasse ist verantwortlich für das Aussenden von BLE-Werbung.
 class BleAdvertiser
 {
@@ -14,7 +16,7 @@ class BleAdvertiser
         await BlePeripheral.initialize();
 
         BlePeripheral.setAdvertisingStatusUpdateCallback((bool advertising, String? error) {
-            print("BleAdvertiser status changed. AdvertisingStatus: $advertising, Error: $error");
+            dprint("BleAdvertiser status changed. AdvertisingStatus: $advertising, Error: $error");
             onAdvertisingStatusChanged.add(advertising);
         });
 

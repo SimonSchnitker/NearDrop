@@ -4,6 +4,7 @@ import 'package:near_drop/tools/DeviceHelper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/domain/enums/DeviceType.dart';
 import 'core/domain/enums/OS.dart';
+import 'main.dart';
 
 /// Stellt Laufzeit-Daten bereit.
 class Runtime
@@ -63,7 +64,7 @@ class Runtime
 
         realtimeChannel = Supabase.instance.client.channel(nearbyUuid);
         realtimeChannel.subscribe((status, o) {
-           print("Supabase RealtimeChannel status changed: $status");
+           dprint("Supabase RealtimeChannel status changed: $status");
 
            if (completer.isCompleted)
            {

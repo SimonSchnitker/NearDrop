@@ -6,6 +6,7 @@ import 'package:near_drop/transport/domain/enums/SendResponse.dart';
 import '../../core/domain/entity/Device.dart';
 import '../../core/domain/enums/CommunicationState.dart';
 import '../../core/domain/enums/ErrorState.dart';
+import '../../main.dart';
 import '../domain/TransportController.dart';
 import '../domain/models/Connection.dart';
 
@@ -19,7 +20,7 @@ class TransportViewModel extends ChangeNotifier
     TransportViewModel()
     {
         isFilesDirectoryInitialized = _transportController.filesDirectory != null;
-        print("TransportViewModel: isFilesDirectoryInitialized: $isFilesDirectoryInitialized");
+        dprint("TransportViewModel: isFilesDirectoryInitialized: $isFilesDirectoryInitialized");
     }
 
     /// Sendet Dateien an ein Gerät.

@@ -8,6 +8,7 @@ import 'package:near_drop/transport/domain/event_args/ConnectionCreatedEventArgs
 import 'package:near_drop/transport/domain/models/RTCNetworkStream.dart';
 import '../../core/domain/entity/Device.dart';
 import '../../core/domain/enums/ErrorState.dart';
+import '../../main.dart';
 import 'models/Connection.dart';
 
 /// Steuert den Signalisierungsprozess für WebRTC-Verbindungen.
@@ -67,11 +68,11 @@ class SignalingController
             List<RTCIceCandidate> candidates = _earlyIceCandidates[connectionId] ?? [];
             if (candidates.isEmpty)
             {
-                print("No early ICE candidates to add for connection $connectionId");
+                dprint("No early ICE candidates to add for connection $connectionId");
                 return;
             }
 
-            print("Adding ${candidates.length} early ICE candidates to connection $connectionId");
+            dprint("Adding ${candidates.length} early ICE candidates to connection $connectionId");
             for (RTCIceCandidate candidate in candidates)
             {
                 await peerConnection.addCandidate(candidate);
@@ -86,7 +87,7 @@ class SignalingController
         // Überprüfen, ob das Angebot gültig ist
         if (!offer.containsKey("sender") || !offer.containsKey("connectionId") || !offer.containsKey("sdp") || !offer.containsKey("sdp-type"))
         {
-            print("Ungültiges Angebot empfangen: $offer");
+            dprint("Ungültiges Angebot empfangen: $offer");
             return;
         }
 
@@ -94,7 +95,7 @@ class SignalingController
         Device? device = await NearbyDevicesContainer.getByUuid(offer["sender"]);
         if (device == null)
         {
-            print("Gerät nicht gefunden: ${offer["sender"]}");
+            dprint("Gerät nicht gefunden: ${offer["sender"]}");
             return;
         }
 
@@ -118,7 +119,7 @@ class SignalingController
 
         // Verbindungsstatus zum Peer überwachen
         peerConnection.onConnectionState = (state) async {
-            print("Verbindungsstatus zu ${device.firstname} (ConnectionId: $connectionId): $state");
+            dprint("Verbindungsstatus zu ${device.firstname} (ConnectionId: $connectionId): $state");
 
             if (state == RTCPeerConnectionState.RTCPeerConnectionStateClosed || state == RTCPeerConnectionState.RTCPeerConnectionStateFailed)
             {
@@ -129,19 +130,19 @@ class SignalingController
 
         // Warten, bis der Datenkanal geöffnet ist
         peerConnection.onDataChannel = (RTCDataChannel dataChannel) {
-            print("Datenkanal empfangen: ${dataChannel.label}");
+            dprint("Datenkanal empfangen: ${dataChannel.label}");
 
             // Verbindungsdaten aktualisieren
             connection.dataChannel = dataChannel;
             connection.networkStream = RTCNetworkStream(dataChannel);
 
             dataChannel.onDataChannelState = (RTCDataChannelState state) async {
-                print("Datenkanal-Status: $state");
+                dprint("Datenkanal-Status: $state");
 
                 // Wenn der Datenkanal geöffnet ist, ist die Verbindung hergestellt
                 if (state == RTCDataChannelState.RTCDataChannelOpen)
                 {
-                    print("Datenkanal geöffnet: ${dataChannel.label}");
+                    dprint("Datenkanal geöffnet: ${dataChannel.label}");
                     onConnectionCreated.add(ConnectionCreatedEventArgs(device, connection, connectionId));
                 }
                 else if (state == RTCDataChannelState.RTCDataChannelClosed)
@@ -173,11 +174,11 @@ class SignalingController
         bool sent = await _retrySendFunction(sendAnswerFunction, peerConnection);
         if (sent)
         {
-            print("Antwort gesendet: $connectionId");
+            dprint("Antwort gesendet: $connectionId");
         }
         else
         {
-            print("Antwort konnte nicht gesendet werden.");
+            dprint("Antwort konnte nicht gesendet werden.");
             await device.closeConnection(connection: connection, errorState: ErrorState.error);
             return;
         }
@@ -189,7 +190,7 @@ class SignalingController
         // Überprüfen, ob die Antwort gültig ist
         if (!answer.containsKey("sender") || !answer.containsKey("connectionId") || !answer.containsKey("sdp") || !answer.containsKey("sdp-type"))
         {
-            print("Ungültige Antwort empfangen: $answer");
+            dprint("Ungültige Antwort empfangen: $answer");
             return;
         }
 
@@ -197,7 +198,7 @@ class SignalingController
         Device? device = await NearbyDevicesContainer.getByUuid(answer["sender"]);
         if (device == null)
         {
-            print("Gerät nicht gefunden: ${answer["sender"]}");
+            dprint("Gerät nicht gefunden: ${answer["sender"]}");
             return;
         }
 
@@ -205,7 +206,7 @@ class SignalingController
         Connection? connection = device.communicationInfo.connection;
         if (connection == null)
         {
-            print("Verbindung nicht gefunden: ${answer["sender"]}");
+            dprint("Verbindung nicht gefunden: ${answer["sender"]}");
             return;
         }
         else if (connection.connectionId != answer["connectionId"])

@@ -15,6 +15,7 @@ import 'package:near_drop/transport/domain/TransportController.dart';
 import '../../../Routes.dart';
 import '../../../Runtime.dart';
 import '../../../core/domain/entity/Device.dart';
+import '../../../main.dart';
 
 /// Interaktionslogik der NearbyPage.
 class NearbyViewModel extends ChangeNotifier
@@ -152,7 +153,7 @@ class NearbyViewModel extends ChangeNotifier
         }
         catch (e)
         {
-            print("Fehler beim Abrufen der Version: $e");
+            dprint("Fehler beim Abrufen der Version: $e");
             return;
         }
 
