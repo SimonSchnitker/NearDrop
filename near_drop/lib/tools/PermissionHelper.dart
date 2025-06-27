@@ -89,4 +89,35 @@ class PermissionHelper
             }
         }
     }
+
+    /// Prüft, ob auf den externen Speicher außerhalb der App zugegriffen werden kann.
+    /// Dies wird nur unter Android 10 oder nieriger benötigt.
+    static Future<bool> hasExternalStoragePermission() async
+    {
+        if (Platform.isAndroid)
+        {
+            final androidInfo = await DeviceInfoPlugin().androidInfo;
+            if (androidInfo.version.sdkInt <= 29)
+            {
+                return await Permission.storage.isGranted;
+            }
+        }
+
+        return true;
+    }
+
+    /// Fordert die Berechtigung für den Zugriff auf den externen Speicher außerhalb der App an.
+    static Future<bool> requestAndroid10AndBelowExternalStoragePermission() async
+    {
+        if (Platform.isAndroid)
+        {
+            final androidInfo = await DeviceInfoPlugin().androidInfo;
+            if (androidInfo.version.sdkInt <= 29)
+            {
+                return await Permission.storage.request() == PermissionStatus.granted;
+            }
+        }
+
+        return true;
+    }
 }

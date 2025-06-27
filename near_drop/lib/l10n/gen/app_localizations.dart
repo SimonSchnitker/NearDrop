@@ -493,7 +493,7 @@ abstract class AppLocalizations {
   /// No description provided for @manually_connecting_sheet_title.
   ///
   /// In en, this message translates to:
-  /// **'Manually connect'**
+  /// **'Connect manually'**
   String get manually_connecting_sheet_title;
 
   /// No description provided for @manually_connecting_sheet_scan_button.
@@ -505,7 +505,7 @@ abstract class AppLocalizations {
   /// No description provided for @qr_code_text.
   ///
   /// In en, this message translates to:
-  /// **'Tell an other person to scan this QR code with their device.'**
+  /// **'Tell another person to scan this QR code with their device.'**
   String get qr_code_text;
 
   /// No description provided for @scan_qr_code.
@@ -937,7 +937,7 @@ abstract class AppLocalizations {
   /// No description provided for @files_directory_initializing_failed_content.
   ///
   /// In en, this message translates to:
-  /// **'We cannot access the Downloads folder of your device.'**
+  /// **'We cannot access the Downloads folder of your device. Please check the app permissions in the settings.'**
   String get files_directory_initializing_failed_content;
 
   /// No description provided for @saved_data_page_title.
@@ -1075,6 +1075,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Visit website'**
   String get open_website_button;
+
+  /// No description provided for @onboarding_external_storage_permission_title.
+  ///
+  /// In en, this message translates to:
+  /// **'External storage'**
+  String get onboarding_external_storage_permission_title;
+
+  /// No description provided for @onboarding_external_storage_permission_content.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow the app to access the external storage of your device. This allows us to save received files.'**
+  String get onboarding_external_storage_permission_content;
 }
 
 class _AppLocalizationsDelegate

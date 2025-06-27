@@ -15,12 +15,19 @@ class TransportViewModel extends ChangeNotifier
 {
     final _transportController = KiwiContainer().resolve<TransportController>();
     static final _cancelTimeout = Duration(seconds: 8);
-    bool isFilesDirectoryInitialized = false;
+    bool isFilesDirectoryInitialized = true;
 
     TransportViewModel()
     {
-        isFilesDirectoryInitialized = _transportController.filesDirectory != null;
-        dprint("TransportViewModel: isFilesDirectoryInitialized: $isFilesDirectoryInitialized");
+        _initFilesDirectory();
+    }
+
+    /// Initialisiert den Ordner, in dem empfangene Dateien gespeichert werden.
+    Future<void> _initFilesDirectory() async
+    {
+        isFilesDirectoryInitialized = await _transportController.initFilesDirectory();
+        dprint("TransportViewModel: _initFilesDirectory: isFilesDirectoryInitialized: $isFilesDirectoryInitialized");
+        notifyListeners();
     }
 
     /// Sendet Dateien an ein Gerät.

@@ -49,15 +49,17 @@ class TransportController
     TransportController(this._signalingController, this._transportGateway, this._settingsController);
 
     /// Initialisiert den Zielordner, in den empfangene Dateien gespeichert werden sollen.
-    Future<void> initialize() async
+    Future<bool> initFilesDirectory() async
     {
         try
         {
             filesDirectory = await _getFilesDirectory();
+            return filesDirectory != null;
         }
         catch (e)
         {
             dprint("Fehler beim Erstellen des Zielordners: $e");
+            return false;
         }
     }
 

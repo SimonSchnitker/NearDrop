@@ -222,14 +222,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get data_volume_warning_dialog_accept_button => 'Send';
 
   @override
-  String get manually_connecting_sheet_title => 'Manually connect';
+  String get manually_connecting_sheet_title => 'Connect manually';
 
   @override
   String get manually_connecting_sheet_scan_button => 'Scan';
 
   @override
   String get qr_code_text =>
-      'Tell an other person to scan this QR code with their device.';
+      'Tell another person to scan this QR code with their device.';
 
   @override
   String get scan_qr_code => 'Scan the QR code of another device.';
@@ -478,7 +478,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get files_directory_initializing_failed_content =>
-      'We cannot access the Downloads folder of your device.';
+      'We cannot access the Downloads folder of your device. Please check the app permissions in the settings.';
 
   @override
   String get saved_data_page_title => 'Saved data';
@@ -562,4 +562,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get open_website_button => 'Visit website';
+
+  @override
+  String get onboarding_external_storage_permission_title => 'External storage';
+
+  @override
+  String get onboarding_external_storage_permission_content =>
+      'Allow the app to access the external storage of your device. This allows us to save received files.';
 }

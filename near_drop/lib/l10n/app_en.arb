@@ -198,7 +198,7 @@
   "grant_permission_button": "Grant permission",
   "grant_permission_skip_button": "Skip",
   "files_directory_initializing_failed_title": "No file reception possible",
-  "files_directory_initializing_failed_content": "We cannot access the Downloads folder of your device.",
+  "files_directory_initializing_failed_content": "We cannot access the Downloads folder of your device. Please check the app permissions in the settings.",
   "saved_data_page_title": "Saved data",
   "saved_data_page_description": "In the following you can fetch all your personal data that is stored on our server. For more information, see our privacy policy.",
   "saved_data_page_fetch_data_button": "Fetch data",
@@ -241,5 +241,7 @@
   "required_update_page_button": "Update now",
   "account_deleted_snackbar_content": "Your account has been successfully deleted.",
   "account_delete_error_snackbar_content": "An error occurred while deleting your account. Check your internet connection or try again later.",
-  "open_website_button": "Visit website"
+  "open_website_button": "Visit website",
+  "onboarding_external_storage_permission_title": "External storage",
+  "onboarding_external_storage_permission_content": "Allow the app to access the external storage of your device. This allows us to save received files."
 }

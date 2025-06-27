@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:near_drop/onboarding/presentation/OnboardingViewModel.dart';
 import 'package:near_drop/tools/PermissionHelper.dart';
@@ -30,7 +31,9 @@ class OnboardingPage extends StatelessWidget
                     physics: NeverScrollableScrollPhysics(),
                     children: [
                         _buildNearbyDevicesPermissionArea(context),
-                        _buildIOSLocalNetworkPermissionArea(context)
+                        if (Platform.isIOS)
+                            _buildIOSLocalNetworkPermissionArea(context),
+                        _buildAndroid10AndBelowExternalStoragePermissionArea(context),
                     ],
                 ).safeArea(),
             )
@@ -68,9 +71,24 @@ class OnboardingPage extends StatelessWidget
                     onPressed: () async {
                         await PermissionHelper.requestNearbyPermission();
 
-                        if (Platform.isIOS) {
+                        if (Platform.isIOS)
+                        {
                             pageViewController.animateToPage(1, duration: Duration(milliseconds: 800), curve: Curves.fastEaseInToSlowEaseOut);
-                        } else {
+                        }
+                        else if (Platform.isAndroid)
+                        {
+                            final androidInfo = await DeviceInfoPlugin().androidInfo;
+                            if (androidInfo.version.sdkInt <= 29) // Android 10 und niedriger
+                            {
+                                pageViewController.animateToPage(1, duration: Duration(milliseconds: 800), curve: Curves.fastEaseInToSlowEaseOut);
+                            }
+                            else
+                            {
+                                Navigator.of(context).pushNamedAndRemoveUntil(Routes.nearby, (route) => false);
+                            }
+                        }
+                        else
+                        {
                             Navigator.of(context).pushNamedAndRemoveUntil(Routes.nearby, (route) => false);
                         }
                     },
@@ -118,6 +136,48 @@ class OnboardingPage extends StatelessWidget
                 FilledButton(
                     onPressed: () async {
                         await PermissionHelper.requestIOSLocalNetworkPermission();
+                        Navigator.of(context).pushNamedAndRemoveUntil(Routes.nearby, (route) => false);
+                    },
+                    child: Text(AppLocalizations.of(context)!.grant_permission_button),
+                ).sized(height: 60),
+                SizedBox(height: 8),
+                TextButton(onPressed: () {
+                    Navigator.of(context).pushNamedAndRemoveUntil(Routes.nearby, (route) => false);
+                }, child: Text(AppLocalizations.of(context)!.grant_permission_skip_button))
+            ],
+        ).paddingAll(16);
+    }
+
+    Widget _buildAndroid10AndBelowExternalStoragePermissionArea(BuildContext context) {
+        return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+                Spacer(),
+                Material(
+                    color: Theme.of(context).colorScheme.surfaceContainer,
+                    borderRadius: BorderRadius.circular(60),
+                    child: Icon(
+                        Icons.save_alt_rounded,
+                        size: 60,
+                    ),
+                ).sized(width: 120, height: 120).align(Alignment.center),
+                SizedBox(height: 32),
+                Text(
+                    AppLocalizations.of(context)!.onboarding_external_storage_permission_title,
+                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                        fontWeight: FontWeight.bold,
+                    )
+                ).align(Alignment.center),
+                SizedBox(height: 12),
+                Text(
+                    AppLocalizations.of(context)!.onboarding_external_storage_permission_content,
+                    textAlign: TextAlign.center,
+                ).opacity(0.7),
+                Spacer(),
+                FilledButton(
+                    onPressed: () async {
+                        await PermissionHelper.requestAndroid10AndBelowExternalStoragePermission();
                         Navigator.of(context).pushNamedAndRemoveUntil(Routes.nearby, (route) => false);
                     },
                     child: Text(AppLocalizations.of(context)!.grant_permission_button),

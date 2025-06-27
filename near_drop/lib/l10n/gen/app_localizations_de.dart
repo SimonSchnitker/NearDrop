@@ -485,7 +485,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get files_directory_initializing_failed_content =>
-      'Wir können nicht auf den Downloads-Ordner deines Geräts zugreifen.';
+      'Wir können nicht auf den Downloads-Ordner deines Geräts zugreifen. Überprüfe die Berechtigungen der App in den Einstellungen deines Geräts.';
 
   @override
   String get saved_data_page_title => 'Gespeicherte Daten';
@@ -569,4 +569,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get open_website_button => 'Website besuchen';
+
+  @override
+  String get onboarding_external_storage_permission_title =>
+      'Externer Speicher';
+
+  @override
+  String get onboarding_external_storage_permission_content =>
+      'Erteile der App die Berechtigung, auf den externen Speicher deines Geräts zuzugreifen. Dadurch können wir empfangene Dateien speichern.';
 }

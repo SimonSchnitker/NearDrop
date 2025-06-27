@@ -198,7 +198,7 @@
     "grant_permission_button": "Berechtigung erteilen",
     "grant_permission_skip_button": "Überspringen",
     "files_directory_initializing_failed_title": "Kein Dateiempfang möglich",
-    "files_directory_initializing_failed_content": "Wir können nicht auf den Downloads-Ordner deines Geräts zugreifen.",
+    "files_directory_initializing_failed_content": "Wir können nicht auf den Downloads-Ordner deines Geräts zugreifen. Überprüfe die Berechtigungen der App in den Einstellungen deines Geräts.",
     "saved_data_page_title": "Gespeicherte Daten",
     "saved_data_page_description": "Im Folgenden kannst du alle deine personenbezogenen Daten, die auf unserem Server gespeichert sind, abrufen. Für weitere Informationen, schaue in unsere Datenschutzerklärung.",
     "saved_data_page_fetch_data_button": "Daten abrufen",
@@ -241,5 +241,7 @@
     "required_update_page_button": "Jetzt aktualisieren",
     "account_deleted_snackbar_content": "Dein Account wurde erfolgreich gelöscht.",
     "account_delete_error_snackbar_content": "Beim Löschen deines Accounts ist ein Fehler aufgetreten. Prüfe deine Internetverbindung oder versuche es später erneut.",
-    "open_website_button": "Website besuchen"
+    "open_website_button": "Website besuchen",
+    "onboarding_external_storage_permission_title": "Externer Speicher",
+    "onboarding_external_storage_permission_content": "Erteile der App die Berechtigung, auf den externen Speicher deines Geräts zuzugreifen. Dadurch können wir empfangene Dateien speichern."
 }
