@@ -9,4 +9,8 @@ class ReceivedFile
     String mimeType = "";
     RandomAccessFile? raf;
     bool fullyReceived = false;
+
+    get isMediaFile => mimeType.startsWith("image/") || mimeType.startsWith("video/");
+    get isImage => mimeType.startsWith("image/");
+    get isVideo => mimeType.startsWith("video/");
 }

@@ -5,8 +5,10 @@ import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:gal/gal.dart';
+import 'package:intl/intl.dart';
 import 'package:media_scanner/media_scanner.dart';
 import 'package:mime/mime.dart';
+import 'package:native_exif/native_exif.dart';
 import 'package:near_drop/Runtime.dart';
 import 'package:near_drop/help/presentation/ReceivedFilesLocationInfoView.dart';
 import 'package:near_drop/nearby/presentation/pages/NearbyPage.dart';
@@ -186,17 +188,15 @@ class TransportController
                 dprint("Datei empfangen: ${receivedFile.name}");
                 receivedFiles.add(receivedFile);
 
-                // Wenn die Datei ein Bild oder Video ist, soll es in der Galerie angezeigt werden
-                if (receivedFile.mimeType.startsWith("image/") || receivedFile.mimeType.startsWith("video/"))
+                try
                 {
-                    try
-                    {
-                        await _putMediaToGallery(receivedFile);
-                    }
-                    catch (e)
-                    {
-                        dprint("Fehler beim Speichern der Datei in der Galerie: $e");
-                    }
+                    await _modifyCreationDate(receivedFile); // Erstellungsdatum der Datei modifizieren
+                    await _scanFile(receivedFile);
+                }
+                catch (e)
+                {
+                    dprint("Fehler beim Modifizieren der Datei: $e");
+                    // Ignorieren
                 }
             }
             else if (result == FileReceiveResult.userCanceled)
@@ -243,22 +243,60 @@ class TransportController
         }
     }
 
-    /// Kümmert sich darum, dass eine Mediendatei unter Android und iOS in der Gallerie auftaucht.
-    Future<void> _putMediaToGallery(ReceivedFile file) async
+    /// Modifiziert das Erstellungsdatum der empfangenen Datei.
+    Future<void> _modifyCreationDate(ReceivedFile receivedFile) async
+    {
+        DateTime now = DateTime.now();
+        final file = File(receivedFile.path);
+
+        // Erstellungdatum der Datei auf das aktuelle Datum setzen
+        try
+        {
+            await file.setLastAccessed(now);
+            await file.setLastModified(now);
+        }
+        catch (e)
+        {
+            dprint("Fehler beim Setzen des Erstellungsdatums: $e");
+        }
+
+        // Unter Android und iOS Exif-Imformationen für Bilder modifizieren
+        if ((Platform.isAndroid || Platform.isIOS) && receivedFile.isImage)
+        {
+            try
+            {
+                String nowFormatted = DateFormat("yyyy:MM:dd HH:mm:ss").format(now);
+                final exif = await Exif.fromPath(receivedFile.path);
+                await exif.writeAttributes({
+                    "DateTimeOriginal": nowFormatted,
+                    "DateTimeDigitized": nowFormatted,
+                    "DateTime": nowFormatted,
+                });
+                await exif.close();
+            }
+            catch (e)
+            {
+                dprint("Fehler beim Modifizieren der Exif-Daten: $e");
+            }
+        }
+    }
+
+    /// Kümmert sich darum, dass eine Datei unter Android und iOS vom System erkannt wird und in den entsprechenden Apps angezeigt wird.
+    Future<void> _scanFile(ReceivedFile file) async
     {
         if (Platform.isAndroid)
         {
             await MediaScanner.loadMedia(path: file.path);
         }
-        else if (Platform.isIOS)
+        else if (Platform.isIOS && file.isMediaFile)
         {
             if (await Gal.requestAccess(toAlbum: true))
             {
-                if (file.mimeType.startsWith("image/"))
+                if (file.isImage)
                 {
                     await Gal.putImage(file.path, album: FOLDER_NAME);
                 }
-                else if (file.mimeType.startsWith("video/"))
+                else if (file.isVideo)
                 {
                     await Gal.putVideo(file.path, album: FOLDER_NAME);
                 }

@@ -193,8 +193,7 @@ class MyApp extends StatelessWidget {
                       Routes.savedUserData: (context) => SavedUserDataPage(),
                       Routes.requiredUpdate: (context) => UpdateRequiredPage(),
                   },
-                  //initialRoute: Supabase.instance.client.auth.currentUser == null ? Routes.welcome : Routes.nearby,
-                  initialRoute: Routes.onboarding,
+                  initialRoute: Supabase.instance.client.auth.currentUser == null ? Routes.welcome : Routes.nearby,
               );
           }
       );

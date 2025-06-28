@@ -61,6 +61,8 @@ dependencies:
   lottie: ^3.3.1
   nsd: ^4.0.3
   url_launcher: ^6.3.1
+  native_exif: ^0.6.2
+  change_app_package_name: ^1.5.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
