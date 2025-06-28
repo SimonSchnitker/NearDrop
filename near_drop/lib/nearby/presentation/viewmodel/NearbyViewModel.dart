@@ -20,6 +20,8 @@ import '../../../main.dart';
 /// Interaktionslogik der NearbyPage.
 class NearbyViewModel extends ChangeNotifier
 {
+    final _bleRestartDuration = Duration(seconds: 4);
+
     final NearbyController _nearbyController = KiwiContainer().resolve<NearbyController>();
     final TransportController _transportController = KiwiContainer().resolve<TransportController>();
     final CoreController _coreController = KiwiContainer().resolve<CoreController>();
@@ -152,6 +154,7 @@ class NearbyViewModel extends ChangeNotifier
         }
 
         _listenForBluetoothStateChanges();
+        _startBleRestartingProcess();
     }
 
     Future<void> _getVersionInfo() async
@@ -242,6 +245,21 @@ class NearbyViewModel extends ChangeNotifier
 
             notifyListeners();
         });
+    }
+
+    /// Startet regelmäßig die Bluetooth-Services neu, weil dadurch die Geräte schneller gefunden werden.
+    Future<void> _startBleRestartingProcess() async
+    {
+        while (true)
+        {
+            await Future.delayed(_bleRestartDuration);
+            if (isBluetoothSupported && isBluetoothEnabled && hasBluetoothPermissions)
+            {
+                print("Restarting Bluetooth services...");
+                await _nearbyController.stopBleServices();
+                await _nearbyController.startBleServices();
+            }
+        }
     }
 
     /// Zeigt eine Ballon-Nachricht an, wenn nach einem Delay immer noch keine Geräte gefunden wurden.
