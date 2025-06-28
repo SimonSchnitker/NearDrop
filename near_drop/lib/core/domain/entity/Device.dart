@@ -91,28 +91,4 @@ class Device extends ChangeNotifier
         this.firstname = username;
         notifyListeners();
     }
-
-    Map<String, dynamic> toMap()
-    {
-        return {
-            "firstname": firstname,
-            "deviceName": name,
-            "deviceType": type.name,
-            "os": os.name,
-            "version": version,
-            "nearby_uuid": nearbyUuid,
-        };
-    }
-
-    static Device fromMap(Map<String, dynamic> json)
-    {
-        return Device(
-            json["firstname"],
-            json["deviceName"],
-            DeviceType.values.byName(json["deviceType"]),
-            OS.values.byName(json["os"]),
-            Version.fromString(json["version"]),
-            json["nearby_uuid"],
-        );
-    }
 }

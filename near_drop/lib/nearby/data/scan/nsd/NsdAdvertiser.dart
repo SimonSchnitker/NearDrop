@@ -19,6 +19,8 @@ class NsdAdvertiser extends NsdBase
                 "nearbyUuid": Uint8List.fromList(Runtime.nearbyUuid.codeUnits),
             }
         ));
+
+        print("NSD Service registriert: ${registration?.service.name} auf Port ${registration?.service.port}");
     }
 
     /// Entfernt die Registrierung des Services bei NSD.

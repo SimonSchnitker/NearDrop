@@ -6,6 +6,7 @@ import 'package:near_drop/core/domain/entity/Device.dart';
 import 'package:near_drop/core/domain/enums/DeviceType.dart';
 import 'package:near_drop/core/domain/enums/OS.dart';
 import 'package:near_drop/Runtime.dart';
+import '../../core/Version.dart';
 import 'event_args/NsdDeviceSpottedEventArgs.dart';
 
 /// Diese Klasse implementiert den Datenaustausch via Sockets.
@@ -59,7 +60,7 @@ class LocalNetworkGateway
                 // Gerätedaten des anfragenden Geräts empfangen und dekodieren.
                 String json = String.fromCharCodes(data);
                 final Map<String, dynamic> deviceMap = jsonDecode(json);
-                Device remoteDevice = Device.fromMap(deviceMap);
+                Device remoteDevice = _fromMap(deviceMap);
 
                 // Eigene Gerätedaten als Antwort zurücksenden.
                 final ownDeviceJson = _getOwnDeviceJson();
@@ -143,7 +144,7 @@ class LocalNetworkGateway
             final remoteData = await socket.first.timeout(_timeoutDuration);
             final remoteString = String.fromCharCodes(remoteData);
             final Map<String, dynamic> deviceMap = jsonDecode(remoteString);
-            final remoteDevice = Device.fromMap(deviceMap);
+            final remoteDevice = _fromMap(deviceMap);
             print("Antwort von '${remoteDevice.firstname}' erhalten.");
 
             // Event auslösen, dass ein Gerät erfolgreich aufgelöst wurde.
@@ -164,13 +165,25 @@ class LocalNetworkGateway
     {
         final deviceMap = {
             "firstname": Runtime.firstname,
-            "deviceName": Runtime.deviceName,
-            "deviceType": Runtime.deviceType.name,
+            "name": Runtime.deviceName,
+            "type": Runtime.deviceType.name,
             "os": Runtime.os.name,
             "version": Runtime.appVersion.toString(),
             "nearbyUuid": Runtime.nearbyUuid,
         };
 
         return jsonEncode(deviceMap);
+    }
+
+    Device _fromMap(Map<String, dynamic> json)
+    {
+        return Device(
+            json["firstname"],
+            json["name"],
+            DeviceType.values.byName(json["type"]),
+            OS.values.byName(json["os"]),
+            Version.fromString(json["version"]),
+            json["nearbyUuid"],
+        );
     }
 }

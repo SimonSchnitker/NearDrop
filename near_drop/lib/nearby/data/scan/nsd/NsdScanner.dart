@@ -19,7 +19,15 @@ class NsdScanner extends NsdBase
             if (status == ServiceStatus.found)
             {
                 // Wenn der gefundene Service nicht zu unserer App gehört, ignorieren
-                if (service.name != Runtime.appName)
+                String? serviceName = service.name;
+                if (serviceName == null)
+                {
+                    return;
+                }
+
+                // Wenn der gefundene Service nicht mit dem App-Namen beginnt, ignorieren
+                // Manchmal wird hinter dem Namen bspw. eine (2) angehängt, wenn der Name bereits existiert.
+                if (!serviceName.startsWith(Runtime.appName))
                 {
                     return;
                 }
@@ -50,6 +58,7 @@ class NsdScanner extends NsdBase
                     return;
                 }
 
+                print("Service gefunden: $serviceName");
                 String nearbyUuid = String.fromCharCodes(nearbyUuidBytes);
                 onDeviceSpotted.add(NsdDeviceSpottedEventArgs(port: service.port!, nearbyUuid: nearbyUuid, host: service.host, addresses: service.addresses));
             }

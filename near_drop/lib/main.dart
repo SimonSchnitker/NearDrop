@@ -149,9 +149,9 @@ class MyApp extends StatelessWidget {
                       pageTransitionsTheme: PageTransitionsTheme(
                           builders: {
                               TargetPlatform.android:
-                                CupertinoPageTransitionsBuilder(),
+                                FadeForwardsPageTransitionsBuilder(),
                               TargetPlatform.windows:
-                                CupertinoPageTransitionsBuilder(),
+                                FadeForwardsPageTransitionsBuilder(),
                           }
                       ),
                       tooltipTheme: TooltipThemeData(
@@ -171,9 +171,9 @@ class MyApp extends StatelessWidget {
                       pageTransitionsTheme: PageTransitionsTheme(
                           builders: {
                               TargetPlatform.android:
-                                CupertinoPageTransitionsBuilder(),
+                                FadeForwardsPageTransitionsBuilder(),
                               TargetPlatform.windows:
-                                CupertinoPageTransitionsBuilder(),
+                                FadeForwardsPageTransitionsBuilder(),
                           }
                       ),
                       progressIndicatorTheme: ProgressIndicatorThemeData(
