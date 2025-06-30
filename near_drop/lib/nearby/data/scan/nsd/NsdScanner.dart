@@ -58,7 +58,6 @@ class NsdScanner extends NsdBase
                     return;
                 }
 
-                print("Service gefunden: $serviceName");
                 String nearbyUuid = String.fromCharCodes(nearbyUuidBytes);
                 onDeviceSpotted.add(NsdDeviceSpottedEventArgs(port: service.port!, nearbyUuid: nearbyUuid, host: service.host, addresses: service.addresses));
             }

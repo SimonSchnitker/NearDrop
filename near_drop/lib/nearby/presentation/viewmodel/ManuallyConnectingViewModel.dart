@@ -74,8 +74,9 @@ class ManuallyConnectingViewModel extends ChangeNotifier
 
             if (await NearbyDevicesContainer.containsUuid(data))
             {
-                _setErrorState(ScanResultError.deviceAlreadyAdded);
-                return;
+                //_setErrorState(ScanResultError.deviceAlreadyAdded);
+                //return;
+                // Trotzdem senden, da es sein kann (selten), dass das andere Gerät uns noch nicht kennt.
             }
 
             await _requestDeviceData(data);
@@ -107,7 +108,7 @@ class ManuallyConnectingViewModel extends ChangeNotifier
 
         try
         {
-           await _nearbyController.requestDeviceData(uuid);
+           await _nearbyController.sendDeviceData(uuid, false);
            Navigator.of(NearbyPage.scaffoldKey.currentContext!).maybePop();
         }
         catch (e)

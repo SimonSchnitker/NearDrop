@@ -150,13 +150,14 @@ class NearbyViewModel extends ChangeNotifier
         List<ConnectivityResult> connectivity = await Connectivity().checkConnectivity();
         if (connectivity.contains(ConnectivityResult.wifi))
         {
-            await Future.delayed(const Duration(seconds: 1));
+            await Future.delayed(const Duration(milliseconds: 500));
         }
 
         _listenForBluetoothStateChanges();
         _startBleRestartingProcess();
     }
 
+    /// Prüft, ob eine Aktualisierung verfügbar ist und ob es sich um eine wichtige Aktualisierung handelt.
     Future<void> _getVersionInfo() async
     {
         try

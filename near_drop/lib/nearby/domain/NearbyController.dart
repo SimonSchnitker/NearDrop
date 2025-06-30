@@ -6,6 +6,7 @@ import 'package:near_drop/nearby/data/scan/ble/BleAdvertiser.dart';
 import 'package:near_drop/nearby/data/scan/ble/BleScanner.dart';
 import 'package:near_drop/nearby/data/scan/nsd/NsdAdvertiser.dart';
 import 'package:near_drop/nearby/data/scan/nsd/NsdScanner.dart';
+import 'package:near_drop/nearby/domain/Exchange.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
 import '../../Runtime.dart';
 import '../../core/domain/entity/Device.dart';
@@ -24,15 +25,14 @@ class NearbyController
     final StreamController<bool> onBleAdvertiserStatusChanged = StreamController.broadcast();
     final StreamController<bool> onBleScannerStatusChanged = StreamController.broadcast();
 
-    final Duration waitingForDeviceDataTimeout = Duration(seconds: 4);
-    final Map<String, DateTime> _requestingDevices = {};
+    final Map<String, Exchange> _exchanges = {};
     int _localNetworkPort = -1;
 
     NearbyController(this._bleScanner, this._bleAdvertiser, this._nsdScanner, this._nsdAdvertiser, this._supabaseDeviceGateway, this._localNetworkGateway)
     {
         // Warten auf Ereignisse über Supabase
         _supabaseDeviceGateway.onDeviceDataReceived.stream.listen(onDeviceDataReceived);
-        _supabaseDeviceGateway.onDeviceRequestReceived.stream.listen(onDeviceRequestReceived);
+        _supabaseDeviceGateway.onAcknowledgementReceived.stream.listen(onAcknowledgementReceived);
 
         // Warten auf Ereignisse über den lokalen Netzwerk-Gateway
         _localNetworkGateway.onDeviceResolved.stream.listen(_onNetworkDeviceResolved);
@@ -48,6 +48,96 @@ class NearbyController
         _bleScanner.onScanningStatusChanged.stream.listen((status) {
             onBleScannerStatusChanged.add(status);
         });
+    }
+
+    /// Wird aufgerufen, wenn ein BLE-Gerät entdeckt wird.
+    Future<void> onBleDeviceSpotted(String nearbyUuid) async
+    {
+        // Wenn wir das Gerät bereits kennen oder unsere Gerätedaten vor Kurzem erst gesendet haben, dann abbrechen
+        if (await NearbyDevicesContainer.containsUuid(nearbyUuid) || _hasDeviceDataSent(nearbyUuid))
+        {
+            return;
+        }
+
+        // Ansonten senden wir unsere Gerätedaten an das gefundene Gerät
+        await sendDeviceData(nearbyUuid, false);
+    }
+
+    /// Prüft, ob unsere Gerätedaten vor Kurzem an das Gerät gesendet wurden.
+    bool _hasDeviceDataSent(String nearbyUuid)
+    {
+        Exchange? exchange = _exchanges[nearbyUuid];
+        if (exchange != null && !exchange.isSendExpired)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    /// Sendet unsere Gerätedaten an ein Gerät mit der gegebenen UUID.
+    Future<void> sendDeviceData(String nearbyUuid, bool attachAck) async
+    {
+        Exchange exchange = _exchanges.putIfAbsent(nearbyUuid, () => Exchange());
+        bool sent = await _supabaseDeviceGateway.sendDeviceData(nearbyUuid, attachAck);
+
+        if (sent)
+        {
+            exchange.deviceDataSent = true;
+            exchange.sentAt = DateTime.now(); // Zeitpunkt aktualisieren
+            dprint("NearbyController: Gerätedaten an $nearbyUuid gesendet.");
+        }
+    }
+
+    /// Wird aufgerufen, wenn Gerätedaten empfangen wurden.
+    Future<void> onDeviceDataReceived(Device device) async
+    {
+        Exchange exchange = _exchanges.putIfAbsent(device.nearbyUuid, () => Exchange());
+        exchange.receivedDevice = device;
+
+        // Prüfen, ob wir unsere Gerätedaten bereits gesendet haben
+        if (exchange.deviceDataSent)
+        {
+            // Nur ACK senden, um zu bestätigen, dass die Gerätedaten empfangen wurden.
+            await _supabaseDeviceGateway.sendAcknowledgement(device.nearbyUuid);
+            dprint("NearbyController: Gerätedaten von ${device.nearbyUuid} empfangen und ACK gesendet.");
+        }
+        else
+        {
+            // Ansonsten senden wir unsere Gerätedaten zurück und senden ein ACK mit, um eine Nachricht zu sparen
+            await sendDeviceData(device.nearbyUuid, true);
+            dprint("NearbyController: Gerätedaten von ${device.nearbyUuid} empfangen. Unsere Gerätedaten und ACK gesendet.");
+        }
+
+        // Wenn der Austausch abgeschlossen ist, dann Gerät hinzufügen
+        if (exchange.isFinished)
+        {
+            await NearbyDevicesContainer.addIfNotContains(device);
+            _exchanges.remove(device.nearbyUuid);
+            dprint("NearbyController: Austausch mit ${device.nearbyUuid} abgeschlossen. Gerät hinzugefügt.");
+        }
+    }
+
+    /// Wird aufgerufen, wenn eine Bestätigung (ACK) von einem Gerät empfangen wurde.
+    Future<void> onAcknowledgementReceived(String nearbyUuid) async
+    {
+        // Wenn kein Austausch mit diesem Gerät existiert, dann abbrechen.
+        Exchange? exchange = _exchanges[nearbyUuid];
+        if (exchange == null)
+        {
+            return;
+        }
+
+        exchange.acknowledgeReceived = true;
+        dprint("NearbyController: ACK von $nearbyUuid empfangen.");
+
+        // Wenn der Austausch abgeschlossen ist, dann Gerät hinzufügen
+        if (exchange.isFinished)
+        {
+            await NearbyDevicesContainer.addIfNotContains(exchange.receivedDevice!);
+            _exchanges.remove(nearbyUuid);
+            dprint("NearbyController: Austausch mit $nearbyUuid abgeschlossen. Gerät hinzugefügt.");
+        }
     }
 
     /// Wird aufgerufen, wenn ein Gerät über NSD gefunden wurde.
@@ -67,6 +157,8 @@ class NearbyController
         }
 
         // Ansonsten Gerätetaten austauschen
+        dprint("NearbyController: NSD-Gerät gefunden: ${args.nearbyUuid}. Tausche Gerätedaten aus.)");
+        _exchanges.putIfAbsent(args.nearbyUuid, () => Exchange()); // Exchange anlegen, um zu verhindern, dass zeitgleich der Austausch über Supabase gestartet wird
         await _localNetworkGateway.exchangeDeviceData(args);
     }
 
@@ -74,71 +166,7 @@ class NearbyController
     Future<void> _onNetworkDeviceResolved(Device device) async
     {
         await NearbyDevicesContainer.addIfNotContains(device);
-    }
-
-    /// Überprüft, ob auf die Gerätedaten eines Geräts gewartet wird.
-    bool _isWaitingForDeviceData(String nearbyUuid)
-    {
-        DateTime? requestTime = _requestingDevices[nearbyUuid];
-        if (requestTime == null)
-        {
-            return false;
-        }
-
-        Duration timeSinceRequest = DateTime.now().difference(requestTime);
-        if (timeSinceRequest < waitingForDeviceDataTimeout)
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    /// Wird aufgerufen, wenn ein BLE-Gerät entdeckt wird.
-    Future<void> onBleDeviceSpotted(String nearbyUuid) async
-    {
-        // Wenn wir das Gerät bereits kennen oder seine Gerätedaten gerade anfordern, dann abbrechen.
-        if (await NearbyDevicesContainer.containsUuid(nearbyUuid) || _isWaitingForDeviceData(nearbyUuid))
-        {
-            return;
-        }
-
-        // Ansonten fordern wir die Gerätedaten an.
-        await requestDeviceData(nearbyUuid);
-    }
-
-    /// Fordert die Gerätedaten eines anderen Geräts an und speichert den Zeitpunkt der Anfrage.
-    Future<void> requestDeviceData(String nearbyUuid) async
-    {
-        _requestingDevices[nearbyUuid] = DateTime.now();
-        await _supabaseDeviceGateway.sendDeviceDataRequest(nearbyUuid);
-    }
-
-    /// Wird aufgerufen, wenn Gerätedaten empfangen wurden.
-    Future<void> onDeviceDataReceived(Device device) async
-    {
-        // Wenn wir die Gerätedaten nicht angefordert haben, dann abbrechen.
-        if (!_isWaitingForDeviceData(device.nearbyUuid))
-        {
-            return;
-        }
-
-        await NearbyDevicesContainer.addIfNotContains(device);
-    }
-
-    /// Wird aufgerufen, wenn eine Anfrage für Gerätedaten empfangen wird.
-    Future<void> onDeviceRequestReceived(String nearbyUuid) async
-    {
-        await _supabaseDeviceGateway.sendDeviceData(nearbyUuid);
-
-        // Wenn wir das Gerät bereits kennen oder seine Gerätedaten gerade anfordern, dann abbrechen.
-        if (await NearbyDevicesContainer.containsUuid(nearbyUuid) || _isWaitingForDeviceData(nearbyUuid))
-        {
-            return;
-        }
-
-        // Ansonsten fordern wir auch seine Gerätedaten an.
-        await requestDeviceData(nearbyUuid);
+        _exchanges.remove(device.nearbyUuid);
     }
 
     /// Startet die BLE-Scanner- und Werbeträgerdienste.

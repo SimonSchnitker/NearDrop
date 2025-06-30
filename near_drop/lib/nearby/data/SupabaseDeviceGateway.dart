@@ -10,30 +10,36 @@ import '../../core/domain/enums/OS.dart';
 class SupabaseDeviceGateway
 {
     final StreamController<Device> onDeviceDataReceived = StreamController<Device>.broadcast();
-    final StreamController<String> onDeviceRequestReceived = StreamController<String>.broadcast();
+    final StreamController<String> onAcknowledgementReceived = StreamController<String>.broadcast();
 
-    /// Fordert die Gerätedaten eines anderen Geräts an.
-    Future<bool> sendDeviceDataRequest(String destinationUuid) async
+    /// Sendet unsere Gerätedaten an ein anderes Gerät über Supabase.
+    Future<bool> sendDeviceData(String destinationUuid, bool attachAck) async
     {
         RealtimeChannel channel = Supabase.instance.client.channel(destinationUuid);
-        ChannelResponse response = await channel.sendBroadcastMessage(event: "device_request", payload: {
-            "sender": Runtime.nearbyUuid,
-        });
 
+        final payload = {
+            "uuid": Runtime.nearbyUuid,
+            "firstname": Runtime.firstname,
+            "name": Runtime.deviceName,
+            "dtype": Runtime.deviceType.index, // Der Name "type" ist von Supabase reserviert, daher "dtype" verwenden
+            "os": Runtime.os.index,
+            "version": Runtime.appVersion.toString(),
+        };
+
+        if (attachAck)
+        {
+            payload["isAck"] = true; // Acknowledgement anhängen
+        }
+
+        ChannelResponse response = await channel.sendBroadcastMessage(event: "device", payload: payload);
         return response == ChannelResponse.ok;
     }
 
-    /// Sendet unsere Gerätedaten an ein anderes Gerät über Supabase.
-    Future<bool> sendDeviceData(String destinationUuid) async
+    Future<bool> sendAcknowledgement(String destinationUuid) async
     {
         RealtimeChannel channel = Supabase.instance.client.channel(destinationUuid);
-        ChannelResponse response = await channel.sendBroadcastMessage(event: "device", payload: {
-            "sender": Runtime.nearbyUuid,
-            "firstname": Runtime.firstname,
-            "name": Runtime.deviceName,
-            "device_type": Runtime.deviceType.index, // Der Name "type" ist von Supabase reserviert, daher "device_type" verwenden
-            "os": Runtime.os.index,
-            "version": Runtime.appVersion.toString(),
+        ChannelResponse response = await channel.sendBroadcastMessage(event: "device_ack", payload: {
+            "uuid": Runtime.nearbyUuid,
         });
 
         return response == ChannelResponse.ok;
@@ -42,20 +48,19 @@ class SupabaseDeviceGateway
     /// Startet das Lauschen auf Gerätedaten.
     void startListeningForDeviceData()
     {
-        Runtime.realtimeChannel.onBroadcast(event: "device_request", callback: (data) async
+        Runtime.realtimeChannel.onBroadcast(event: "device_ack", callback: (data) async
         {
             data = data["payload"];
-            String nearbyUuid = data["sender"];
-            onDeviceRequestReceived.add(nearbyUuid);
+            String nearbyUuid = data["uuid"];
+            onAcknowledgementReceived.add(nearbyUuid);
         });
-
         Runtime.realtimeChannel.onBroadcast(event: "device", callback: (data) async
         {
             data = data["payload"];
-            String nearbyUuid = data["sender"];
+            String nearbyUuid = data["uuid"];
             String firstname = data["firstname"];
             String name = data["name"];
-            int type = data["device_type"]; // Der Name "type" ist von Supabase reserviert, daher "device_type" verwenden
+            int type = data["dtype"]; // Der Name "type" ist von Supabase reserviert, daher "device_type" verwenden
             int os = data["os"];
             String version = data["version"];
 
@@ -69,6 +74,13 @@ class SupabaseDeviceGateway
             );
 
             onDeviceDataReceived.add(device);
+
+            // Prüfen, ob das Acknowledgement mitgesendet wurde
+            bool? isAcknowledge = data["isAck"];
+            if (isAcknowledge == true)
+            {
+                onAcknowledgementReceived.add(nearbyUuid);
+            }
         });
     }
 }
