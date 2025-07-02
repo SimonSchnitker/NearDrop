@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dynamic_system_colors/dynamic_system_colors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:kiwi/kiwi.dart';
 import 'package:near_drop/Runtime.dart';
@@ -62,6 +63,8 @@ void main() async
             await windowManager.focus();
         });
     }
+
+    await dotenv.load(fileName: ".env");
 
     // Neuen Foto-Picker unter Android aktivieren
     final ImagePickerPlatform imagePickerImplementation = ImagePickerPlatform.instance;
