@@ -20,7 +20,7 @@ import '../../../main.dart';
 /// Interaktionslogik der NearbyPage.
 class NearbyViewModel extends ChangeNotifier
 {
-    final _bleRestartDuration = Duration(seconds: 4);
+    final _bleRestartDuration = Duration(seconds: 5);
 
     final NearbyController _nearbyController = KiwiContainer().resolve<NearbyController>();
     final TransportController _transportController = KiwiContainer().resolve<TransportController>();
@@ -96,7 +96,6 @@ class NearbyViewModel extends ChangeNotifier
             notifyListeners();
         });
 
-        _listenNetworkStateChanges();
         initializeCore();
 
         // Auf Updates prüfen
@@ -144,14 +143,16 @@ class NearbyViewModel extends ChangeNotifier
         // Wenn erfolgreich, alle notwendigen Dienste starten
         await _nearbyController.startListeningForDeviceData();
         _transportController.startSignaling();
-        _nearbyController.startNsdServices(); // Kein await, da das Starten von NSD manchmal etwas dauern kann.
+        _listenNetworkStateChanges();
 
         // Wenn das Gerät eine WLAN-Verbindung hat, wird erstmal nur über NSD gesucht, um Supabase zu entlasten.
+        /*
         List<ConnectivityResult> connectivity = await Connectivity().checkConnectivity();
         if (connectivity.contains(ConnectivityResult.wifi))
         {
             await Future.delayed(const Duration(milliseconds: 500));
         }
+         */
 
         _listenForBluetoothStateChanges();
         _startBleRestartingProcess();
@@ -177,7 +178,8 @@ class NearbyViewModel extends ChangeNotifier
         if (isRequiredUpdateAvailable)
         {
             await Navigator.of(NearbyPage.scaffoldKey.currentContext!).pushNamedAndRemoveUntil(Routes.requiredUpdate, (route) => false);
-            await _nearbyController.stopBleServices();
+            await _nearbyController.startBleScanner();
+            await _nearbyController.stopBleAdvertiser();
             await _nearbyController.startNsdServices();
             await Runtime.unsubscribeChannel();
         }
@@ -201,7 +203,7 @@ class NearbyViewModel extends ChangeNotifier
     /// Startet das Lauschen auf Netzwerkstatusänderungen.
     Future<void> _listenNetworkStateChanges() async
     {
-        Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
+        Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) async {
             if (result.contains(ConnectivityResult.wifi) || result.contains(ConnectivityResult.mobile) || result.contains(ConnectivityResult.ethernet))
             {
                 isConnectedWithNetwork = true;
@@ -209,6 +211,17 @@ class NearbyViewModel extends ChangeNotifier
             else
             {
                 isConnectedWithNetwork = false;
+            }
+
+            // Wenn eine WLAN-Verbindung besteht, NSD-Services starten
+            if (result.contains(ConnectivityResult.wifi))
+            {
+                await _nearbyController.startNsdServices();
+            }
+            // Wenn keine WLAN-Verbindung besteht, NSD-Services stoppen
+            else
+            {
+                await _nearbyController.stopNsdServices();
             }
 
             notifyListeners();
@@ -234,21 +247,23 @@ class NearbyViewModel extends ChangeNotifier
                 if (hasBluetoothPermissions)
                 {
                     hasBluetoothPermissions = true;
-                    await _nearbyController.startBleServices();
+                    await _nearbyController.startBleScanner();
+                    await _nearbyController.startBleAdvertiser();
                     _showDeviceNotFoundBalloonAfterDelay();
                 }
             }
             else if (state == BluetoothAdapterState.off)
             {
                 isBluetoothEnabled = false;
-                await _nearbyController.stopBleServices();
+                await _nearbyController.stopBleScanner();
+                await _nearbyController.stopBleAdvertiser();
             }
 
             notifyListeners();
         });
     }
 
-    /// Startet regelmäßig die Bluetooth-Services neu, weil dadurch die Geräte schneller gefunden werden.
+    /// Startet regelmäßig den Bluetooth-Werbeprozess neu, weil dadurch die Sendeausstrahlung permanent hoch bleibt.
     Future<void> _startBleRestartingProcess() async
     {
         while (true)
@@ -256,9 +271,9 @@ class NearbyViewModel extends ChangeNotifier
             await Future.delayed(_bleRestartDuration);
             if (isBluetoothSupported && isBluetoothEnabled && hasBluetoothPermissions)
             {
-                print("Restarting Bluetooth services...");
-                await _nearbyController.stopBleServices();
-                await _nearbyController.startBleServices();
+                print("Restarting Bluetooth advertiser...");
+                await _nearbyController.stopBleAdvertiser();
+                await _nearbyController.startBleAdvertiser();
             }
         }
     }

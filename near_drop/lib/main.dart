@@ -152,7 +152,7 @@ class MyApp extends StatelessWidget {
                       pageTransitionsTheme: PageTransitionsTheme(
                           builders: {
                               TargetPlatform.android:
-                                FadeForwardsPageTransitionsBuilder(),
+                                CupertinoPageTransitionsBuilder(),
                               TargetPlatform.windows:
                                 FadeForwardsPageTransitionsBuilder(),
                           }
@@ -174,7 +174,7 @@ class MyApp extends StatelessWidget {
                       pageTransitionsTheme: PageTransitionsTheme(
                           builders: {
                               TargetPlatform.android:
-                                FadeForwardsPageTransitionsBuilder(),
+                                CupertinoPageTransitionsBuilder(),
                               TargetPlatform.windows:
                                 FadeForwardsPageTransitionsBuilder(),
                           }

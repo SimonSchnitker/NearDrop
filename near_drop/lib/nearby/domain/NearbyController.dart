@@ -169,18 +169,9 @@ class NearbyController
         _exchanges.remove(device.nearbyUuid);
     }
 
-    /// Startet die BLE-Scanner- und Werbeträgerdienste.
-    Future<void> startBleServices() async
+    /// Startet den BLE-Advertiser, um Gerätedaten zu bewerben.
+    Future<void> startBleAdvertiser() async
     {
-        try
-        {
-            await _bleScanner.start();
-        }
-        catch (e)
-        {
-            dprint("BLE-Scanner konnte nicht gestartet werden: $e");
-        }
-
         try
         {
             await _bleAdvertiser.start();
@@ -191,8 +182,34 @@ class NearbyController
         }
     }
 
-    /// Stoppt die BLE-Scanner- und Werbeträgerdienste.
-    Future<void> stopBleServices() async
+    /// Startet den BLE-Scanner, um nach Geräten in der Nähe zu suchen.
+    Future<void> startBleScanner() async
+    {
+        try
+        {
+            await _bleScanner.start();
+        }
+        catch (e)
+        {
+            dprint("BLE-Scanner konnte nicht gestartet werden: $e");
+        }
+    }
+
+    /// Stoppt den BLE-Advertiser, um die Werbung von Gerätedaten zu beenden.
+    Future<void> stopBleAdvertiser() async
+    {
+        try
+        {
+            await _bleAdvertiser.stop();
+        }
+        catch (e)
+        {
+            dprint("BLE-Advertiser konnte nicht gestoppt werden: $e");
+        }
+    }
+
+    /// Stoppt den BLE-Scanner, um die Suche nach Geräten zu beenden.
+    Future<void> stopBleScanner() async
     {
         try
         {
@@ -201,15 +218,6 @@ class NearbyController
         catch (e)
         {
             dprint("BLE-Scanner konnte nicht gestoppt werden: $e");
-        }
-
-        try
-        {
-            await _bleAdvertiser.stop();
-        }
-        catch (e)
-        {
-            dprint("BLE-Advertiser konnte nicht gestoppt werden: $e");
         }
     }
 
