@@ -15,9 +15,9 @@ import 'models/Connection.dart';
 /// Steuert den Signalisierungsprozess für WebRTC-Verbindungen.
 class SignalingController
 {
-    static const sendRetryCount = 3;
+    static const sendRetryCount = 2;
     static const sendRetryDelay = Duration(seconds: 3);
-    static const connectTimeoutSeconds = 10;
+    static const connectTimeoutSeconds = 6;
     static const dataChannelName = "data";
     static final configuration = {
         "iceServers":

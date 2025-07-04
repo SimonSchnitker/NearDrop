@@ -24,7 +24,7 @@ class NearbyDevicesContainer
         if (Platform.isAndroid || Platform.isIOS)
         {
             AppLifecycleListener(
-                onPause: () {
+                onInactive: () {
                     _appPaused = DateTime.now();
                 },
                 onResume: () {
