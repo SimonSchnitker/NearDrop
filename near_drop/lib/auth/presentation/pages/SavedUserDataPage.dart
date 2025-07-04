@@ -23,6 +23,7 @@ class SavedUserDataPage extends StatelessWidget
                       FlexibleAppBar(title: AppLocalizations.of(context)!.saved_data_page_title),
                       SliverToBoxAdapter(
                           child: SafeArea(
+                              top: false,
                             child: context.watch<SavedUserDataViewModel>().userData == null
                                 ? _buildFetchUserData(context)
                                 : _buildUserData(context),

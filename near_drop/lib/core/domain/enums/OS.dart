@@ -4,8 +4,8 @@ enum OS
     unknown,
     android,
     ios,
-    windows,
     macos,
+    windows,
     linux,
     web,
 }

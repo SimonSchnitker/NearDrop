@@ -51,7 +51,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guest_login_title => 'Create profile';
 
   @override
-  String get firstname_textfield_label => 'Firstname';
+  String get firstname_textfield_label => 'First name';
 
   @override
   String get firstname_textfield_helper_text =>
@@ -292,13 +292,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get account_page_title => 'My profile';
 
   @override
-  String get account_page_change_firstname_label => 'Change firstname';
+  String get account_page_change_firstname_label => 'Change first name';
 
   @override
-  String get account_page_change_firstname_dialog_title => 'Change firstname';
+  String get account_page_change_firstname_dialog_title => 'Change first name';
 
   @override
-  String get account_page_change_firstname_textfield_label => 'New firstname';
+  String get account_page_change_firstname_textfield_label => 'New first name';
 
   @override
   String get account_page_change_firstname_dialog_save_button => 'Save';

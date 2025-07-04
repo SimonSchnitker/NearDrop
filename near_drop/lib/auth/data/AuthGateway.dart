@@ -30,8 +30,8 @@ class AuthGateway
         await Supabase.instance.client.rpc(
             "record_all_consents",
             params: {
-                "p_privacy_policy_version_id": Runtime.privacyPolicyVersion,
-                "p_terms_of_use_version_id": Runtime.termsOfUseVersion,
+                "p_privacy_version_id": Runtime.privacyPolicyVersion,
+                "p_terms_version_id": Runtime.termsOfUseVersion,
             }
         );
     }

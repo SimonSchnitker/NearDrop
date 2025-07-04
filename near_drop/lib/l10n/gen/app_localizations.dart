@@ -185,7 +185,7 @@ abstract class AppLocalizations {
   /// No description provided for @firstname_textfield_label.
   ///
   /// In en, this message translates to:
-  /// **'Firstname'**
+  /// **'First name'**
   String get firstname_textfield_label;
 
   /// No description provided for @firstname_textfield_helper_text.
@@ -613,19 +613,19 @@ abstract class AppLocalizations {
   /// No description provided for @account_page_change_firstname_label.
   ///
   /// In en, this message translates to:
-  /// **'Change firstname'**
+  /// **'Change first name'**
   String get account_page_change_firstname_label;
 
   /// No description provided for @account_page_change_firstname_dialog_title.
   ///
   /// In en, this message translates to:
-  /// **'Change firstname'**
+  /// **'Change first name'**
   String get account_page_change_firstname_dialog_title;
 
   /// No description provided for @account_page_change_firstname_textfield_label.
   ///
   /// In en, this message translates to:
-  /// **'New firstname'**
+  /// **'New first name'**
   String get account_page_change_firstname_textfield_label;
 
   /// No description provided for @account_page_change_firstname_dialog_save_button.

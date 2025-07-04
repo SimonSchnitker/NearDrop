@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus_windows/flutter_blue_plus_windows.dart';
@@ -97,8 +99,6 @@ class NearbyViewModel extends ChangeNotifier
         });
 
         initializeCore();
-
-        // Auf Updates prüfen
         _getVersionInfo();
     }
 
@@ -212,6 +212,7 @@ class NearbyViewModel extends ChangeNotifier
             {
                 isConnectedWithNetwork = false;
             }
+            notifyListeners();
 
             // Wenn eine WLAN-Verbindung besteht, NSD-Services starten
             if (result.contains(ConnectivityResult.wifi))
@@ -223,8 +224,6 @@ class NearbyViewModel extends ChangeNotifier
             {
                 await _nearbyController.stopNsdServices();
             }
-
-            notifyListeners();
         });
     }
 
@@ -261,6 +260,21 @@ class NearbyViewModel extends ChangeNotifier
 
             notifyListeners();
         });
+
+        // Seltsamer Bug: Wenn die App längere Zeit im Hintergrund war und dann wieder geöffnet wird, scannt der BleScanner nicht mehr.
+        // Daher wird der BleScanner neu gestartet, wenn die App wieder geöffnet wird.
+        if (Platform.isAndroid || Platform.isIOS)
+        {
+            AppLifecycleListener(
+                onResume: () async {
+                    if (hasBluetoothPermissions && isBluetoothEnabled)
+                    {
+                        await _nearbyController.stopBleScanner();
+                        await _nearbyController.startBleScanner();
+                    }
+                }
+            );
+        }
     }
 
     /// Startet regelmäßig den Bluetooth-Werbeprozess neu, weil dadurch die Sendeausstrahlung permanent hoch bleibt.
