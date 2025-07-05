@@ -1,4 +1,4 @@
-package de.neardrop.v2
+package de.neardrop.app
 
 import io.flutter.embedding.android.FlutterActivity
 

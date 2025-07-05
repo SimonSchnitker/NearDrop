@@ -26,7 +26,7 @@
         android:maxSdkVersion="29" />
     
     <application
-        android:label="Near V2"
+        android:label="Near Drop"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true">
