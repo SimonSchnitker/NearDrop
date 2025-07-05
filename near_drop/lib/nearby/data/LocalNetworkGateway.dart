@@ -166,8 +166,8 @@ class LocalNetworkGateway
         final deviceMap = {
             "firstname": Runtime.firstname,
             "name": Runtime.deviceName,
-            "type": Runtime.deviceType.name,
-            "os": Runtime.os.name,
+            "type": Runtime.deviceType.index,
+            "os": Runtime.os.index,
             "version": Runtime.appVersion.toString(),
             "nearbyUuid": Runtime.nearbyUuid,
         };
@@ -180,8 +180,8 @@ class LocalNetworkGateway
         return Device(
             json["firstname"],
             json["name"],
-            DeviceType.values.byName(json["type"]),
-            OS.values.byName(json["os"]),
+            DeviceType.values[json["type"]],
+            OS.values[json["os"]],
             Version.fromString(json["version"]),
             json["nearbyUuid"],
         );
