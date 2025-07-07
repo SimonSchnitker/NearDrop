@@ -195,7 +195,7 @@
   "bluetooth_devices_permission_content": "Grant the app permission to find and connect to Bluetooth devices. This allows us to establish a connection with nearby devices.",
   "ios_local_network_permission_title": "Local network",
   "ios_local_network_permission_content": "Grant the app permission to access the local network. This allows us to find other devices in the network.",
-  "grant_permission_button": "Grant permission",
+  "grant_permission_button": "Next",
   "grant_permission_skip_button": "Skip",
   "files_directory_initializing_failed_title": "No file reception possible",
   "files_directory_initializing_failed_content": "We cannot access the Downloads folder of your device. Please check the app permissions in the settings.",
