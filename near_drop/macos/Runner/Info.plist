@@ -33,5 +33,7 @@
     <string>Bluetooth LE is used for scanning devices nearby.</string>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>Photo Library is used to select media files.</string>
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
 </dict>
 </plist>
