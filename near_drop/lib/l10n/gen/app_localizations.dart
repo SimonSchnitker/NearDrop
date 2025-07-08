@@ -919,7 +919,7 @@ abstract class AppLocalizations {
   /// No description provided for @grant_permission_button.
   ///
   /// In en, this message translates to:
-  /// **'Grant permission'**
+  /// **'Next'**
   String get grant_permission_button;
 
   /// No description provided for @grant_permission_skip_button.

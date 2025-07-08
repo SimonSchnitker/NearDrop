@@ -474,7 +474,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Erteile der App die Berechtigung auf das lokale Netzwerk zuzugreifen. Dadurch können wir andere Geräte im Netzwerk finden.';
 
   @override
-  String get grant_permission_button => 'Berechtigung erteilen';
+  String get grant_permission_button => 'Weiter';
 
   @override
   String get grant_permission_skip_button => 'Überspringen';

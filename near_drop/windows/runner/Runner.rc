@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "de.symxn" "\0"
-            VALUE "FileDescription", "near_drop" "\0"
+            VALUE "CompanyName", "de.neardrop" "\0"
+            VALUE "FileDescription", "Near Drop" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "near_drop" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 de.symxn. All rights reserved." "\0"
+            VALUE "InternalName", "Near Drop" "\0"
+            VALUE "LegalCopyright", "" "\0"
             VALUE "OriginalFilename", "near_drop.exe" "\0"
-            VALUE "ProductName", "near_drop" "\0"
+            VALUE "ProductName", "Near Drop" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

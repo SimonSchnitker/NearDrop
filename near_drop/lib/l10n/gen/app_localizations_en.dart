@@ -467,7 +467,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Grant the app permission to access the local network. This allows us to find other devices in the network.';
 
   @override
-  String get grant_permission_button => 'Grant permission';
+  String get grant_permission_button => 'Next';
 
   @override
   String get grant_permission_skip_button => 'Skip';
