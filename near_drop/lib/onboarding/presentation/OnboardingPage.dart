@@ -94,14 +94,6 @@ class OnboardingPage extends StatelessWidget
                     },
                     child: Text(AppLocalizations.of(context)!.grant_permission_button),
                 ).sized(height: 60),
-                SizedBox(height: 8),
-                TextButton(onPressed: () {
-                    if (Platform.isIOS) {
-                        pageViewController.animateToPage(1, duration: Duration(milliseconds: 800), curve: Curves.fastEaseInToSlowEaseOut);
-                    } else {
-                        Navigator.of(context).pushNamedAndRemoveUntil(Routes.nearby, (route) => false);
-                    }
-                }, child: Text(AppLocalizations.of(context)!.grant_permission_skip_button))
             ],
         ).paddingAll(16);
   }
@@ -140,10 +132,6 @@ class OnboardingPage extends StatelessWidget
                     },
                     child: Text(AppLocalizations.of(context)!.grant_permission_button),
                 ).sized(height: 60),
-                SizedBox(height: 8),
-                TextButton(onPressed: () {
-                    Navigator.of(context).pushNamedAndRemoveUntil(Routes.nearby, (route) => false);
-                }, child: Text(AppLocalizations.of(context)!.grant_permission_skip_button))
             ],
         ).paddingAll(16);
     }
@@ -182,10 +170,6 @@ class OnboardingPage extends StatelessWidget
                     },
                     child: Text(AppLocalizations.of(context)!.grant_permission_button),
                 ).sized(height: 60),
-                SizedBox(height: 8),
-                TextButton(onPressed: () {
-                    Navigator.of(context).pushNamedAndRemoveUntil(Routes.nearby, (route) => false);
-                }, child: Text(AppLocalizations.of(context)!.grant_permission_skip_button))
             ],
         ).paddingAll(16);
     }
