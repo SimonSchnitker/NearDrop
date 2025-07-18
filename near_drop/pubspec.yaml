@@ -63,7 +63,18 @@ dependencies:
   url_launcher: ^6.3.1
   native_exif: ^0.6.2
   flutter_dotenv: ^5.2.1
+  msix: ^3.16.9
   # change_app_package_name: ^1.5.0
+
+# Konfiguration für MSIX-Paketierung für den Microsoft Store
+msix_config:
+  display_name: Near Drop
+  publisher_display_name: Simon Schnitker
+  identity_name: SimonSchnitker.NearDrop
+  publisher: CN=1F477998-F36A-4A7A-AED4-9AA2C5E8899D
+  msix_version: 1.0.0.0
+  logo_path: assets/app_icon/windows/icon_round_1024x1024.png
+  store: true
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

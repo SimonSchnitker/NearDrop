@@ -28,7 +28,7 @@ android {
         //minSdk = flutter.minSdkVersion
         minSdk = 26 // Android 8.0 (Oreo)
         targetSdk = flutter.targetSdkVersion
-        versionCode = 2
+        versionCode = 3
         versionName = flutter.versionName
     }
 
