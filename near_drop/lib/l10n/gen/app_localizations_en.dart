@@ -15,9 +15,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcome_subtitle => 'Share files nearby';
 
   @override
-  String get welcome_preview_info_text => 'Preview version';
-
-  @override
   String get app_info_button => 'App information';
 
   @override

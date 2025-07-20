@@ -16,9 +16,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Dateien schnell & drahtlos in der Nähe teilen';
 
   @override
-  String get welcome_preview_info_text => 'Vorschauversion';
-
-  @override
   String get app_info_button => 'App-Info';
 
   @override
@@ -381,7 +378,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get help_page_received_files_bottom_sheet_files_content =>
-      'Alle anderen empfangene Dateien findest du im Downloads-Ordner deines Geräts.';
+      'Alle anderen empfangenen Dateien findest du im Downloads-Ordner deines Geräts.';
 
   @override
   String get help_page_received_files_bottom_sheet_files_title_desktop =>
@@ -389,7 +386,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get help_page_received_files_bottom_sheet_files_content_desktop =>
-      'Alle empfangene Dateien findest du im Downloads-Ordner.';
+      'Alle empfangenen Dateien findest du im Downloads-Ordner.';
 
   @override
   String get nearby_page_help_button_tooltip => 'Hilfe';

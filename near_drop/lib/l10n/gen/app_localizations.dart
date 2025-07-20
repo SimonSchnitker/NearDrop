@@ -110,12 +110,6 @@ abstract class AppLocalizations {
   /// **'Share files nearby'**
   String get welcome_subtitle;
 
-  /// No description provided for @welcome_preview_info_text.
-  ///
-  /// In en, this message translates to:
-  /// **'Preview version'**
-  String get welcome_preview_info_text;
-
   /// No description provided for @app_info_button.
   ///
   /// In en, this message translates to:
