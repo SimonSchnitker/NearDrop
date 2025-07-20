@@ -12,7 +12,7 @@ class Runtime
     static const String nearDropWebsiteUrl = "https://neardrop.app";
     static const String privacyPolicyUrl = "https://neardrop.app/privacy";
     static const String imprintUrl = "https://neardrop.app/imprint";
-    static const String termsOfUsetUrl = "https://neardrop.app/termsofuse";
+    static const String termsOfUseUrl = "https://neardrop.app/termsofuse";
     static const String androidAppUrl = "https://play.google.com/";
     static const String iosAppUrl = "https://www.apple.com/app-store/";
     static const String windowsAppUrl = "https://apps.microsoft.com/home";

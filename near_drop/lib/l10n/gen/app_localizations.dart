@@ -164,6 +164,12 @@ abstract class AppLocalizations {
   /// **'About used licenses'**
   String get licenses_subtitle;
 
+  /// No description provided for @terms_of_use_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Use'**
+  String get terms_of_use_title;
+
   /// No description provided for @version_title.
   ///
   /// In en, this message translates to:

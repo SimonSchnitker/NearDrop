@@ -43,6 +43,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get licenses_subtitle => 'Über die verwendeten Lizenzen';
 
   @override
+  String get terms_of_use_title => 'Nutzungsbedingungen';
+
+  @override
   String get version_title => 'Version';
 
   @override

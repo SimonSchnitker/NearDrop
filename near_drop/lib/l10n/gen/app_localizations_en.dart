@@ -42,6 +42,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get licenses_subtitle => 'About used licenses';
 
   @override
+  String get terms_of_use_title => 'Terms of Use';
+
+  @override
   String get version_title => 'Version';
 
   @override

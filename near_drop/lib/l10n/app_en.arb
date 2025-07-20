@@ -10,6 +10,7 @@
 	"data_privacy_subtitle": "About the data processing",
 	"licenses_title": "Licences",
 	"licenses_subtitle": "About used licenses",
+    "terms_of_use_title": "Terms of Use",
 	"version_title": "Version",
 	"guest_login_title": "Create profile",
 	"firstname_textfield_label": "First name",

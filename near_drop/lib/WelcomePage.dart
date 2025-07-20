@@ -107,19 +107,6 @@ Widget _appInfoDialog(BuildContext context) {
             ),
             SizedBox(height: 4),
             ShapedMaterial(
-                shapePosition: ShapePosition.middle,
-                color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                onTap: () async {
-                    await launchUrlString(Runtime.privacyPolicyUrl, mode: LaunchMode.externalApplication);
-                },
-                child: ListTile(
-                    title: Text(AppLocalizations.of(context)!.data_privacy_title),
-                    subtitle: Text(AppLocalizations.of(context)!.data_privacy_subtitle),
-                    leading: Icon(Icons.shield_outlined),
-                ),
-            ),
-            SizedBox(height: 4),
-            ShapedMaterial(
                 shapePosition: ShapePosition.end,
                 color: Theme.of(context).colorScheme.surfaceContainerHigh,
                 onTap: () {
