@@ -7,9 +7,11 @@ import 'package:mutex/mutex.dart';
 /// Umschließt einen RTCDataChannel und stellt Methoden bereit, um Daten zu senden und zu empfangen.
 class RTCNetworkStream
 {
+    static const Duration _queueCheckInterval = Duration(milliseconds: 25);
+
     final RTCDataChannel _dataChannel;
-    final StreamController<String> _stringStreamController = StreamController<String>.broadcast();
-    final StreamController<Uint8List> _binaryStreamController = StreamController<Uint8List>.broadcast();
+    final Queue<String> _stringQueue = Queue<String>();
+    final Queue<Uint8List> _binaryQueue = Queue<Uint8List>();
 
     RTCNetworkStream(this._dataChannel)
     {
@@ -21,44 +23,48 @@ class RTCNetworkStream
     {
         if (message.isBinary)
         {
-            while (!_binaryStreamController.hasListener)
-            {
-                if (_dataChannel.state == RTCDataChannelState.RTCDataChannelClosed)
-                {
-                    return;
-                }
-
-                await Future.delayed(const Duration(milliseconds: 50));
-            }
-
-            _binaryStreamController.add(message.binary);
+            _binaryQueue.add(message.binary);
         }
         else
         {
-            while (!_stringStreamController.hasListener)
-            {
-                if (_dataChannel.state == RTCDataChannelState.RTCDataChannelClosed)
-                {
-                    return;
-                }
-
-                await Future.delayed(const Duration(milliseconds: 50));
-            }
-
-            _stringStreamController.add(message.text);
+            _stringQueue.add(message.text);
         }
     }
 
     /// Liest einen String asynchron vom Stream.
     Future<String> readString() async
     {
-        return await _stringStreamController.stream.first;
+        // Warten, bis ein String verfügbar ist
+        while (_stringQueue.isEmpty)
+        {
+            await Future.delayed(_queueCheckInterval);
+
+            // Überprüfen, ob der DataChannel geschlossen ist
+            if (_dataChannel.state == RTCDataChannelState.RTCDataChannelClosed)
+            {
+                throw Exception("RTCDataChannel is closed, cannot read string.");
+            }
+        }
+
+        return _stringQueue.removeFirst();
     }
 
     /// Liest Binärdaten (Uint8List) asynchron vom Stream.
     Future<Uint8List> readBinary() async
     {
-        return await _binaryStreamController.stream.first;
+        // Warten, bis Binärdaten verfügbar sind
+        while (_binaryQueue.isEmpty)
+        {
+            await Future.delayed(_queueCheckInterval);
+
+            // Überprüfen, ob der DataChannel geschlossen ist
+            if (_dataChannel.state == RTCDataChannelState.RTCDataChannelClosed)
+            {
+                throw Exception("RTCDataChannel is closed, cannot read binary data.");
+            }
+        }
+
+        return _binaryQueue.removeFirst();
     }
 
     /// Schreibt einen String in den RTCDataChannel.
@@ -76,8 +82,8 @@ class RTCNetworkStream
     /// Schließt den zugrunde liegenden RTCDataChannel.
     Future<void> close() async
     {
-        await _stringStreamController.close();
-        await _binaryStreamController.close();
+        _stringQueue.clear();
+        _binaryQueue.clear();
         await _dataChannel?.close();
     }
 }
