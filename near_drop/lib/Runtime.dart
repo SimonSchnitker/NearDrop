@@ -13,11 +13,11 @@ class Runtime
     static const String privacyPolicyUrl = "https://neardrop.app/privacy";
     static const String imprintUrl = "https://neardrop.app/imprint";
     static const String termsOfUseUrl = "https://neardrop.app/termsofuse";
-    static const String androidAppUrl = "https://play.google.com/";
-    static const String iosAppUrl = "https://www.apple.com/app-store/";
-    static const String windowsAppUrl = "https://apps.microsoft.com/home";
+    static const String androidAppUrl = "https://play.google.com/store/apps/details?id=de.neardrop.app";
+    static const String iosAppUrl = "https://apps.apple.com/de/app/near-drop-file-sharing/id6747198778";
+    static const String windowsAppUrl = "https://apps.microsoft.com/detail/9p7czj2vktt7";
     static const String appName = "Near Drop";
-    static final appVersion = Version(1, 0, 0);
+    static final appVersion = Version(1, 0, 1);
     static final int privacyPolicyVersion = 1;
     static final int termsOfUseVersion = 1;
 
