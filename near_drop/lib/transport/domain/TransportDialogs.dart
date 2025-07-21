@@ -1,10 +1,13 @@
 import 'dart:io';
+import 'package:android_intent_plus/android_intent.dart';
+import 'package:android_intent_plus/flag.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:near_drop/tools/FileSizeHelper.dart';
 import 'package:near_drop/transport/domain/TransportController.dart';
 import 'package:open_app_file/open_app_file.dart';
 import 'package:path/path.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/domain/entity/Device.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../main.dart';
@@ -297,7 +300,6 @@ Future<void> showImagePreviewDialog({
             itemBuilder: (ctx, index) {
                 final file = currentOtherFiles[index];
                 return ListTile(
-                    leading: Icon(Icons.insert_drive_file_outlined),
                     title: Text(file.name, overflow: TextOverflow.ellipsis),
                     subtitle: Text(getFileSizeString(file.size), style: TextStyle(fontSize: 12)),
                     onTap: () => OpenAppFile.open(file.path),
@@ -314,14 +316,31 @@ Future<void> showImagePreviewDialog({
         );
     }
 
-    // Hilfsfunktion zum Öffnen der Galerie (Platzhalter)
+    Future<void> _openGallery(ReceivedFile file) async {
+        if (Platform.isAndroid) {
+
+        } else if (Platform.isIOS) {
+
+        }
+    }
+
+    // Hilfsfunktion zum Öffnen der Galerie
     Future<void> _openFilesLocation(Directory? directory) async {
         if (directory == null) {
             dprint("Kein Zielverzeichnis für Galerie angegeben.");
             return;
         }
 
-        OpenResult result = await OpenAppFile.open(directory.path);
+        if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+            await OpenAppFile.open(directory.path);
+        } else if (Platform.isAndroid) {
+            final intent = AndroidIntent(
+                action: 'action_view',
+                type: 'image/*',
+                flags: [Flag.FLAG_ACTIVITY_NEW_TASK],
+            );
+            intent.launch();
+        }
     }
 
     bool isDesktop = Platform.isMacOS || Platform.isWindows || Platform.isLinux;
@@ -354,9 +373,11 @@ Future<void> showImagePreviewDialog({
 
             actions.add(TextButton(child: Text(AppLocalizations.of(context)!.dialog_close_button), onPressed: () => Navigator.of(dialogContext).pop()));
 
-            // Anzeigen-Button hinzufügen, wenn wir auf Desktop sind
-            if (isDesktop) {
-                actions.add(TextButton(child: Text(AppLocalizations.of(context)!.received_files_dialog_show_files_button), onPressed: () => _openFilesLocation(targetDirectory)));
+            if (isDesktop || (Platform.isAndroid && onlyImages)) {
+                actions.add(TextButton(child: Text(AppLocalizations.of(context)!.received_files_dialog_show_files_button), onPressed: () {
+                    Navigator.of(dialogContext).pop(); // Schließt den Dialog
+                    _openFilesLocation(targetDirectory);
+                }));
             }
 
             return AlertDialog(
