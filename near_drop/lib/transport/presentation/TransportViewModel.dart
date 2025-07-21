@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:kiwi/kiwi.dart';
+import 'package:near_drop/Runtime.dart';
 import 'package:near_drop/transport/domain/enums/SendResponse.dart';
 import '../../core/domain/entity/Device.dart';
 import '../../core/domain/enums/CommunicationState.dart';
@@ -16,9 +18,12 @@ import '../domain/models/Connection.dart';
 /// Steuert die UI des Dateiübertragungsprozesses.
 class TransportViewModel extends ChangeNotifier
 {
+    static final Setting _sentCountSetting = Setting("sentCount", int);
+    static const List<int> _sendCountsForReview = [5, 15, 30];
+    static final _cancelTimeout = Duration(seconds: 8);
+
     final _transportController = KiwiContainer().resolve<TransportController>();
     final _settingsController = KiwiContainer().resolve<SettingsController>();
-    static final _cancelTimeout = Duration(seconds: 8);
     bool isFilesDirectoryInitialized = true;
 
     final Setting _filesSentSetting = Setting("filesSent", bool);
@@ -51,15 +56,43 @@ class TransportViewModel extends ChangeNotifier
     {
         SendResponse response = await _transportController.sendFiles(device, files);
 
-        // Wenn Dateien das erste Mal erfolgreich gesendet wurden, wird das Flag in den Einstellungen auf true gesetzt.
-        if (response == SendResponse.ok && !hasFilesSent)
+        try
         {
-            await _settingsController.set(_filesSentSetting, true);
-            hasFilesSent = true;
-            notifyListeners();
+            // Wenn Dateien das erste Mal erfolgreich gesendet wurden, wird das Flag in den Einstellungen auf true gesetzt.
+            if (response == SendResponse.ok && !hasFilesSent)
+            {
+                await _settingsController.set(_filesSentSetting, true);
+                hasFilesSent = true;
+                notifyListeners();
+            }
+
+            // ggf. In-App-Bewertung anzeigen, wenn die Dateien erfolgreich gesendet wurden und der Benutzer noch nicht bewertet hat.
+            if (response == SendResponse.ok)
+            {
+                _handleInAppReview(); // Kein await!
+            }
+        }
+        catch (e)
+        {
+            // Ignorieren, da es nicht kritisch ist
         }
 
         return response;
+    }
+
+    /// Verarbeitet das Anzeigen einer In-App-Bewertung, wenn der Benutzer Dateien gesendet hat.
+    Future<void> _handleInAppReview() async
+    {
+        // Anzahl gesendeter Male abrufen und erhöhen
+        int sentCount = await _settingsController.get(_sentCountSetting) ?? 0;
+        sentCount++;
+        await _settingsController.set(_sentCountSetting, sentCount);
+
+        // Wenn die Anzahl der gesendeten Male in der Liste für Bewertungen enthalten ist und die In-App-Bewertung verfügbar ist, wird die Bewertung angefordert.
+        if (_sendCountsForReview.contains(sentCount) && await InAppReview.instance.isAvailable())
+        {
+            await InAppReview.instance.requestReview();
+        }
     }
 
     /// Bricht die Übertragung ab.
