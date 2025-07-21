@@ -1087,6 +1087,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Allow the app to access the external storage of your device. This allows us to save received files.'**
   String get onboarding_external_storage_permission_content;
+
+  /// No description provided for @how_it_works_title.
+  ///
+  /// In en, this message translates to:
+  /// **'How it works'**
+  String get how_it_works_title;
+
+  /// No description provided for @how_it_works_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Near Drop on other devices. Nearby devices are automatically detected. Then select a device to send files.'**
+  String get how_it_works_subtitle;
 }
 
 class _AppLocalizationsDelegate

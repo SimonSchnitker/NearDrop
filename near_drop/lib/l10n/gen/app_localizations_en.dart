@@ -569,4 +569,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onboarding_external_storage_permission_content =>
       'Allow the app to access the external storage of your device. This allows us to save received files.';
+
+  @override
+  String get how_it_works_title => 'How it works';
+
+  @override
+  String get how_it_works_subtitle =>
+      'Start Near Drop on other devices. Nearby devices are automatically detected. Then select a device to send files.';
 }

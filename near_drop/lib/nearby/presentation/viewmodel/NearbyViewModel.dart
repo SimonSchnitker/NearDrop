@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -12,21 +13,26 @@ import 'package:near_drop/core/domain/enums/OS.dart';
 import 'package:near_drop/nearby/domain/NearbyController.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
 import 'package:near_drop/nearby/presentation/pages/NearbyPage.dart';
+import 'package:near_drop/settings/domain/SettingsController.dart';
 import 'package:near_drop/tools/PermissionHelper.dart';
 import 'package:near_drop/transport/domain/TransportController.dart';
+import 'package:near_drop/transport/presentation/TransportViewModel.dart';
 import '../../../Routes.dart';
 import '../../../Runtime.dart';
 import '../../../core/domain/entity/Device.dart';
 import '../../../main.dart';
+import '../../../settings/domain/Setting.dart';
 
 /// Interaktionslogik der NearbyPage.
 class NearbyViewModel extends ChangeNotifier
 {
     final _bleRestartDuration = Duration(seconds: 5);
+    final Setting _filesSentSetting = Setting("filesSent", bool);
 
     final NearbyController _nearbyController = KiwiContainer().resolve<NearbyController>();
     final TransportController _transportController = KiwiContainer().resolve<TransportController>();
     final CoreController _coreController = KiwiContainer().resolve<CoreController>();
+    final SettingsController _settingsController = KiwiContainer().resolve<SettingsController>();
 
     bool isUpdateAvailable = false;
     bool isRequiredUpdateAvailable = false;
@@ -296,9 +302,12 @@ class NearbyViewModel extends ChangeNotifier
     Future<void> _showDeviceNotFoundBalloonAfterDelay() async
     {
         await Future.delayed(deviceNotFoundBalloonDelay);
+        bool hasFilesSent = await _settingsController.get(_filesSentSetting) ?? false;
 
-        // Wenn nach dem Delay immer noch keine Geräte gefunden wurden, die Ballon-Nachricht anzeigen.
-        if (nearbyDevices.isEmpty)
+        // Wenn nach dem Delay immer noch keine Geräte gefunden wurden,
+        // keine Info-Nachrichten angezeigt werden und bereits Dateien gesendet wurden,
+        // wird die Ballon-Nachricht angezeigt.
+        if (nearbyDevices.isEmpty && !isInfoAreaVisible && hasFilesSent)
         {
             isDeviceNotFoundBalloonVisible = true;
             notifyListeners();

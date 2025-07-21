@@ -78,6 +78,8 @@ class NearbyPage extends StatelessWidget
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                     _infoArea(context),
+                    _howItWorksView(context)
+                        .visible(!context.watch<TransportViewModel>().hasFilesSent),
                     _bottomBar(context).visible(context.watch<NearbyViewModel>().isInitializingFailed == false),
                 ],
             )
@@ -87,6 +89,39 @@ class NearbyPage extends StatelessWidget
         ),
       ),
     );
+  }
+
+  Widget _howItWorksView(BuildContext context) {
+      return Material(
+          color: Theme.of(context).colorScheme.primaryContainer,
+          borderRadius: BorderRadius.circular(12),
+          child: Row(
+              spacing: 12,
+              children: [
+                  Icon(Icons.lightbulb_outline),
+                  Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 4,
+                      children: [
+                          Text(
+                              AppLocalizations.of(context)!.how_it_works_title,
+                              style: Theme.of(context).textTheme.titleSmall!.copyWith(color: Theme.of(context).colorScheme.onPrimaryContainer),
+                          ),
+                          Text(
+                              AppLocalizations.of(context)!.how_it_works_subtitle,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                          )
+                      ],
+                  ).expanded()
+              ],
+          ).paddingAll(12)
+          .clickable(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                  Navigator.of(context).pushNamed(Routes.help);
+              }
+          )
+      );
   }
 
   Widget _initializingNearbyUuidFailedView(BuildContext context) {

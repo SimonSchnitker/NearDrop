@@ -16,6 +16,9 @@ class Runtime
     static const String androidAppUrl = "https://play.google.com/store/apps/details?id=de.neardrop.app";
     static const String iosAppUrl = "https://apps.apple.com/de/app/near-drop-file-sharing/id6747198778";
     static const String windowsAppUrl = "https://apps.microsoft.com/detail/9p7czj2vktt7";
+    static const String appStoreAppleId = "6747198778";
+    static const String microsoftStoreAppId = "9P7CZJ2VKTT7";
+
     static const String appName = "Near Drop";
     static final appVersion = Version(1, 0, 1);
     static final int privacyPolicyVersion = 1;

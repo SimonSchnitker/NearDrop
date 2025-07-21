@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:kiwi/kiwi.dart';
@@ -7,6 +8,8 @@ import '../../core/domain/entity/Device.dart';
 import '../../core/domain/enums/CommunicationState.dart';
 import '../../core/domain/enums/ErrorState.dart';
 import '../../main.dart';
+import '../../settings/domain/Setting.dart';
+import '../../settings/domain/SettingsController.dart';
 import '../domain/TransportController.dart';
 import '../domain/models/Connection.dart';
 
@@ -14,12 +17,17 @@ import '../domain/models/Connection.dart';
 class TransportViewModel extends ChangeNotifier
 {
     final _transportController = KiwiContainer().resolve<TransportController>();
+    final _settingsController = KiwiContainer().resolve<SettingsController>();
     static final _cancelTimeout = Duration(seconds: 8);
     bool isFilesDirectoryInitialized = true;
+
+    final Setting _filesSentSetting = Setting("filesSent", bool);
+    bool hasFilesSent = true;
 
     TransportViewModel()
     {
         _initFilesDirectory();
+        _checkHasFilesSent();
     }
 
     /// Initialisiert den Ordner, in dem empfangene Dateien gespeichert werden.
@@ -30,10 +38,28 @@ class TransportViewModel extends ChangeNotifier
         notifyListeners();
     }
 
+    /// Prüft, ob der Benutzer mindestens einmal Dateien gesendet hat.
+    Future<void> _checkHasFilesSent() async
+    {
+        hasFilesSent = await _settingsController.get(_filesSentSetting) ?? false;
+        dprint("TransportViewModel: _checkHasFilesSent: hasFilesSent: $hasFilesSent");
+        notifyListeners();
+    }
+
     /// Sendet Dateien an ein Gerät.
     Future<SendResponse> sendFiles(Device device, List<File> files) async
     {
-        return await _transportController.sendFiles(device, files);
+        SendResponse response = await _transportController.sendFiles(device, files);
+
+        // Wenn Dateien das erste Mal erfolgreich gesendet wurden, wird das Flag in den Einstellungen auf true gesetzt.
+        if (response == SendResponse.ok && !hasFilesSent)
+        {
+            await _settingsController.set(_filesSentSetting, true);
+            hasFilesSent = true;
+            notifyListeners();
+        }
+
+        return response;
     }
 
     /// Bricht die Übertragung ab.
