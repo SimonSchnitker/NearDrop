@@ -286,9 +286,6 @@ class TransportGateway
             final chunk = await stream.readBinary();
             bytesReceived += chunk.length;
 
-            // Chunk in die Datei schreiben
-            await raf.writeFrom(chunk);
-
             // Prüfen, ob der Benutzer das Abbrechen angefordert hat
             if (device.communicationInfo.cancelationRequested)
             {
@@ -298,8 +295,11 @@ class TransportGateway
                 return FileReceiveResult.userCanceled;
             }
 
-            // Bestätigung senden
+            // Schonmal eine Bestätigung senden
             await stream.writeString(ACK_FLAG);
+
+            // Chunk in die Datei schreiben (In der Zeit sendet der Sender und bereits den nächsten Chunk)
+            await raf.writeFrom(chunk);
 
             // Fortschritt aktualisieren
             progress.sentBytes += chunk.length;
