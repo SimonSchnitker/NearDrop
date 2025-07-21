@@ -36,12 +36,10 @@ class RTCNetworkStream
             {
                 if (_binaryStream.hasListener)
                 {
-                    print("STREAM");
                     _binaryStream.add(message.binary);
                 }
                 else
                 {
-                    print("QUEUE");
                     _binaryQueue.add(message.binary);
                 }
             }
@@ -57,12 +55,10 @@ class RTCNetworkStream
             {
                 if (_stringStream.hasListener)
                 {
-                    print("STREAM");
                     _stringStream.add(message.text);
                 }
                 else
                 {
-                    print("QUEUE");
                     _stringQueue.add(message.text);
                 }
             }

@@ -6,6 +6,7 @@ import 'package:near_drop/core/domain/entity/Device.dart';
 import 'package:near_drop/core/domain/enums/DeviceType.dart';
 import 'package:near_drop/core/domain/enums/OS.dart';
 import 'package:near_drop/Runtime.dart';
+import 'package:near_drop/main.dart';
 import '../../core/Version.dart';
 import 'event_args/NsdDeviceSpottedEventArgs.dart';
 
@@ -23,20 +24,20 @@ class LocalNetworkGateway
     {
         if (_serverSocket != null)
         {
-            print("Server lauscht bereits.");
+            dprint("Server lauscht bereits.");
             return _serverSocket?.port ?? -1;
         }
 
         try
         {
             _serverSocket = await ServerSocket.bind(InternetAddress.anyIPv4, 0);
-            print("Local Network Gateway lauscht auf Port ${_serverSocket!.port}");
+            dprint("Local Network Gateway lauscht auf Port ${_serverSocket!.port}");
             _serverSocket!.listen(_handleIncomingConnection);
             return _serverSocket!.port;
         }
         catch (e)
         {
-            print("Fehler beim Starten des Local Network Gateway: $e");
+            dprint("Fehler beim Starten des Local Network Gateway: $e");
         }
 
         return -1;
@@ -52,7 +53,7 @@ class LocalNetworkGateway
     /// Verarbeitet eine eingehende Verbindung von einem anderen Gerät, das einen Handshake initiiert.
     void _handleIncomingConnection(Socket client)
     {
-        print("Eingehende Verbindung von ${client.remoteAddress.address}:${client.remotePort}");
+        dprint("Eingehende Verbindung von ${client.remoteAddress.address}:${client.remotePort}");
         client.listen((Uint8List data) async
         {
             try
@@ -68,11 +69,11 @@ class LocalNetworkGateway
 
                 // Event auslösen, dass ein Gerät erfolgreich aufgelöst wurde.
                 onDeviceResolved.add(remoteDevice);
-                print("Gerät '${remoteDevice.firstname}' erfolgreich aufgelöst und eigene Daten gesendet.");
+                dprint("Gerät '${remoteDevice.firstname}' erfolgreich aufgelöst und eigene Daten gesendet.");
             }
             catch (e)
             {
-                print("Fehler bei der Verarbeitung eingehender Daten: $e");
+                dprint("Fehler bei der Verarbeitung eingehender Daten: $e");
             }
             finally
             {
@@ -82,7 +83,7 @@ class LocalNetworkGateway
         },
             onError: (error)
             {
-                print("Socket-Fehler bei eingehender Verbindung: $error");
+                dprint("Socket-Fehler bei eingehender Verbindung: $error");
                 client.destroy();
             },
             onDone: ()
@@ -112,7 +113,7 @@ class LocalNetworkGateway
 
         if (endPoints.isEmpty)
         {
-            print("Keine Endpunkte für Gerät ${args.nearbyUuid} gefunden.");
+            dprint("Keine Endpunkte für Gerät ${args.nearbyUuid} gefunden.");
             return;
         }
 
@@ -129,11 +130,11 @@ class LocalNetworkGateway
 
             if (socket == null)
             {
-                print("Keine Verbindung zu Gerät ${args.nearbyUuid} möglich.");
+                dprint("Keine Verbindung zu Gerät ${args.nearbyUuid} möglich.");
                 return;
             }
 
-            print("Erfolgreich verbunden mit ${socket.address}:${socket.port}.");
+            dprint("Erfolgreich verbunden mit ${socket.address}:${socket.port}.");
 
             // Eigene Gerätedaten senden.
             String ownJson = _getOwnDeviceJson();
@@ -145,14 +146,14 @@ class LocalNetworkGateway
             final remoteString = String.fromCharCodes(remoteData);
             final Map<String, dynamic> deviceMap = jsonDecode(remoteString);
             final remoteDevice = _fromMap(deviceMap);
-            print("Antwort von '${remoteDevice.firstname}' erhalten.");
+            dprint("Antwort von '${remoteDevice.firstname}' erhalten.");
 
             // Event auslösen, dass ein Gerät erfolgreich aufgelöst wurde.
             onDeviceResolved.add(remoteDevice);
         }
         catch (e)
         {
-            print("Konnte keine IPv4-Verbindung zu Gerät ${args.nearbyUuid} herstellen: $e");
+            dprint("Konnte keine IPv4-Verbindung zu Gerät ${args.nearbyUuid} herstellen: $e");
         }
         finally
         {

@@ -285,7 +285,7 @@ class NearbyViewModel extends ChangeNotifier
             await Future.delayed(_bleRestartDuration);
             if (isBluetoothSupported && isBluetoothEnabled && hasBluetoothPermissions)
             {
-                print("Restarting Bluetooth advertiser...");
+                dprint("Restarting Bluetooth advertiser...");
                 await _nearbyController.stopBleAdvertiser();
                 await _nearbyController.startBleAdvertiser();
             }
