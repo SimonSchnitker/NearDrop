@@ -50,7 +50,7 @@ dependencies:
   external_path: ^2.2.0
   media_scanner: ^2.2.0
   file_picker: ^10.1.9
-  open_app_file: ^4.0.4
+  open_file: ^3.5.10
   connectivity_plus: ^6.1.4
   qr_flutter: ^4.1.0
   qr_code_scanner_plus: ^2.0.10+1

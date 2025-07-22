@@ -5,9 +5,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:near_drop/tools/FileSizeHelper.dart';
 import 'package:near_drop/transport/domain/TransportController.dart';
-import 'package:open_app_file/open_app_file.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path/path.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../core/domain/entity/Device.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../main.dart';
@@ -216,7 +215,21 @@ Future<void> showImagePreviewDialog({
                         opacity: frame == null ? 0 : 1,
                         duration: const Duration(milliseconds: fadeInDurationMs),
                         curve: Curves.easeOut,
-                        child: child,
+                        child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                                child,
+                                Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                        borderRadius: BorderRadius.circular(borderRadius),
+                                        onTap: () async {
+                                            await OpenFile.open(file.path);
+                                        },
+                                    ),
+                                )
+                            ],
+                        ),
                     );
                 },
             ),
@@ -302,7 +315,7 @@ Future<void> showImagePreviewDialog({
                 return ListTile(
                     title: Text(file.name, overflow: TextOverflow.ellipsis),
                     subtitle: Text(getFileSizeString(file.size), style: TextStyle(fontSize: 12)),
-                    onTap: () => OpenAppFile.open(file.path),
+                    onTap: () => OpenFile.open(file.path),
                 );
             },
         );
@@ -316,24 +329,20 @@ Future<void> showImagePreviewDialog({
         );
     }
 
-    Future<void> _openGallery(ReceivedFile file) async {
-        if (Platform.isAndroid) {
-
-        } else if (Platform.isIOS) {
-
-        }
-    }
-
     // Hilfsfunktion zum Öffnen der Galerie
-    Future<void> _openFilesLocation(Directory? directory) async {
+    Future<void> _openFilesLocation(BuildContext dialogContext, Directory? directory) async {
         if (directory == null) {
             dprint("Kein Zielverzeichnis für Galerie angegeben.");
             return;
         }
 
         if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
-            await OpenAppFile.open(directory.path);
+            OpenResult result = await OpenFile.open(directory.path);
+            if (result.type == ResultType.done) {
+                Navigator.of(dialogContext).pop();
+            }
         } else if (Platform.isAndroid) {
+            Navigator.of(dialogContext).pop();
             final intent = AndroidIntent(
                 action: 'action_view',
                 type: 'image/*',
@@ -375,8 +384,7 @@ Future<void> showImagePreviewDialog({
 
             if (isDesktop || (Platform.isAndroid && onlyImages)) {
                 actions.add(TextButton(child: Text(AppLocalizations.of(context)!.received_files_dialog_show_files_button), onPressed: () {
-                    Navigator.of(dialogContext).pop(); // Schließt den Dialog
-                    _openFilesLocation(targetDirectory);
+                    _openFilesLocation(dialogContext, targetDirectory);
                 }));
             }
 

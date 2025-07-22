@@ -227,20 +227,22 @@ class TransportController
             return;
         }
 
-        // Empfangene Dateien auf der UI anzeigen
-        await showImagePreviewDialog(context: NearbyPage.scaffoldKey.currentContext!, allFiles: receivedFiles, device: device, targetDirectory: filesDirectory, mimeTypeGroup: sendRequest.mimeTypeGroup);
-
         // BottomSheet mit Erklärung anzeigen, wenn Dateien auf diesem Gerät zum allerersten Mal empfangen wurden
         bool? isFirstTimeReceivingFiles = await _settingsController.get(_isFirstTimeReceivingFilesSetting);
         if (isFirstTimeReceivingFiles == null)
         {
-            await _settingsController.set(_isFirstTimeReceivingFilesSetting, true); // Merken, dass Dateien empfangen wurden
             await showModalBottomSheet(
                 context: NearbyPage.scaffoldKey.currentContext!,
                 builder: (_) => ReceivedFilesLocationInfoView(),
                 showDragHandle: true
             );
+
+            // Speichern, wenn ModalBottomSheet geschlossen wurde
+            await _settingsController.set(_isFirstTimeReceivingFilesSetting, true); // Merken, dass Dateien empfangen wurden
         }
+
+        // Empfangene Dateien auf der UI anzeigen
+        await showImagePreviewDialog(context: NearbyPage.scaffoldKey.currentContext!, allFiles: receivedFiles, device: device, targetDirectory: filesDirectory, mimeTypeGroup: sendRequest.mimeTypeGroup);
     }
 
     /// Modifiziert das Erstellungsdatum der empfangenen Datei.
