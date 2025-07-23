@@ -23,6 +23,12 @@ PODS:
   - gal (1.0.0):
     - Flutter
     - FlutterMacOS
+  - in_app_review (2.0.0):
+    - FlutterMacOS
+  - nsd_macos (0.0.1):
+    - FlutterMacOS
+  - open_file_mac (0.0.1):
+    - FlutterMacOS
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -49,6 +55,9 @@ DEPENDENCIES:
   - flutter_webrtc (from `Flutter/ephemeral/.symlinks/plugins/flutter_webrtc/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - gal (from `Flutter/ephemeral/.symlinks/plugins/gal/darwin`)
+  - in_app_review (from `Flutter/ephemeral/.symlinks/plugins/in_app_review/macos`)
+  - nsd_macos (from `Flutter/ephemeral/.symlinks/plugins/nsd_macos/macos`)
+  - open_file_mac (from `Flutter/ephemeral/.symlinks/plugins/open_file_mac/macos`)
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
   - screen_retriever_macos (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos`)
   - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin`)
@@ -82,6 +91,12 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral
   gal:
     :path: Flutter/ephemeral/.symlinks/plugins/gal/darwin
+  in_app_review:
+    :path: Flutter/ephemeral/.symlinks/plugins/in_app_review/macos
+  nsd_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/nsd_macos/macos
+  open_file_mac:
+    :path: Flutter/ephemeral/.symlinks/plugins/open_file_mac/macos
   path_provider_foundation:
     :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin
   screen_retriever_macos:
@@ -105,6 +120,9 @@ SPEC CHECKSUMS:
   flutter_webrtc: 377dbcebdde6fed0fc40de87bcaaa2bffcec9a88
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   gal: baecd024ebfd13c441269ca7404792a7152fde89
+  in_app_review: 0599bccaed5e02f6bed2b0d30d16f86b63ed8638
+  nsd_macos: a472240e770b92f6c6df1022403aa29c90d012e3
+  open_file_mac: 01874b6d6a2c1485ac9b126d7105b99102dea2cf
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   screen_retriever_macos: 452e51764a9e1cdb74b3c541238795849f21557f
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7

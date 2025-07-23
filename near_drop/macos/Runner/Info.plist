@@ -28,12 +28,13 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-
 	<key>NSBluetoothAlwaysUsageDescription</key>
-    <string>Bluetooth LE is used for scanning devices nearby.</string>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>Photo Library is used to select media files.</string>
-    <key>ITSAppUsesNonExemptEncryption</key>
-    <false/>
+	<string>Bluetooth LE is used for scanning devices nearby.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Photo Library is used to select media files.</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.productivity</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
