@@ -20,7 +20,6 @@ import 'package:near_drop/onboarding/presentation/OnboardingPage.dart';
 import 'package:near_drop/settings/data/SettingsGateway.dart';
 import 'package:near_drop/settings/domain/SettingsController.dart';
 import 'package:near_drop/transport/data/SignalingGateway.dart';
-import 'package:near_drop/transport/data/TransportGateway.dart';
 import 'package:near_drop/transport/domain/SignalingController.dart';
 import 'package:near_drop/transport/domain/TransportController.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -111,8 +110,7 @@ void initializeDIContainer()
     final nearbyController = NearbyController(bleScanner, bleAdvertiser, nsdScanner, nsdAdvertiser, supabaseDeviceGateway, localNetworkGateway);
     final signalingGateway = SignalingGateway();
     final signalingController = SignalingController(signalingGateway);
-    final transportGateway = TransportGateway();
-    final transportController = TransportController(signalingController, transportGateway, settingsController);
+    final transportController = TransportController(signalingController);
     final coreGateway = CoreGateway();
     final coreController = CoreController(coreGateway, settingsController);
 
@@ -127,7 +125,6 @@ void initializeDIContainer()
     KiwiContainer().registerInstance(signalingGateway);
     KiwiContainer().registerInstance(signalingController);
     KiwiContainer().registerInstance(transportController);
-    KiwiContainer().registerInstance(transportGateway);
     KiwiContainer().registerInstance(coreGateway);
     KiwiContainer().registerInstance(coreController);
 }

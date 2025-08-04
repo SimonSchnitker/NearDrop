@@ -20,7 +20,7 @@ class Runtime
     static const String microsoftStoreAppId = "9P7CZJ2VKTT7";
 
     static const String appName = "Near Drop";
-    static final appVersion = Version(1, 0, 1);
+    static final appVersion = Version(2, 0, 0);
     static final int privacyPolicyVersion = 1;
     static final int termsOfUseVersion = 1;
 

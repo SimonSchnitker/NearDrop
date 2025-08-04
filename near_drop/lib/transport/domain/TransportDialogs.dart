@@ -6,13 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:near_drop/tools/FileSizeHelper.dart';
 import 'package:near_drop/transport/domain/TransportController.dart';
 import 'package:open_file/open_file.dart';
-import 'package:path/path.dart';
 import '../../core/domain/entity/Device.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../main.dart';
 import '../../nearby/presentation/pages/NearbyPage.dart';
 import 'enums/MimeTypeGroup.dart';
-import 'enums/SendRequestAnswer.dart';
 import 'models/ReceivedFile.dart';
 
 /// Gibt den MIME-Typ-String basierend auf der Gruppe und der Anzahl der Dateien zurück.
@@ -41,7 +39,8 @@ String getMimeTypeString(BuildContext context, MimeTypeGroup mimeTypeGroup, int 
     }
 }
 
-Future<bool> showAskSkipFileDialog(File file) async
+/// Zeigt ein Dialogfeld an, um die Sendeanfrage des Geräts zu akzeptieren oder abzulehnen.
+Future<bool> showSendRequestDialog(Device device, int filesCount, int totalSize, MimeTypeGroup mimeTypeGroup) async
 {
     if (NearbyPage.scaffoldKey.currentContext == null)
     {
@@ -50,54 +49,18 @@ Future<bool> showAskSkipFileDialog(File file) async
     }
 
     BuildContext context = NearbyPage.scaffoldKey.currentContext!;
-    String filename = basename(file.path);
-
-    bool skipFile = false;
-    await showDialog(
-        context: context,
-        builder: (dialogContext) =>
-            AlertDialog(
-                title: Text(AppLocalizations.of(context)!.file_skip_dialog_title),
-                content: Text(AppLocalizations.of(context)!.file_skip_dialog_content(filename)),
-                actions: [
-                    TextButton(onPressed: () {
-                        skipFile = false;
-                        Navigator.pop(dialogContext);
-                    }, child: Text(AppLocalizations.of(context)!.file_skip_dialog_cancel_transport_button)),
-                    TextButton(onPressed: () {
-                        skipFile = true;
-                        Navigator.pop(dialogContext);
-                    }, child: Text(AppLocalizations.of(context)!.file_skip_dialog_skip_button)),
-                ],
-            )
-    );
-
-    return skipFile;
-}
-
-/// Zeigt ein Dialogfeld an, um die Sendeanfrage des Geräts zu akzeptieren oder abzulehnen.
-Future<SendRequestAnswer> showSendRequestDialog(Device device, int filesCount, int totalSize, MimeTypeGroup mimeTypeGroup) async
-{
-    if (NearbyPage.scaffoldKey.currentContext == null)
-    {
-        dprint("Fehler: ScaffoldContext ist null.");
-        return SendRequestAnswer.error;
-    }
-
-    BuildContext context = NearbyPage.scaffoldKey.currentContext!;
     String mimeTypeString = getMimeTypeString(context, mimeTypeGroup, filesCount);
     String dialogContentText = AppLocalizations.of(context)!.send_request_dialog_content(device.firstname, filesCount, mimeTypeString);
 
     // Wenn das Gerät keine WLAN- oder Ethernet-Verbindung hat und die Gesamtgröße einen bestimmten Wert übersteigt, Datenvolumen-Warnung anzeigen
     List<ConnectivityResult> connectivity = await Connectivity().checkConnectivity();
-    if (!connectivity.contains(ConnectivityResult.wifi) && !connectivity.contains(ConnectivityResult.ethernet) && totalSize >= TransportController.MIN_BYTES_FOR_DATA_VOLUME_WARNING)
+    if (!connectivity.contains(ConnectivityResult.wifi) && !connectivity.contains(ConnectivityResult.ethernet) && totalSize >= TransportController.minBytesForDataVolumeWarning)
     {
         String sizeString = getFileSizeString(totalSize);
         dialogContentText += "\n${AppLocalizations.of(context)!.data_volume_warning_dialog_content(sizeString)}";
     };
 
-    SendRequestAnswer answer = SendRequestAnswer.declined;
-    device.isSendRequestDialogOpen = true;
+    bool answer = false;
     await showDialog(barrierDismissible: false, context: context, builder: (dialogContext) =>
         AlertDialog(
             key: device.sendRequestDialogKey,
@@ -109,18 +72,17 @@ Future<SendRequestAnswer> showSendRequestDialog(Device device, int filesCount, i
             content: Text(dialogContentText),
             actions: [
                 TextButton(onPressed: () {
-                    answer = SendRequestAnswer.declined;
+                    answer = false;
                     Navigator.pop(dialogContext);
                 }, child: Text(AppLocalizations.of(context)!.decline_button)),
                 TextButton(onPressed: () {
-                    answer = SendRequestAnswer.accepted;
+                    answer = true;
                     Navigator.pop(dialogContext);
                 }, child: Text(AppLocalizations.of(context)!.accept_button)),
             ],
         )
     );
 
-    device.isSendRequestDialogOpen = false;
     return answer;
 }
 

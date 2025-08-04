@@ -1,9 +1,10 @@
-import 'package:near_drop/transport/domain/enums/SendRequestType.dart';
+import 'package:near_drop/transport/domain/enums/MimeTypeGroup.dart';
 
-/// Beinhaltet die Info, welche Art von Anfrage empfangen wurde.
 class SendRequestDTO
 {
-    SendRequestType type;
+    int filesCount;
+    int totalSize;
+    MimeTypeGroup mimeTypeGroup;
 
-    SendRequestDTO(this.type);
+    SendRequestDTO(this.filesCount, this.totalSize, this.mimeTypeGroup);
 }

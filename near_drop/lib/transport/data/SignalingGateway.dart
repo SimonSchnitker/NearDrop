@@ -1,17 +1,18 @@
 import 'dart:async';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:mutex/mutex.dart';
-import 'package:near_drop/Runtime.dart';
+import 'package:near_drop/transport/data/dto/AnswerDTO.dart';
+import 'package:near_drop/transport/data/dto/IceCandidateDTO.dart';
+import 'package:near_drop/transport/data/dto/OfferDTO.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
+import 'package:flutter_webrtc/flutter_webrtc.dart';
+import '../../Runtime.dart';
 import '../../core/domain/entity/Device.dart';
 
 /// Definiert Methoden zum Austauschen von WebRTC-Angeboten, -Antworten und -ICE-Kandidaten.
 class SignalingGateway
 {
-    final onOfferReceived = StreamController<Map<String, dynamic>>.broadcast();
-    final onAnswerReceived = StreamController<Map<String, dynamic>>.broadcast();
-    final onIceCandidateReceived = StreamController<Map<String, dynamic>>.broadcast();
+    final onOfferReceived = StreamController<OfferDTO>.broadcast();
+    final onAnswerReceived = StreamController<AnswerDTO>.broadcast();
+    final onIceCandidateReceived = StreamController<IceCandidateDTO>.broadcast();
 
     /// Sendet ein WebRTC-Angebot an ein Gerät.
     Future<bool> sendOffer(Device device, RTCSessionDescription offer, int connectionId) async
@@ -80,15 +81,18 @@ class SignalingGateway
     {
         Runtime.realtimeChannel.onBroadcast(event: "webrtc-offer", callback: (data) async {
             final offer = data["payload"];
-            onOfferReceived.add(offer);
+            final dto = OfferDTO.fromMap(offer);
+            onOfferReceived.add(dto);
         });
         Runtime.realtimeChannel.onBroadcast(event: "webrtc-answer", callback: (data) async {
             final answer = data["payload"];
-            onAnswerReceived.add(answer);
+            final dto = AnswerDTO.fromMap(answer);
+            onAnswerReceived.add(dto);
         });
         Runtime.realtimeChannel.onBroadcast(event: "webrtc-ice", callback: (data) async {
             final candidate = data["payload"];
-            onIceCandidateReceived.add(candidate);
+            final dto = IceCandidateDTO.fromMap(candidate);
+            onIceCandidateReceived.add(dto);
         });
         Runtime.realtimeChannel.onBroadcast(event: "webrtc-ice-batch", callback: (data) async {
             final payload = data["payload"];
@@ -97,13 +101,8 @@ class SignalingGateway
 
             for (final candidate in payload["candidates"])
             {
-                onIceCandidateReceived.add({
-                    "sender": sender,
-                    "connectionId": connectionId,
-                    "candidate": candidate["candidate"],
-                    "sdpMid": candidate["sdpMid"],
-                    "sdpMLineIndex": candidate["sdpMLineIndex"],
-                });
+                final dto = IceCandidateDTO(sender, connectionId, candidate["candidate"], candidate["sdpMid"], candidate["sdpMLineIndex"]);
+                onIceCandidateReceived.add(dto);
             }
         });
     }

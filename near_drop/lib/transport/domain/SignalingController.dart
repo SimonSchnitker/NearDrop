@@ -1,46 +1,25 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:mutex/mutex.dart';
+import 'package:near_drop/core/domain/entity/Device.dart';
+import 'package:near_drop/main.dart';
 import 'package:near_drop/nearby/domain/NearbyDevicesContainer.dart';
-import 'package:near_drop/transport/data/IceCandidateBatcher.dart';
-import 'package:near_drop/transport/data/SignalingGateway.dart';
-import 'package:near_drop/transport/domain/event_args/ConnectionCreatedEventArgs.dart';
-import 'package:near_drop/transport/domain/models/RTCNetworkStream.dart';
-import '../../core/domain/entity/Device.dart';
-import '../../core/domain/enums/ErrorState.dart';
-import '../../main.dart';
-import 'models/Connection.dart';
+import 'package:near_drop/transport/data/dto/AnswerDTO.dart';
+import 'package:near_drop/transport/data/dto/IceCandidateDTO.dart';
+import 'package:near_drop/transport/data/dto/OfferDTO.dart';
+import 'package:near_drop/transport/domain/enums/SendResponse.dart';
+import 'package:near_drop/transport/domain/event-args/IncomingConnectionEventArgs.dart';
+import 'package:near_drop/transport/domain/models/Connection.dart';
 
-/// Steuert den Signalisierungsprozess für WebRTC-Verbindungen.
+import '../data/SignalingGateway.dart';
+
 class SignalingController
 {
-    static const sendRetryCount = 2;
-    static const sendRetryDelay = Duration(seconds: 3);
-    static const connectTimeoutSeconds = 6;
-    static const dataChannelName = "data";
-    static final configuration = {
-        "iceServers":
-        [
-            {
-                'urls': 'stuns:vps.neardrop.app:5349',
-            },
-            {
-                'urls': 'turns:vps.neardrop.app:5349',
-                'username': dotenv.env['TURN_USERNAME'],
-                'credential': dotenv.env['TURN_CREDENTIAL'],
-            }
-        ]
-    };
-
-    // Hier werden ICE-Kandidaten gespeichert, die empfangen wurden, bevor die Verbindung hergestellt wurde. Diese werden später hinzugefügt.
-    // Der Key ist die ConnectionId, der Verbindung, die später erzeugt wird.
-    // Dies dient dazu, dass später nur die ICE-Kandidaten der Verbindung hinzugefügt werden, die auch tatsächlich zu dieser Verbindung gehören.
-    final Map<int, List<RTCIceCandidate>> _earlyIceCandidates = {};
-    final Mutex _earlyIceCandidatesMutex = Mutex();
-
     final SignalingGateway _signalingGateway;
-    StreamController<ConnectionCreatedEventArgs> onConnectionCreated = StreamController<ConnectionCreatedEventArgs>.broadcast();
+    final Map<int, Connection> _connections = {};
+
+    StreamController<IncomingConnectionEventArgs> onIncomingConnection = StreamController<IncomingConnectionEventArgs>.broadcast();
 
     SignalingController(this._signalingGateway)
     {
@@ -55,324 +34,97 @@ class SignalingController
         _signalingGateway.startListening();
     }
 
-    /// Fügt alle zu früh empfangenen ICE-Kandidaten zu einer Verbindung hinzu.
-    Future<void> _addEarlyIceCandidatesToConnection(int connectionId, RTCPeerConnection peerConnection) async
-    {
-        await _earlyIceCandidatesMutex.protect(() async {
-            List<RTCIceCandidate> candidates = _earlyIceCandidates[connectionId] ?? [];
-            if (candidates.isEmpty)
-            {
-                dprint("No early ICE candidates to add for connection $connectionId");
-                return;
-            }
-
-            dprint("Adding ${candidates.length} early ICE candidates to connection $connectionId");
-            for (RTCIceCandidate candidate in candidates)
-            {
-                await peerConnection.addCandidate(candidate);
-            }
-            _earlyIceCandidates.remove(connectionId); // Entfernen, da sie jetzt hinzugefügt wurden
-        });
-    }
-
     /// Wird aufgerufen, wenn ein Angebot empfangen wurde.
-    Future<void> _onOfferReceived(Map<String, dynamic> offer) async
+    Future<void> _onOfferReceived(OfferDTO offer) async
     {
-        // Überprüfen, ob das Angebot gültig ist
-        if (!offer.containsKey("sender") || !offer.containsKey("connectionId") || !offer.containsKey("sdp") || !offer.containsKey("sdp-type"))
-        {
-            dprint("Ungültiges Angebot empfangen: $offer");
-            return;
-        }
-
-        // Prüfen, ob das Gerät in unserer Liste vorhanden ist
-        Device? device = await NearbyDevicesContainer.getByUuid(offer["sender"]);
+        Device? device = await NearbyDevicesContainer.getByUuid(offer.sender);
         if (device == null)
         {
-            dprint("Gerät nicht gefunden: ${offer["sender"]}");
+            dprint("SignalingController: _onOfferReceived: Device not found for UUID ${offer.sender}");
             return;
         }
 
-        // Aktuelle Verbindung zum Gerät schließen, falls vorhanden
-        await device.closeCurrentConnection();
+        final connection = Connection(_signalingGateway, device, offer.connectionId);
+        _connections[connection.connectionId] = connection;
 
-        // Angebot auslesen und PeerConnection-Instanz erstellen
-        int connectionId = offer["connectionId"];
-        RTCSessionDescription sessionDescription = RTCSessionDescription(offer["sdp"], offer["sdp-type"]);
-        RTCPeerConnection peerConnection = await createPeerConnection(configuration);
+        await connection.initializeAsAnswerer(RTCSessionDescription(offer.sdp, offer.sdpType));
 
-        // Verbindung merken
-        Connection connection = Connection(peerConnection: peerConnection, connectionId: connectionId);
-        device.communicationInfo.connection = connection;
-
-        // ICE-Kandidaten an Peer senden, wenn sie erstellt wurden
-        final IceCandidateBatcher iceCandidateBatcher = IceCandidateBatcher(_signalingGateway, device, connectionId);
-        peerConnection.onIceCandidate = (candidate) async {
-            await iceCandidateBatcher.add(candidate);
-        };
-
-        // Verbindungsstatus zum Peer überwachen
-        peerConnection.onConnectionState = (state) async {
-            dprint("Verbindungsstatus zu ${device.firstname} (ConnectionId: $connectionId): $state");
-
-            if (state == RTCPeerConnectionState.RTCPeerConnectionStateClosed || state == RTCPeerConnectionState.RTCPeerConnectionStateFailed)
-            {
-                iceCandidateBatcher.dispose();
-                await device.closeConnection(connection: connection);
-            }
-        };
-
-        // Warten, bis der Datenkanal geöffnet ist
-        peerConnection.onDataChannel = (RTCDataChannel dataChannel) {
-            dprint("Datenkanal empfangen: ${dataChannel.label}");
-
-            // Verbindungsdaten aktualisieren
-            connection.dataChannel = dataChannel;
-            connection.networkStream = RTCNetworkStream(dataChannel);
-
-            dataChannel.onDataChannelState = (RTCDataChannelState state) async {
-                dprint("Datenkanal-Status: $state");
-
-                // Wenn der Datenkanal geöffnet ist, ist die Verbindung hergestellt
-                if (state == RTCDataChannelState.RTCDataChannelOpen)
-                {
-                    dprint("Datenkanal geöffnet: ${dataChannel.label}");
-                    onConnectionCreated.add(ConnectionCreatedEventArgs(device, connection, connectionId));
-                }
-                else if (state == RTCDataChannelState.RTCDataChannelClosed)
-                {
-                    // Schonmal die UI zurücksetzen und Dialoge schließen, da der Datenkanal meist deutlich eher geschlossen wird als die PeerConnection
-                    if (device.communicationInfo.connection?.connectionId == connectionId)
-                    {
-                        device.communicationInfo.reset();
-                        //device.closeOpenDialogs();
-                    }
-                }
-            };
-        };
-
-        // Angebot annehmen
-        await peerConnection.setRemoteDescription(sessionDescription);
-
-        // ICE-Kandidaten hinzufügen, die vor der Verbindung empfangen wurden
-        await _addEarlyIceCandidatesToConnection(connectionId, peerConnection);
-
-        // Antwort erstellen und senden
-        RTCSessionDescription answer = await peerConnection.createAnswer();
-        await peerConnection.setLocalDescription(answer);
-
-        sendAnswerFunction() async {
-            return await _signalingGateway.sendAnswer(device, answer, connectionId);
-        }
-
-        bool sent = await _retrySendFunction(sendAnswerFunction, peerConnection);
-        if (sent)
+        bool established = await connection.isEstablished;
+        if (established)
         {
-            dprint("Antwort gesendet: $connectionId");
+            dprint("SignalingController: _onOfferReceived: Connection established with ${device.name}");
+            onIncomingConnection.add(IncomingConnectionEventArgs(device, connection));
         }
         else
         {
-            dprint("Antwort konnte nicht gesendet werden.");
-            await device.closeConnection(connection: connection, errorState: ErrorState.error);
-            return;
+            dprint("SignalingController: _onOfferReceived: Failed to establish connection with ${device.name}");
+            await connection.close();
+            _connections.remove(connection.connectionId);
         }
     }
 
     /// Wird aufgerufen, wenn eine Antwort empfangen wurde.
-    Future<void> _onAnswerReceived(Map<String, dynamic> answer) async
+    Future<void> _onAnswerReceived(AnswerDTO answer) async
     {
-        // Überprüfen, ob die Antwort gültig ist
-        if (!answer.containsKey("sender") || !answer.containsKey("connectionId") || !answer.containsKey("sdp") || !answer.containsKey("sdp-type"))
-        {
-            dprint("Ungültige Antwort empfangen: $answer");
-            return;
-        }
-
-        // Prüfen, ob das Gerät in unserer Liste vorhanden ist
-        Device? device = await NearbyDevicesContainer.getByUuid(answer["sender"]);
-        if (device == null)
-        {
-            dprint("Gerät nicht gefunden: ${answer["sender"]}");
-            return;
-        }
-
-        // Prüfen, ob die Verbindung existiert
-        Connection? connection = device.communicationInfo.connection;
+        Connection? connection = _connections[answer.connectionId];
         if (connection == null)
         {
-            dprint("Verbindung nicht gefunden: ${answer["sender"]}");
-            return;
-        }
-        else if (connection.connectionId != answer["connectionId"])
-        {
-            print("Alte Verbindung, daher ignorieren: ${answer["sender"]}");
+            dprint("SignalingController: _onAnswerReceived: Connection not found for ID ${answer.connectionId}");
             return;
         }
 
-        // Prüfen, ob Verbindung im gültigen Signalisierungs-Zustand ist
-        if (connection.peerConnection.signalingState != RTCSignalingState.RTCSignalingStateHaveLocalOffer)
-        {
-            print("Verbindung nicht im gültigen Zustand: ${connection.peerConnection.signalingState}");
-            await device.closeConnection(connection: connection);
-            return;
-        }
-
-        RTCSessionDescription sessionDescription = RTCSessionDescription(answer["sdp"], answer["sdp-type"]);
-        await connection.peerConnection.setRemoteDescription(sessionDescription);
+        await connection.setAnswer(RTCSessionDescription(answer.sdp, answer.sdpType));
     }
 
     /// Wird aufgerufen, wenn ein ICE-Kandidat empfangen wurde.
-    Future<void> _onIceCandidateReceived(Map<String, dynamic> candidate) async
+    Future<void> _onIceCandidateReceived(IceCandidateDTO ice) async
     {
-        // Überprüfen, ob der ICE-Kandidat gültig ist
-        if (!candidate.containsKey("sender") || !candidate.containsKey("connectionId") || !candidate.containsKey("sdpMid") || !candidate.containsKey("sdpMLineIndex") || !candidate.containsKey("candidate"))
+        Connection? connection = _connections[ice.connectionId];
+        if (connection == null)
         {
-            print("Ungültiger ICE-Kandidat empfangen: $candidate");
+            dprint("SignalingController: _onIceCandidateReceived: Connection not found for ID ${ice.connectionId}");
             return;
         }
 
-        // Prüfen, ob das Gerät in unserer Liste vorhanden ist
-        Device? device = await NearbyDevicesContainer.getByUuid(candidate["sender"]);
-        if (device == null)
-        {
-            print("Gerät nicht gefunden: ${candidate["sender"]}");
-            return;
-        }
-
-        int connectionId = candidate["connectionId"];
-        RTCIceCandidate iceCandidate = RTCIceCandidate(
-            candidate["candidate"],
-            candidate["sdpMid"],
-            candidate["sdpMLineIndex"],
-        );
-
-        Connection? connection = device.communicationInfo.connection;
-
-        // Falls die Verbindung nicht existiert, wird der ICE-Kandidat gespeichert, um später hinzugefügt zu werden
-        if (connection == null || connection.peerConnection.getRemoteDescription() == null)
-        {
-            print("Puffere ICE-Kandidat für zukünftige Connection: $connectionId");
-            await _earlyIceCandidatesMutex.protect(() async {
-                _earlyIceCandidates.putIfAbsent(connectionId, () => []).add(iceCandidate);
-            });
-            return;
-        }
-        else if (connection.connectionId != connectionId)
-        {
-            print("Alte Verbindung, daher ignorieren: ${candidate["sender"]}");
-            return;
-        }
-
-        await connection.peerConnection.addCandidate(iceCandidate);
+        await connection.addIceCandidate(RTCIceCandidate(ice.candidate, ice.sdpMid, ice.sdpMLineIndex));
     }
 
-    /// Stellt eine Verbindung zu einem Gerät her.
-    Future<Connection?> connect(Device device, int connectionTryCount) async
+    /// Versucht, eine Verbindung zu einem Gerät herzustellen.
+    Future<Connection?> connect(Device device) async
     {
-        Completer<Connection?> completer = Completer<Connection?>();
-        device.communicationInfo.connectingCompleter = completer;
+        int connectionId = DateTime.now().millisecondsSinceEpoch; // Eindeutige ID basierend auf der aktuellen Zeit
+        final connection = Connection(_signalingGateway, device, connectionId);
+        _connections[connectionId] = connection;
 
-        // Verbinden wird abgebrochen, wenn die Verbindung nicht innerhalb des Timeouts hergestellt werden konnte
-        Future.delayed(Duration(seconds: connectTimeoutSeconds * connectionTryCount), () {
-            if (!completer.isCompleted)
-            {
-                completer.complete(null);
-            }
-        });
+        await connection.initializeAsOfferer();
 
-        // Als ConnectionId wird die aktuelle Zeit verwendet
-        int connectionId = DateTime.now().millisecondsSinceEpoch;
-
-        // PeerConnection-Instanz erstellen
-        RTCPeerConnection peerConnection = await createPeerConnection(configuration);
-
-        // DataChannel erstellen
-        RTCDataChannel dataChannel = await peerConnection.createDataChannel(dataChannelName, RTCDataChannelInit());
-
-        // Verbindung merken
-        Connection connection = Connection(peerConnection: peerConnection, connectionId: connectionId, dataChannel: dataChannel, networkStream: RTCNetworkStream(dataChannel));
-        device.communicationInfo.connection = connection;
-
-        // ICE-Kandidaten an Peer senden, wenn sie erstellt wurden
-        final IceCandidateBatcher iceCandidateBatcher = IceCandidateBatcher(_signalingGateway, device, connectionId);
-        peerConnection.onIceCandidate = (candidate) async {
-            await iceCandidateBatcher.add(candidate);
-        };
-
-        // Verbindungsstatus zum Peer überwachen
-        peerConnection.onConnectionState = (state) async {
-            print("Verbindungsstatus zu ${device.firstname} (ConnectionId: $connectionId): $state");
-
-            if (state == RTCPeerConnectionState.RTCPeerConnectionStateClosed || state == RTCPeerConnectionState.RTCPeerConnectionStateFailed)
-            {
-                iceCandidateBatcher.dispose();
-                await device.closeConnection(connection: connection);
-            }
-        };
-
-        // DataChannel-Status überwachen
-        dataChannel.onDataChannelState = (RTCDataChannelState state) async {
-            print("DataChannel-Status: $state");
-
-            // Wenn der Datenkanal geöffnet ist, ist die Verbindung hergestellt
-            if (state == RTCDataChannelState.RTCDataChannelOpen)
-            {
-                if (!completer.isCompleted)
-                {
-                    completer.complete(connection);
-                }
-            }
-            else if (state == RTCDataChannelState.RTCDataChannelClosed)
-            {
-                // Schonmal die UI zurücksetzen und Dialoge schließen, da der Datenkanal meist deutlich eher geschlossen wird als die PeerConnection
-                if (device.communicationInfo.connection?.connectionId == connectionId)
-                {
-                    device.communicationInfo.reset();
-                    //device.closeOpenDialogs();
-                }
-            }
-        };
-
-        // Angebot erstellen
-        RTCSessionDescription offer = await peerConnection.createOffer();
-        await peerConnection.setLocalDescription(offer);
-
-        sendOfferFunction() async {
-            return await _signalingGateway.sendOffer(device, offer, connectionId);
-        }
-
-        bool sent = await _retrySendFunction(sendOfferFunction, peerConnection);
-        if (sent)
+        bool established = await connection.isEstablished;
+        if (established)
         {
-            print("Angebot gesendet: $connectionId");
+            dprint("SignalingController: connect: Connection established with ${device.name}");
+            return connection;
         }
         else
         {
-            print("Angebot konnte nicht gesendet werden.");
-            completer.complete(null);
+            dprint("SignalingController: connect: Failed to establish connection with ${device.name}");
+            await connection.close();
+            _connections.remove(connection.connectionId);
             return null;
         }
-
-        return await completer.future;
     }
 
-    /// Führt eine Funktion mit mehreren Wiederholungen aus, wenn sie fehlschlägt.
-    Future<bool> _retrySendFunction(Future<bool> Function() function, RTCPeerConnection peerConnection) async
+    Future<void> closeConnection(int connectionId) async
     {
-        for (int i = 0; i < sendRetryCount; i++)
+        Connection? connection = _connections[connectionId];
+        if (connection != null)
         {
-            // Wenn die PeerConnection mittlerweile geschlossen wurde, dann abbrechen.
-            if (peerConnection.connectionState == RTCPeerConnectionState.RTCPeerConnectionStateClosed || peerConnection.connectionState == RTCPeerConnectionState.RTCPeerConnectionStateDisconnected || peerConnection.connectionState == RTCPeerConnectionState.RTCPeerConnectionStateFailed)
-            {
-                return false;
-            }
-
-            if (await function())
-            {
-                return true;
-            }
-            await Future.delayed(sendRetryDelay);
+            await connection.close();
+            _connections.remove(connectionId);
+            dprint("SignalingController: closeConnection: Connection $connectionId closed.");
         }
-        return false;
+        else
+        {
+            dprint("SignalingController: closeConnection: Connection $connectionId not found.");
+        }
     }
 }

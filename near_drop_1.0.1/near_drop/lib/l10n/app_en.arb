@@ -1,0 +1,250 @@
+{
+	"app_name": "Near Drop",
+	"welcome_subtitle": "Share files nearby",
+	"app_info_button": "App information",
+	"continue_button": "Next",
+	"app_info_title": "App information",
+	"imprint_title": "Imprint",
+	"imprint_subtitle": "About the developer",
+	"data_privacy_title": "Data protection",
+	"data_privacy_subtitle": "About the data processing",
+	"licenses_title": "Licences",
+	"licenses_subtitle": "About used licenses",
+    "terms_of_use_title": "Terms of Use",
+	"version_title": "Version",
+	"guest_login_title": "Create profile",
+	"firstname_textfield_label": "First name",
+	"firstname_textfield_helper_text": "Other devices nearby will see this name.",
+	"guest_login_error_message": "An error occurred while logging in. Please try again later.",
+	"data_protection_info_text_1": "I have read and accept the ",
+	"data_protection_info_text_2": "data protection regulations",
+	"data_protection_info_text_3": ".",
+    "terms_info_text_1": "I have read and accept the ",
+    "terms_info_text_2": "Terms of Use",
+    "terms_info_text_3": ".",
+	"nearby_page_menu_icon_tooltip": "App information",
+	"nearby_page_account_icon_tooltip": "My account",
+	"nearby_page_manual_connection_tooltip": "Connect manually",
+	"nearby_page_visibility_info_prefix": "You are visible as ",
+    "nearby_page_devices_label": "Nearby devices",
+    "nearby_page_no_devices_found_balloon_title": "Device not found?",
+    "nearby_page_no_devices_found_balloon_subtitle": "Connect you device via qr code.",
+    "send_dialog_title": "Send to {firstname}",
+    "@send_dialog_title": {
+      "placeholders": {
+        "firstname": {
+          "type": "String"
+        }
+      }
+    },
+    "send_dialog_files_label": "Files",
+    "send_dialog_media_label": "Photos & Videos",
+    "cancel_button": "Cancel",
+  "send_request_dialog_title": "Send request",
+  "send_request_dialog_content": "{firstname} wants to send you {filesCount} {mimeType}.",
+  "@send_request_dialog_content": {
+    "placeholders": {
+      "firstname": {
+        "type": "String"
+      },
+      "filesCount": {
+        "type": "int"
+      },
+      "mimeType": {
+        "type": "String"
+      }
+    }
+  },
+  "mime_type_image": "image",
+  "mime_type_images": "images",
+  "mime_type_video": "video",
+  "mime_type_videos": "videos",
+  "mime_type_audio": "audio",
+  "mime_type_audios": "audios",
+  "mime_type_media": "media files",
+  "mime_type_file": "file",
+  "mime_type_files": "files",
+  "accept_button": "Accept",
+  "decline_button": "Decline",
+  "communication_state_connecting": "Connecting...",
+  "communication_state_requesting": "Requesting...",
+  "communication_state_sending": "Sending...",
+  "communication_state_receiving": "Receiving...",
+  "communication_state_canceling": "Canceling...",
+  "success_state_sended": "Sent!",
+  "success_state_received": "Received!",
+  "error_state_error": "Error",
+  "error_state_receiver_declined": "Declined",
+  "error_state_canceled": "Aborted",
+  "dialog_close_button": "Close",
+  "received_files_dialog_show_files_button": "Show",
+  "received_files_dialog_title": "{filesCount} {mimeType} received from {firstname}",
+  "@received_files_dialog_title": {
+    "placeholders": {
+      "filesCount": {
+        "type": "int"
+      },
+      "mimeType": {
+        "type": "String"
+      },
+      "firstname": {
+        "type": "String"
+      }
+    }
+  },
+  "received_files_dialog_more_files_text": "+ {filesCount} more file(s)",
+  "@received_files_dialog_more_files_text": {
+    "placeholders": {
+      "filesCount": {
+        "type": "int"
+      }
+    }
+  },
+  "data_volume_warning_dialog_title": "Send?",
+  "data_volume_warning_dialog_content": "This occurrence needs minimum {sizeText} of your data volume.",
+  "@data_volume_warning_dialog_content": {
+    "placeholders": {
+      "sizeText": {
+        "type": "String"
+      }
+    }
+  },
+  "data_volume_warning_dialog_accept_button": "Send",
+  "manually_connecting_sheet_title": "Connect manually",
+  "manually_connecting_sheet_scan_button": "Scan",
+  "qr_code_text": "Tell another person to scan this QR code with their device.",
+  "scan_qr_code": "Scan the QR code of another device.",
+  "qr_code_error_no_permission": "Grant camera permission in settings.",
+  "qr_code_error_invalid": "Invalid QR code",
+  "qr_code_error_device_already_added": "Device already found",
+  "qr_code_error_device_request": "Device could not be contacted. Check your internet connection.",
+  "no_internet_connection_info_bar_title": "No internet connection",
+  "no_internet_connection_info_bar_subtitle": "Connect to a network to send and receive files.",
+  "bluetooth_not_supported_info_bar_title": "Bluetooth not supported",
+  "bluetooth_not_supported_info_bar_subtitle": "Your device does not have a Bluetooth component. Devices nearby cannot be found.",
+  "bluetooth_no_permission_info_bar_title": "Bluetooth permission missing",
+  "bluetooth_no_permission_info_bar_subtitle": "Grant the app access to Bluetooth in the settings to find devices nearby.",
+  "bluetooth_disabled_info_bar_title": "Bluetooth disabled",
+  "bluetooth_disabled_info_bar_subtitle": "Enable Bluetooth to find devices nearby.",
+  "bluetooth_error_info_bar_title": "Bluetooth error",
+  "bluetooth_error_info_bar_subtitle": "Schaue in der Hilfe nach für Problemlösungen. Some Bluetooth processes have failed. Check the help for troubleshooting.",
+  "drawer_close": "Close",
+  "account_page_title": "My profile",
+  "account_page_change_firstname_label": "Change first name",
+  "account_page_change_firstname_dialog_title": "Change first name",
+  "account_page_change_firstname_textfield_label": "New first name",
+  "account_page_change_firstname_dialog_save_button": "Save",
+  "account_page_show_my_data_label": "Saved data",
+  "account_page_delete_account_label": "Delete all data",
+  "account_page_delete_account_dialog_title": "Delete all data",
+  "account_page_delete_account_dialog_content": "Are you sure you want to delete all your data? This action cannot be undone.",
+  "account_page_delete_account_dialog_delete_button": "Delete",
+  "account_page_delete_account_error_message": "An error occurred while deleting your data. Check your internet connection or try again later.",
+  "help_page_title": "Help",
+  "help_page_installation_title": "Installation",
+  "help_page_installation_description": "Install Near Drop on other devices to send and receive files.",
+  "help_page_install_on_android_title": "Near Drop for Android",
+  "help_page_install_on_android_content": "Available on Play Store",
+  "help_page_install_on_apple_title": "Near Drop for iOS and macOS",
+  "help_page_install_on_apple_content": "Available on App Store",
+  "help_page_install_on_windows_title": "Near Drop for Windows",
+  "help_page_install_on_windows_content": "Available on Microsoft Store",
+  "help_page_faq_title": "Answered questions",
+  "help_page_faq_received_files_question": "Where can I find received files?",
+  "help_page_received_files_bottom_sheet_title": "Received files",
+  "help_page_received_files_bottom_sheet_media_label": "Photos & Videos",
+  "help_page_received_files_bottom_sheet_media_content": "Received photos and videos can be found in your Photos app in the album 'Near Drop'.",
+  "help_page_received_files_bottom_sheet_files_label": "Other files",
+  "help_page_received_files_bottom_sheet_files_content": "All other received files can be found in the Downloads folder of your device.",
+  "help_page_received_files_bottom_sheet_files_title_desktop": "Files",
+  "help_page_received_files_bottom_sheet_files_content_desktop": "All received files can be found in the Downloads folder.",
+  "nearby_page_help_button_tooltip": "Help",
+  "snackbar_message_connection_error": "An connection error occurred during the transfer.",
+  "snackbar_message_timeout": "The connection to the device could not be established.",
+  "snackbar_message_file_access_error": "It was not possible to access at least one file.",
+  "snackbar_message_receiver_error": "An error occurred at the receiver.",
+  "snackbar_retry_action": "Retry",
+  "cancel_transport_title": "Stop transfer with {firstname}?",
+  "@cancel_transport_title": {
+    "placeholders": {
+      "firstname": {
+        "type": "String"
+      }
+    }
+  },
+  "cancel_transport_confirm_dialog_button": "Stop",
+  "cancel_transport_cancel_dialog_button": "Continue",
+  "file_skip_dialog_title": "No access to file",
+  "file_skip_dialog_content": "File {filename} cannot be accessed. Do you want to skip it?",
+  "@file_skip_dialog_content": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
+  "file_skip_dialog_skip_button": "Skip",
+  "file_skip_dialog_cancel_transport_button": "Cancel transfer",
+  "core_initializing_loading_text": "Initializing...",
+  "core_initializing_error_text": "The initialization process has failed. Check your internet connection and try again.",
+  "core_initializing_error_retry_button": "Retry",
+  "onboarding_title": "First steps",
+  "nearby_permission_title": "Nearby devices",
+  "nearby_permission_content": "Grant the app permission to find nearby devices and determine their relative position. This allows us to detect nearby devices and establish a connection with them.",
+  "bluetooth_devices_permission_title": "Bluetooth devices",
+  "bluetooth_devices_permission_content": "Grant the app permission to find and connect to Bluetooth devices. This allows us to establish a connection with nearby devices.",
+  "ios_local_network_permission_title": "Local network",
+  "ios_local_network_permission_content": "Grant the app permission to access the local network. This allows us to find other devices in the network.",
+  "grant_permission_button": "Next",
+  "grant_permission_skip_button": "Skip",
+  "files_directory_initializing_failed_title": "No file reception possible",
+  "files_directory_initializing_failed_content": "We cannot access the Downloads folder of your device. Please check the app permissions in the settings.",
+  "saved_data_page_title": "Saved data",
+  "saved_data_page_description": "In the following you can fetch all your personal data that is stored on our server. For more information, see our privacy policy.",
+  "saved_data_page_fetch_data_button": "Fetch data",
+  "saved_data_page_fetch_data_error_message": "An error occurred while fetching your data. Check your internet connection or try again later.",
+  "saved_data_page_login_data_label": "Login data",
+  "saved_data_page_user_id_label": "User ID",
+  "saved_data_page_created_at_label": "Profile created at",
+  "saved_data_page_updated_at_label": "Profile updated at",
+  "saved_data_page_last_sign_in_at_label": "Last sign in at",
+  "saved_data_page_sessions_label": "Sessions",
+  "saved_data_page_sessions_ip_label": "IP address",
+  "saved_data_page_privacy_policy_consents_label": "Data policy consents",
+  "saved_data_page_privacy_policy_consents_accepted_at_label": "Accepted at {acceptedAt}",
+  "@saved_data_page_privacy_policy_consents_accepted_at_label": {
+    "placeholders": {
+      "acceptedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "saved_data_page_terms_of_use_consents_label": "Terms of Use consents",
+  "saved_data_page_terms_of_use_consents_accepted_at_label": "Accepted at {acceptedAt}",
+  "@saved_data_page_terms_of_use_consents_accepted_at_label": {
+    "placeholders": {
+      "acceptedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "incompatible_app_version_snackbar_content": "Your device is not compatible with the device of {firstname}. Please update both Near Drop to the latest version.",
+  "@incompatible_app_version_snackbar_content": {
+    "placeholders": {
+      "firstname": {
+        "type": "String"
+      }
+    }
+  },
+  "required_update_page_title": "Update required",
+  "required_update_page_content": "An update is required to continue using the app. Please update the app to the latest version.",
+  "required_update_page_button": "Update now",
+  "account_deleted_snackbar_content": "Your account has been successfully deleted.",
+  "account_delete_error_snackbar_content": "An error occurred while deleting your account. Check your internet connection or try again later.",
+  "open_website_button": "Visit website",
+  "onboarding_external_storage_permission_title": "External storage",
+  "onboarding_external_storage_permission_content": "Allow the app to access the external storage of your device. This allows us to save received files.",
+  "how_it_works_title": "How it works",
+  "how_it_works_subtitle": "Start Near Drop on other devices. Nearby devices are automatically detected. Then select a device to send files."
+
+}

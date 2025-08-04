@@ -161,7 +161,7 @@ class NearbyViewModel extends ChangeNotifier
          */
 
         _listenForBluetoothStateChanges();
-        _startBleRestartingProcess();
+        //_startBleRestartingProcess();
     }
 
     /// Prüft, ob eine Aktualisierung verfügbar ist und ob es sich um eine wichtige Aktualisierung handelt.
