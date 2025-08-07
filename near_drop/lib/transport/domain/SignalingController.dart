@@ -11,13 +11,14 @@ import 'package:near_drop/transport/data/dto/OfferDTO.dart';
 import 'package:near_drop/transport/domain/enums/SendResponse.dart';
 import 'package:near_drop/transport/domain/event-args/IncomingConnectionEventArgs.dart';
 import 'package:near_drop/transport/domain/models/Connection.dart';
+import 'package:uuid/uuid.dart';
 
 import '../data/SignalingGateway.dart';
 
 class SignalingController
 {
     final SignalingGateway _signalingGateway;
-    final Map<int, Connection> _connections = {};
+    final Map<String, Connection> _connections = {};
 
     StreamController<IncomingConnectionEventArgs> onIncomingConnection = StreamController<IncomingConnectionEventArgs>.broadcast();
 
@@ -32,6 +33,11 @@ class SignalingController
     void startListening()
     {
         _signalingGateway.startListening();
+    }
+
+    Connection? getCurrentConnection(Device device)
+    {
+
     }
 
     /// Wird aufgerufen, wenn ein Angebot empfangen wurde.
@@ -67,7 +73,7 @@ class SignalingController
     Future<void> _onAnswerReceived(AnswerDTO answer) async
     {
         Connection? connection = _connections[answer.connectionId];
-        if (connection == null)
+        if (connection == null || connection.device.nearbyUuid != answer.sender)
         {
             dprint("SignalingController: _onAnswerReceived: Connection not found for ID ${answer.connectionId}");
             return;
@@ -80,7 +86,7 @@ class SignalingController
     Future<void> _onIceCandidateReceived(IceCandidateDTO ice) async
     {
         Connection? connection = _connections[ice.connectionId];
-        if (connection == null)
+        if (connection == null || connection.device.nearbyUuid != ice.sender)
         {
             dprint("SignalingController: _onIceCandidateReceived: Connection not found for ID ${ice.connectionId}");
             return;
@@ -92,11 +98,11 @@ class SignalingController
     /// Versucht, eine Verbindung zu einem Gerät herzustellen.
     Future<Connection?> connect(Device device) async
     {
-        int connectionId = DateTime.now().millisecondsSinceEpoch; // Eindeutige ID basierend auf der aktuellen Zeit
+        String connectionId = Uuid().v4(); // Zufällige ConnectionId generieren
         final connection = Connection(_signalingGateway, device, connectionId);
         _connections[connectionId] = connection;
 
-        await connection.initializeAsOfferer();
+        connection.initializeAsOfferer(); // Nicht darauf warten!
 
         bool established = await connection.isEstablished;
         if (established)
@@ -113,7 +119,8 @@ class SignalingController
         }
     }
 
-    Future<void> closeConnection(int connectionId) async
+    /// Schließt eine Verbindung und räumt alle Ressourcen auf.
+    Future<void> closeConnection(String connectionId) async
     {
         Connection? connection = _connections[connectionId];
         if (connection != null)

@@ -9,4 +9,5 @@ enum SendResponse
     connectionError,
     timeout,
     userCanceled,
+    unknownError,
 }

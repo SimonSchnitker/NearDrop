@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:mime/mime.dart';
+import 'package:near_drop/transport/data/messages/CancelMessage.dart';
 import 'package:near_drop/transport/data/messages/ControlMessage.dart';
 import 'package:near_drop/transport/data/messages/FileInfoMessage.dart';
 import 'package:near_drop/transport/data/messages/FileReadyMessage.dart';
@@ -19,26 +20,39 @@ import 'messages/TransferFinishedMessage.dart';
 enum SendResult
 {
     ok,
-    receiverDeclined,
     timeout,
-    unkownError,
+    userCanceled,
+    connectionError,
+}
+
+enum RequestResult
+{
+    accepted,
+    declined,
+    timeout,
+    connectionError
 }
 
 /// Verarbeitet den Sendevorgang von Dateien über einen RTCDataChannel.
 class Sender
 {
+    static const Duration _timeoutDuration = Duration(seconds: 30);
     static const int _chunkSize = 64 * 1024; // 64 KB: Größe eines einzelnen Chunks
-    static const int _bufferedAmountThreshold = 128 * 1024; // 128 KB: Schwellenwert, ab dem der Puffer wieder Platz hat
-    static const int _highWaterMark = 128 * 1024; // 128 KB: Senden stoppen
-    static const int _lowWaterMark = 64 * 1024;  // 64 KB: Senden fortsetzen
-    static const int _chunkBatchSize = 1; // Sende 1 Chunk (64 KB) am Stück, bevor der Puffer überprüft wird
+    static const int _bufferedAmountThreshold = 64 * 1024; // Unter 64 KB: Schwellenwert, ab dem der Puffer wieder Platz hat
+    static const int _highWaterMark = 128 * 1024; // Über 128 KB: Senden stoppen
+    static const int _lowWaterMark = 64 * 1024;  // Unter 64 KB: Senden fortsetzen
 
     final RTCDataChannel _dataChannel;
     final RTCDataChannel _controlChannel;
+    int startTime = 0;
 
     // Stream für eingehende Kontrollnachrichten
     final _controlStreamController = StreamController<ControlMessage>.broadcast();
     Stream<ControlMessage> get _controlStream => _controlStreamController.stream;
+
+    // Die Completer, der aufgelöst wird, wenn das Senden abgeschlossen wurde (oder fehlschlug)
+    final _completer = Completer<SendResult>();
+    Future<SendResult> get isFinished => _completer.future;
 
     // Completer für das Event, wenn der Puffer wieder Platz hat
     Completer<void>? _lowAmountCompleter;
@@ -52,53 +66,60 @@ class Sender
             _controlStreamController.add(ControlMessage.fromMap(jsonDecode(message.text)));
         };
 
-        return;
-        // Nur unter Android verfügbar
-        if (Platform.isAndroid)
-        {
-            _dataChannel.onBufferedAmountChange = (amount, a) {
-                // Wird aufgerufen, wenn sich der Puffer ändert
-                dprint("Sender: Buffered Amount geändert: $amount, $a Bytes");
-            };
+        _dataChannel.onBufferedAmountChange = (amount, a) {
+            // Wird aufgerufen, wenn sich der Puffer ändert
+            dprint("Sender: Buffered Amount geändert: $amount, $a Bytes");
+        };
 
-            // Wird aufgerufen, wenn der Puffer des DataChannels vorher voll war und jetzt wieder Platz hat
-            _dataChannel.onBufferedAmountLow = (amount) {
-                if (_lowAmountCompleter != null && !_lowAmountCompleter!.isCompleted && amount < _lowWaterMark)
-                {
-                    dprint("✅ Event: Puffer hat wieder Platz. Setze Übertragung fort.");
-                    _lowAmountCompleter!.complete();
-                }
-            };
-        }
+        // Wird aufgerufen, wenn der Puffer des DataChannels vorher voll war und jetzt wieder Platz hat
+        _dataChannel.onBufferedAmountLow = (amount) {
+            if (_lowAmountCompleter != null && !_lowAmountCompleter!.isCompleted && amount < _lowWaterMark)
+            {
+                dprint("✅ Event: Puffer hat wieder Platz. Setze Übertragung fort.");
+                _lowAmountCompleter!.complete();
+            }
+        };
     }
 
-    /// Startet den gesamten Sendevorgang.
-    Future<SendResult> start(List<File> files, int totalSize, MimeTypeGroup mimeTypeGroup, Function(double progress) onProgress) async
+    /// Senden eine Anfrage an den Empfänger.
+    Future<RequestResult> request(int filesCount, int totalSize, MimeTypeGroup mimeTypeGroup) async
     {
         // 1. Handshake: Transfer anfragen
         dprint("Sender: TransferRequestMessage senden");
-        final request = TransferRequestMessage(files.length, totalSize, mimeTypeGroup);
-        await _controlChannel.send(RTCDataChannelMessage(jsonEncode(request.toMap())));
+        final request = TransferRequestMessage(filesCount, totalSize, mimeTypeGroup);
 
         try
         {
+            await _controlChannel.send(RTCDataChannelMessage(jsonEncode(request.toMap())));
+
             // Auf Antwort vom Empfänger warten: Akzeptieren oder Ablehnen
             dprint("Sender: Warte auf TransferAcceptMessage oder TransferDeclineMessage...");
             final response = await _controlStream.firstWhere((msg) => msg is TransferAcceptMessage || msg is TransferDeclineMessage,
-            ).timeout(const Duration(seconds: 30));
+            ).timeout(_timeoutDuration);
 
             if (response is TransferDeclineMessage)
             {
                 dprint("Sender: Transfer abgelehnt vom Empfänger.");
-                return SendResult.receiverDeclined;
+                return RequestResult.declined;
             }
         }
         on TimeoutException
         {
-            return SendResult.timeout;
+            return RequestResult.timeout;
+        }
+        catch (e)
+        {
+            return RequestResult.connectionError;
         }
 
         dprint("Sender: Transfer akzeptiert. Starte Dateiübertragung...");
+        return RequestResult.accepted;
+    }
+
+    /// Startet den gesamten Sendevorgang.
+    Future<void> start(List<File> files, Function(double progress) onProgress) async
+    {
+        startTime = DateTime.now().millisecondsSinceEpoch;
 
         // Auf asynchrone Progress-Updates vom Empfänger lauschen
         _controlStream.where((msg) => msg is ProgressMessage).listen((msg)
@@ -106,101 +127,151 @@ class Sender
             onProgress((msg as ProgressMessage).progress);
         });
 
-        // 2. Datei-Loop: Metadaten und Chunks senden
-        int start = DateTime.now().millisecondsSinceEpoch;
+        // Auf Cancel-Flag vom Empfänger lauschen
+        _controlStream.where((msg) => msg is CancelMessage).listen((msg)
+        {
+            _completer.complete(SendResult.userCanceled);
+        });
+
+        // Datei-Loop: Metadaten und Chunks senden
         for (final file in files)
         {
-            dprint("Sender: Sende FileInfoMessage für Datei ${file.path}...");
-            final fileInfo = FileInfoMessage(basename(file.path), await file.length(), lookupMimeType(file.path) ?? "");
-            await _controlChannel.send(RTCDataChannelMessage(jsonEncode(fileInfo.toMap())));
+            String filename = basename(file.path);
+            int size = await file.length();
+            String mimeType = lookupMimeType(file.path) ?? "";
 
             try
             {
-                // Warten auf Bestätigung, dass der Empfänger bereit für die Datei ist
-                dprint("Sender: Warte auf FileReadyMessage für Datei ${file.path}...");
-                await _controlStream.firstWhere((msg) => msg is FileReadyMessage).timeout(const Duration(seconds: 15));
+                await _sendFileInfo(filename, size, mimeType);
+                await _waitForFileReady();
             }
             on TimeoutException
             {
-                return SendResult.timeout;
+                _completer.complete(SendResult.timeout);
+                return;
+            }
+            catch (e)
+            {
+                _completer.complete(SendResult.connectionError);
+                return;
             }
 
-            // Chunks senden
-            final raf = await file.open(mode: FileMode.read);
-            final fileSize = await raf.length();
-            int bytesSent = 0;
-            while (bytesSent < fileSize)
+            try
             {
-                /*
+                await _sendFile(file, size);
+                await _waitForFileReceived();
+            }
+            on TimeoutException
+            {
+                _completer.complete(SendResult.timeout);
+                return;
+            }
+            catch (e)
+            {
+                _completer.complete(SendResult.connectionError);
+                return;
+            }
+        }
+
+        // Finale Nachricht senden, dass der Transfer abgeschlossen ist
+        await _sendFinished();
+        _completer.complete(SendResult.ok);
+    }
+
+    /// Sendet dem Empfänger, dass die Übertragung abgeschlossen ist
+    Future<void> _sendFinished() async
+    {
+        dprint("Sender: Sende TransferFinishedMessage...");
+        final finishedMessage = TransferFinishedMessage();
+        await _controlChannel.send(RTCDataChannelMessage(jsonEncode(finishedMessage.toMap())));
+
+        int endTime = DateTime.now().millisecondsSinceEpoch;
+        dprint("Sender: Alle Dateien gesendet. Zeit: ${(endTime - startTime) / 1000}s)");
+    }
+
+    /// Sendet Informationen einer Datei an den Empfänger.
+    Future<void> _sendFileInfo(String name, int size, String mimeType) async
+    {
+        dprint("Sender: Sende FileInfoMessage für Datei $name...");
+        final fileInfo = FileInfoMessage(name, size, mimeType);
+        await _controlChannel.send(RTCDataChannelMessage(jsonEncode(fileInfo.toMap())));
+    }
+
+    /// Wartet auf die Nachricht vom Empfänger, dass er bereit ist, eine Datei zu empfangen.
+    Future<void> _waitForFileReady() async
+    {
+        dprint("Sender: Warte auf FileReadyMessage...");
+        await _controlStream.firstWhere((msg) => msg is FileReadyMessage).timeout(_timeoutDuration);
+    }
+
+    /// Sendet eine Datei an den Empfänger.
+    Future<void> _sendFile(File file, int size) async
+    {
+        final raf = await file.open(mode: FileMode.read);
+        int bytesSent = 0;
+        while (bytesSent < size)
+        {
+            // Einen Chunk senden
+            dprint("Sende Chunks mit $_chunkSize Bytes.");
+            final chunk = await raf.read(_chunkSize);
+            if (chunk.isEmpty) break;
+
+            await _dataChannel.send(RTCDataChannelMessage.fromBinary(chunk));
+            bytesSent += chunk.length;
+
+            // Prüfe den Pufferstand nach dem Senden des Batches
+            int currentBufferedAmount = await _dataChannel.getBufferedAmount();
+            dprint("Sender: Aktueller Pufferstand: $currentBufferedAmount Bytes");
+
+            // Wenn der obere Schwellenwert überschritten ist...
+            if (currentBufferedAmount > _highWaterMark)
+            {
+                dprint("Puffer über Schwellenwert. Warte, bis er unter $_lowWaterMark Bytes fällt...");
+
+                // ...dann warte so lange, bis er den UNTEREN Schwellenwert unterschreitet.
                 if (Platform.isAndroid)
                 {
-                    // Diese Version funktioniert nur unter Android, da die bufferedAmount-Eigenschaft und die Events auf den anderen Plattformen nicht implementiert sind.
-                    if ((_dataChannel.bufferedAmount ?? 0) >= _bufferedAmountThreshold)
-                    {
-                        dprint("⏸️ Puffer voll. Pausiere und warte auf onBufferedAmountLow Event...");
-                        // Erstelle einen neuen Completer für dieses Warte-Ereignis
-                        _lowAmountCompleter = Completer<void>();
-                        // Warte hier auf das Future des Completers
-                        await _lowAmountCompleter!.future;
-                    }
-
-                    dprint("Sender: Sende Chunk mit Größe ${_chunkSize} Bytes. Buffered Amount: ${_dataChannel.bufferedAmount} Bytes");
-                    final chunk = await raf.read(_chunkSize);
-                    await _dataChannel.send(RTCDataChannelMessage.fromBinary(chunk));
-                    bytesSent += chunk.length;
+                    _lowAmountCompleter = Completer<void>();
+                    await _lowAmountCompleter!.future;
                 }
                 else
                 {
-
-                }
-                 */
-
-                // 1. Sende einen schnellen "Batch" von Chunks ohne jede Prüfung
-                dprint("Sender: Sende Batch von Chunks...");
-                for (int i = 0; i < _chunkBatchSize && bytesSent < fileSize; i++)
-                {
-                    final chunk = await raf.read(_chunkSize);
-                    if (chunk.isEmpty) break;
-
-                    await _dataChannel.send(RTCDataChannelMessage.fromBinary(chunk));
-                    bytesSent += chunk.length;
-                }
-
-                // Prüfe den Pufferstand nach dem Senden des Batches
-                int currentBufferedAmount = await _dataChannel.getBufferedAmount();
-                dprint("Sender: Aktueller Pufferstand: $currentBufferedAmount Bytes");
-
-                // 2. WENN der obere Schwellenwert überschritten ist...
-                if (currentBufferedAmount >= _highWaterMark)
-                {
-                    dprint("Puffer über Schwellenwert. Warte, bis er unter $_lowWaterMark Bytes fällt...");
-
-                    // 3. ...DANN warte so lange, bis er den UNTEREN Schwellenwert unterschreitet.
                     while (currentBufferedAmount > _lowWaterMark)
                     {
                         await Future.delayed(const Duration(milliseconds: 25));
                         currentBufferedAmount = await _dataChannel.getBufferedAmount();
                         dprint("Aktueller Pufferstand: $currentBufferedAmount Bytes");
                     }
-                    dprint("Puffer hat wieder ausreichend Platz. Pufferstand: $currentBufferedAmount Bytes");
                 }
+
+                dprint("Puffer hat wieder ausreichend Platz. Pufferstand: $currentBufferedAmount Bytes");
             }
-            await raf.close();
-
-            int end = DateTime.now().millisecondsSinceEpoch;
-            dprint("Sender: Alle Chunks für Datei ${file.path} gesendet. Zeit: ${(end - start) / 1000}s)");
-
-            // Warten auf Bestätigung, dass die Datei empfangen wurde
-            dprint("Sender: Warte auf FileReceivedMessage für Datei ${file.path}...");
-            await _controlStream.firstWhere((msg) => msg is FileReceivedMessage);
         }
 
-        // 3. Finale Nachricht senden, dass der Transfer abgeschlossen ist
-        dprint("Sender: Sende TransferFinishedMessage...");
-        final finishedMessage = TransferFinishedMessage();
-        await _controlChannel.send(RTCDataChannelMessage(jsonEncode(finishedMessage.toMap())));
+        await raf.close();
+    }
 
-        return SendResult.ok;
+    /// Wartet auf die Nachricht vom Empfänger, dass er eine Datei empfangen hat.
+    Future<void> _waitForFileReceived() async
+    {
+        // Warten auf Bestätigung, dass die Datei empfangen wurde
+        dprint("Sender: Warte auf FileReceivedMessage...");
+        await _controlStream.firstWhere((msg) => msg is FileReceivedMessage).timeout(_timeoutDuration);
+    }
+
+    /// Sendet dem Empfänger, dass wir als Sender die Übertragung abbrechen möchten.
+    Future<void> sendCancel() async
+    {
+        final cancelMessage = CancelMessage();
+
+        try
+        {
+            await _controlChannel.send(RTCDataChannelMessage(jsonEncode(cancelMessage.toMap())));
+        }
+        catch (e)
+        {
+            dprint("Fehler beim Senden des Abbrechen-Flags: $e");
+        }
     }
 
     void dispose()

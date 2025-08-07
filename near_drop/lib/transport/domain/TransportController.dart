@@ -55,26 +55,26 @@ class TransportController
             {
                 filesDirectory = await getApplicationDocumentsDirectory();
             }
+
+            if (await filesDirectory?.exists() == false)
+            {
+                filesDirectory = await filesDirectory?.create(recursive: true);
+            }
+
+            if (filesDirectory != null && await filesDirectory!.exists())
+            {
+                Receiver.setFilesDirectory(filesDirectory!);
+                return true;
+            }
+
+            dprint("Zielordner konnte nicht erstellt oder gefunden werden.");
+            return false;
         }
         catch (e)
         {
             dprint("Fehler beim Erstellen des Zielordners: $e");
             return false;
         }
-
-        if (await filesDirectory?.exists() == false)
-        {
-            filesDirectory = await filesDirectory?.create(recursive: true);
-        }
-
-        if (filesDirectory != null && await filesDirectory!.exists())
-        {
-            Receiver.setFilesDirectory(filesDirectory!);
-            return true;
-        }
-
-        dprint("Zielordner konnte nicht erstellt oder gefunden werden.");
-        return false;
     }
 
     /// Startet den Signalisierungsprozess und wartet auf eingehende Verbindungen.
@@ -83,6 +83,11 @@ class TransportController
         _signalingController.onIncomingConnection.stream.listen(_onIncomingConnection);
         _signalingController.startListening();
         dprint("Signalisierung gestartet.");
+    }
+
+    Future<void> cancelTransport(Device device) async
+    {
+        //Connection? connection = _signalingController.getConnection(connectionId);
     }
 
     /// Sendet Dateien an ein Gerät.
@@ -113,30 +118,47 @@ class TransportController
             return SendResponse.connectionError;
         }
 
-        device.communicationInfo.setSending(0);
         final sender = Sender(connection.dataChannel!, connection.controlChannel!);
 
-        SendResult result = await sender.start(files, totalSize, mimeTypeGroup, (progress) {
+        // Sendeanfrage stellen
+        device.communicationInfo.setRequesting();
+        RequestResult requestResult = await sender.request(files.length, totalSize, mimeTypeGroup);
+        switch (requestResult)
+        {
+            case RequestResult.accepted:
+                break;
+            case RequestResult.declined:
+                return SendResponse.receiverDeclined;
+            case RequestResult.timeout:
+                return SendResponse.timeout;
+            case RequestResult.connectionError:
+                return SendResponse.connectionError;
+        }
+
+        // Dateien senden
+        device.communicationInfo.setSending(0);
+        await sender.start(files, (progress) {
             device.communicationInfo.setSending(progress);
         });
+        SendResult sendResult = await sender.isFinished;
 
-        await _signalingController.closeConnection(connection.connectionId);
+        _signalingController.closeConnection(connection.connectionId); // Nicht darauf warten!
         sender.dispose();
 
-        switch (result)
+        switch (sendResult)
         {
             case SendResult.ok:
                 device.communicationInfo.setSuccessState(SuccessState.sendedSuccessfully);
                 return SendResponse.ok;
-            case SendResult.receiverDeclined:
-                device.communicationInfo.setErrorState(ErrorState.receiverDeclined);
-                return SendResponse.receiverDeclined;
+            case SendResult.userCanceled:
+                device.communicationInfo.setErrorState(ErrorState.userCanceled);
+                return SendResponse.userCanceled;
             case SendResult.timeout:
                 device.communicationInfo.setErrorState(ErrorState.error);
                 return SendResponse.timeout;
-            default:
+            case SendResult.connectionError:
                 device.communicationInfo.setErrorState(ErrorState.error);
-                return SendResponse.receiverError;
+                return SendResponse.connectionError;
         }
     }
 
@@ -211,9 +233,17 @@ class TransportController
         {
             args.device.communicationInfo.setSuccessState(SuccessState.receivedSuccessfully);
         }
-        else if (response == ReceiveResult.fileWriteError || response == ReceiveResult.unknownError)
+        else if (response == ReceiveResult.fileWriteError || response == ReceiveResult.connectionError)
         {
             args.device.communicationInfo.setErrorState(ErrorState.error);
+            await receiver.deleteCurrentBrokenFile();
+            await _deleteReceivedFiles(receivedFiles);
+        }
+        else if (response == ReceiveResult.userCanceled)
+        {
+            args.device.communicationInfo.setErrorState(ErrorState.userCanceled);
+            await receiver.deleteCurrentBrokenFile();
+            await _deleteReceivedFiles(receivedFiles);
         }
 
         _signalingController.closeConnection(args.connection.connectionId);
@@ -221,6 +251,23 @@ class TransportController
 
         // Dialog mit den empfangenen Dateien anzeigen
         await showImagePreviewDialog(context: NearbyPage.scaffoldKey.currentContext!, allFiles: receivedFiles, device: args.device, targetDirectory: filesDirectory, mimeTypeGroup: mimeTypeGroup);
+    }
+
+    /// Löscht alle empfangenen Dateien.
+    /// Wird genutzt, wenn der Empfang nicht vollständig erfolgreich war.
+    Future<void> _deleteReceivedFiles(List<ReceivedFile> receivedFiles) async
+    {
+        for (ReceivedFile file in receivedFiles)
+        {
+            try
+            {
+                File(file.path).delete();
+            }
+            catch (e)
+            {
+                // Ignorieren
+            }
+        }
     }
 
     /// Modifiziert das Erstellungsdatum der empfangenen Datei.

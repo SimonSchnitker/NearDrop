@@ -25,11 +25,13 @@ class TransportViewModel extends ChangeNotifier
         notifyListeners();
     }
 
+    /// Sendet Dateien an ein Gerät.
     Future<SendResponse> sendFiles(Device device, List<File> files) async
     {
         return await _transportController.sendFiles(device, files);
     }
 
+    /// Bricht den Transport von Dateien zu einem Gerät ab.
     Future<void> cancelTransport(Device device) async
     {
 

@@ -15,11 +15,11 @@ class SignalingGateway
     final onIceCandidateReceived = StreamController<IceCandidateDTO>.broadcast();
 
     /// Sendet ein WebRTC-Angebot an ein Gerät.
-    Future<bool> sendOffer(Device device, RTCSessionDescription offer, int connectionId) async
+    Future<bool> sendOffer(Device device, RTCSessionDescription offer, String connectionId) async
     {
         final channel = Supabase.instance.client.channel(device.nearbyUuid);
         final result = await channel.sendBroadcastMessage(event: "webrtc-offer", payload: {
-            "sender": Runtime.nearbyUuid,
+            "nearby-uuid": Runtime.nearbyUuid,
             "connectionId": connectionId,
             "sdp": offer.sdp,
             "sdp-type": offer.type,
@@ -29,11 +29,11 @@ class SignalingGateway
     }
 
     /// Sendet eine WebRTC-Antwort an ein Gerät.
-    Future<bool> sendAnswer(Device device, RTCSessionDescription answer, int connectionId) async
+    Future<bool> sendAnswer(Device device, RTCSessionDescription answer, String connectionId) async
     {
         final channel = Supabase.instance.client.channel(device.nearbyUuid);
         final result = await channel.sendBroadcastMessage(event: "webrtc-answer", payload: {
-            "sender": Runtime.nearbyUuid,
+            "nearby-uuid": Runtime.nearbyUuid,
             "connectionId": connectionId,
             "sdp": answer.sdp,
             "sdp-type": answer.type,
@@ -43,11 +43,11 @@ class SignalingGateway
     }
 
     /// Sendet einen ICE-Kandidaten an ein Gerät.
-    Future<bool> sendIceCandidate(Device device, RTCIceCandidate candidate, int connectionId) async
+    Future<bool> sendIceCandidate(Device device, RTCIceCandidate candidate, String connectionId) async
     {
         final channel = Supabase.instance.client.channel(device.nearbyUuid);
         final result = await channel.sendBroadcastMessage(event: "webrtc-ice", payload: {
-            "sender": Runtime.nearbyUuid,
+            "nearby-uuid": Runtime.nearbyUuid,
             "connectionId": connectionId,
             "candidate": candidate.candidate,
             "sdpMid": candidate.sdpMid,
@@ -58,12 +58,12 @@ class SignalingGateway
     }
 
     /// Sendet eine Batch von ICE-Kandidaten an ein Gerät.
-    Future<bool> sendIceCandidateBatch(Device device, List<RTCIceCandidate> candidates, int connectionId) async
+    Future<bool> sendIceCandidateBatch(Device device, List<RTCIceCandidate> candidates, String connectionId) async
     {
         final channel = Supabase.instance.client.channel(device.nearbyUuid);
 
         final Map<String, dynamic> payload = {
-            "sender": Runtime.nearbyUuid,
+            "nearby-uuid": Runtime.nearbyUuid,
             "connectionId": connectionId,
             "candidates": candidates.map((candidate) => {
                 "candidate": candidate.candidate,
@@ -96,8 +96,8 @@ class SignalingGateway
         });
         Runtime.realtimeChannel.onBroadcast(event: "webrtc-ice-batch", callback: (data) async {
             final payload = data["payload"];
-            String sender = payload["sender"];
-            int connectionId = payload["connectionId"];
+            String sender = payload["nearby-uuid"];
+            String connectionId = payload["connectionId"];
 
             for (final candidate in payload["candidates"])
             {

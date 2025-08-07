@@ -5,6 +5,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:mutex/mutex.dart';
 import 'package:near_drop/transport/data/dto/ReceivedFileDTO.dart';
 import 'package:near_drop/transport/data/dto/SendRequestDTO.dart';
+import 'package:near_drop/transport/data/messages/CancelMessage.dart';
 import 'package:near_drop/transport/data/messages/FileInfoMessage.dart';
 import 'package:near_drop/transport/data/messages/FileReadyMessage.dart';
 import 'package:near_drop/transport/data/messages/FileReceivedMessage.dart';
@@ -17,24 +18,35 @@ import 'package:path/path.dart';
 import '../../main.dart';
 import 'messages/ControlMessage.dart';
 
+enum ReceiveState
+{
+    waitingForRequest,
+    waitingForFileInfoOrFinish,
+    receivingFile,
+    finished
+}
+
 enum ReceiveResult
 {
     ok,
     declined,
     fileWriteError,
-    unknownError,
+    userCanceled,
+    connectionError,
 }
 
 /// Verarbeitet eingehende Dateien über einen WebRTC-Datenkanal.
 class Receiver
 {
+    static const Duration _progressInterval = Duration(milliseconds: 250);
+    static late final Directory _filesDirectory;
+
     final RTCDataChannel _dataChannel;
     final RTCDataChannel _controlChannel;
-    static late final Directory _filesDirectory;
     final Mutex _writeMutex = Mutex();
     Timer? _progressTimer;
-    static const Duration _progressInterval = Duration(milliseconds: 250);
     int startTime = 0;
+    ReceiveState _receiveState = ReceiveState.waitingForRequest;
 
     String _currentFileName = "";
     String _currentFilePath = "";
@@ -49,14 +61,13 @@ class Receiver
     final _completer = Completer<ReceiveResult>();
     Future<ReceiveResult> get isFinished => _completer.future;
 
-    // Callback, der für jede fertige Datei aufgerufen wird
     late final Function(ReceivedFileDTO file) _onFileReceived;
     late final Function(double progress) _onProgress;
     late final Function(SendRequestDTO sendRequest) _onSendRequest;
 
     Receiver(this._dataChannel, this._controlChannel)
     {
-        _dataChannel.bufferedAmountLowThreshold = 2 * 1024 * 1024; // 6 MB
+        //_dataChannel.bufferedAmountLowThreshold = 2 * 1024 * 1024; // 6 MB
         _dataChannel.onMessage = _handleDataChunk;
         _controlChannel.onMessage = _handleControlMessage;
     }
@@ -84,18 +95,26 @@ class Receiver
         switch (controlMessage)
         {
             case TransferRequestMessage():
+                if (_receiveState != ReceiveState.waitingForRequest) return;
                 dprint("Empfänger: TransferRequestMessage empfangen.");
                 _totalSize = controlMessage.totalSize;
                 _onSendRequest(SendRequestDTO(controlMessage.filesCount, controlMessage.totalSize, controlMessage.mimeTypeGroup));
                 break;
             case FileInfoMessage():
+                if (_receiveState != ReceiveState.waitingForFileInfoOrFinish) return;
                 dprint("Empfänger: FileInfoMessage empfangen: ${controlMessage.name}, Größe: ${controlMessage.size}");
                 _handleFileInfoMessage(controlMessage);
                 break;
             case TransferFinishedMessage():
+                if (_receiveState != ReceiveState.waitingForFileInfoOrFinish) return;
+                _receiveState = ReceiveState.finished;
                 int endTime = DateTime.now().millisecondsSinceEpoch;
                 dprint("Empfänger: TransferFinishedMessage empfangen. Dauer: ${(endTime - startTime) / 1000} Sekunden");
                 _completer.complete(ReceiveResult.ok);
+            case CancelMessage():
+                dprint("Sender möchte das Senden abbrechen.");
+                _receiveState = ReceiveState.finished;
+                _completer.complete(ReceiveResult.userCanceled);
             default:
                 // Unbekannter Steuerbefehl, ignorieren
                 dprint("Unbekannter Steuerbefehl empfangen: ${controlMessage.runtimeType}");
@@ -106,6 +125,7 @@ class Receiver
     /// Verarbeitet einen eingehenden Daten-Chunk.
     Future<void> _handleDataChunk(RTCDataChannelMessage message) async
     {
+        if (_receiveState != ReceiveState.receivingFile) return;
         if (!message.isBinary) return;
 
         dprint("Empfänger: Datenchunk empfangen. Größe: ${message.binary.length} Bytes");
@@ -146,6 +166,7 @@ class Receiver
                 _currentMimeType = "";
                 _currentRaf?.close();
                 _currentRaf = null;
+                _receiveState = ReceiveState.waitingForFileInfoOrFinish;
 
                 // Bestätigungsnachricht senden
                 dprint("Empfänger: Sende FileReceivedMessage.");
@@ -155,7 +176,7 @@ class Receiver
             catch (e)
             {
                 dprint("Fehler beim Verarbeiten der empfangenen Datei: $e");
-                _completer.complete(ReceiveResult.unknownError);
+                _completer.complete(ReceiveResult.connectionError);
                 return;
             }
             finally
@@ -179,50 +200,80 @@ class Receiver
             final file = await _createFile(_filesDirectory, _currentFileName);
             _currentFilePath = file.path;
             _currentRaf = await file.open(mode: FileMode.writeOnly);
+        }
+        catch (e)
+        {
+            dprint("Fehler beim Erstellen der zu empfangenen Datei: $e");
+            _completer.complete(ReceiveResult.fileWriteError);
+            return;
+        }
 
-            // Senden, dass wir bereit sind, die Datei zu empfangen
-            final readyMessage = FileReadyMessage();
+        // Senden, dass wir bereit sind, die Datei zu empfangen
+        _receiveState = ReceiveState.receivingFile;
+        final readyMessage = FileReadyMessage();
+        try
+        {
             await _controlChannel.send(RTCDataChannelMessage(jsonEncode(readyMessage.toMap())));
         }
         catch (e)
         {
-            dprint("Fehler beim Verarbeiten der FileInfoMessage: $e");
-            _completer.complete(ReceiveResult.unknownError);
+            dprint("Fehler beim Senden der FileReadyMessage: $e");
+            _completer.complete(ReceiveResult.connectionError);
         }
     }
 
     /// Sendet dem Sender, dass wir den Transfer akzeptieren.
     Future<void> sendAccept() async
     {
+        dprint("Empfänger: Sende TransferAcceptMessage.");
+        _receiveState = ReceiveState.waitingForFileInfoOrFinish;
+        final acceptMessage = TransferAcceptMessage();
+
         try
         {
-            dprint("Empfänger: Sende TransferAcceptMessage.");
-            final acceptMessage = TransferAcceptMessage();
             await _controlChannel.send(RTCDataChannelMessage(jsonEncode(acceptMessage.toMap())));
-            startTime = DateTime.now().millisecondsSinceEpoch;
-            _startProgressReporting();
         }
         catch (e)
         {
             dprint("Fehler beim Senden der Transfer-Akzeptanz: $e");
-            _completer.complete(ReceiveResult.unknownError);
+            _completer.complete(ReceiveResult.connectionError);
             return;
         }
+
+        startTime = DateTime.now().millisecondsSinceEpoch;
+        _startProgressReporting();
     }
 
     /// Sendet dem Senderr, dass wir den Transfer ablehnen.
     Future<void> sendDecline() async
     {
+        dprint("Empfänger: Sende TransferDeclineMessage.");
+        _receiveState = ReceiveState.finished;
+        final declineMessage = TransferDeclineMessage();
+
         try
         {
-            dprint("Empfänger: Sende TransferDeclineMessage.");
-            final declineMessage = TransferDeclineMessage();
-            return _controlChannel.send(RTCDataChannelMessage(jsonEncode(declineMessage.toMap())));
+            await _controlChannel.send(RTCDataChannelMessage(jsonEncode(declineMessage.toMap())));
         }
         catch (e)
         {
             dprint("Fehler beim Senden der Transfer-Ablehnung: $e");
-            _completer.complete(ReceiveResult.unknownError);
+        }
+    }
+
+    /// Sendet dem Sender, dass wir als Empfänger die Übertragung abbrechen möchten.
+    Future<void> sendCancel() async
+    {
+        _receiveState = ReceiveState.finished;
+        final cancelMessage = CancelMessage();
+
+        try
+        {
+            await _controlChannel.send(RTCDataChannelMessage(jsonEncode(cancelMessage.toMap())));
+        }
+        catch (e)
+        {
+            dprint("Fehler beim Senden des Abbrechen-Flags: $e");
         }
     }
 
@@ -232,6 +283,12 @@ class Receiver
         _progressTimer?.cancel();
         _progressTimer = Timer.periodic(_progressInterval, (timer) async
         {
+            // Wenn die Übertragung beendet wurde, den Timer stoppen
+            if (_receiveState == ReceiveState.finished)
+            {
+                timer.cancel();
+            }
+
             if (_totalSize == 0) return;
             double progress = _totalReceivedBytes / _totalSize;
 
@@ -239,12 +296,6 @@ class Receiver
             final progressMessage = ProgressMessage(progress);
             await _controlChannel.send(RTCDataChannelMessage(jsonEncode(progressMessage.toMap())));
             _onProgress(progress); // Callback aufrufen, um Fortschritt an UI zu melden
-
-            // Wenn die Übertragung fertig ist, den Timer stoppen
-            if (_totalReceivedBytes >= _totalSize)
-            {
-                timer.cancel();
-            }
         });
     }
 
@@ -266,8 +317,32 @@ class Receiver
         return file;
     }
 
+    /// Löscht die Datei, in die aktuell geschrieben wird.
+    /// Notwendig, wenn während der Übertragung ein Fehler auftritt.
+    Future<void> deleteCurrentBrokenFile() async
+    {
+        try
+        {
+            _currentRaf?.close();
+        }
+        catch (e)
+        {
+            // Ignorieren
+        }
+
+        try
+        {
+            File(_currentFilePath).delete();
+        }
+        catch (e)
+        {
+            // Ignorieren
+        }
+    }
+
     void dispose()
     {
+        _receiveState = ReceiveState.finished;
         _progressTimer?.cancel();
     }
 }

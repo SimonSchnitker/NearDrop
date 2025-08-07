@@ -2,7 +2,7 @@
 class OfferDTO
 {
     String sender;
-    int connectionId;
+    String connectionId;
     String sdp;
     String sdpType;
 
@@ -11,8 +11,8 @@ class OfferDTO
     static OfferDTO fromMap(Map<String, dynamic> map)
     {
         return OfferDTO(
-            map['sender'] as String,
-            map['connectionId'] as int,
+            map['nearby-uuid'] as String,
+            map['connectionId'] as String,
             map['sdp'] as String,
             map['sdp-type'] as String
         );

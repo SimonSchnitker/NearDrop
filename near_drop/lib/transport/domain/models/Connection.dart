@@ -2,12 +2,23 @@ import 'dart:async';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:near_drop/core/domain/entity/Device.dart';
+import 'package:near_drop/transport/data/Sender.dart';
 import 'package:near_drop/transport/data/SignalingGateway.dart';
 import '../../../main.dart';
+import '../../data/Receiver.dart';
+
+enum Role
+{
+    none,
+    sender,
+    receiver
+}
 
 /// Stellt eine WebRTC-Verbindung zu einem anderen Gerät her und verwaltet die DataChannels für den Datenaustausch.
 class Connection
 {
+    static const _waitingForAnswerDuration = Duration(seconds: 3);
+    static const _timeout = Duration(seconds: 12);
     static const dataChannelName = "data";
     static const controlChannelName = "control";
     static final configuration = {
@@ -25,11 +36,16 @@ class Connection
     };
 
     final SignalingGateway _signalingGateway;
-    final int connectionId;
+    final int timestamp = DateTime.now().millisecondsSinceEpoch;
+    final String connectionId;
     final Device device;
     late RTCPeerConnection peerConnection;
     RTCDataChannel? dataChannel;
     RTCDataChannel? controlChannel;
+
+    Role _role = Role.none;
+    Sender? sender;
+    Receiver? receiver;
 
     // Die Completer, der aufgelöst wird, wenn die Verbindung steht (oder fehlschlägt)
     final _completer = Completer<bool>();
@@ -43,6 +59,7 @@ class Connection
     /// Initialisiert die Verbindung als Offerer (Sender).
     Future<void> initializeAsOfferer() async
     {
+        _role = Role.sender;
         peerConnection = await createPeerConnection(configuration);
 
         // Sender erstellt aktiv die DataChannels
@@ -54,15 +71,38 @@ class Connection
         _setIceCandidateListener();
         _setOffererDataChannelListeners();
 
-        // Angebot erstellen und über Supabase senden
+        // Angebot erstellen
         RTCSessionDescription offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
+
+        // Timeout einrichten
+        Future.delayed(_timeout, () {
+            if (!_completer.isCompleted)
+            {
+                _completer.complete(false);
+            }
+        });
+
+        // Angebot über Supabase senden und ggf. wiederholen
         await _signalingGateway.sendOffer(device, offer, connectionId);
+        await Future.delayed(_waitingForAnswerDuration);
+        if (!_isRemoteDescriptionSet)
+        {
+            await _signalingGateway.sendOffer(device, offer, connectionId);
+
+            // Wenn nach doppelter Zeit immernoch keine Antwort kam, ist der Empfänger vermutlich nicht erreichbar
+            await Future.delayed(_waitingForAnswerDuration * 2);
+            if (!_isRemoteDescriptionSet)
+            {
+                _completer.complete(false);
+            }
+        }
     }
 
     /// Initialisiert die Verbindung als Answerer (Empfänger).
     Future<void> initializeAsAnswerer(RTCSessionDescription offer) async
     {
+        _role = Role.receiver;
         peerConnection = await createPeerConnection(configuration);
         _setPeerConnectionListener();
         _setIceCandidateListener();
@@ -133,6 +173,7 @@ class Connection
             // Wenn beide Channels offen sind, wurde die Verbindung erfolgreich hergestellt
             if (dataChannel!.state == RTCDataChannelState.RTCDataChannelOpen && controlChannel!.state == RTCDataChannelState.RTCDataChannelOpen)
             {
+                sender = Sender(dataChannel!, controlChannel!);
                 _completer.complete(true);
             }
         }
@@ -161,6 +202,7 @@ class Connection
             // Wenn beide Channels offen sind, wurde die Verbindung erfolgreich hergestellt
             if (dataChannel?.state == RTCDataChannelState.RTCDataChannelOpen && controlChannel?.state == RTCDataChannelState.RTCDataChannelOpen)
             {
+                receiver = Receiver(dataChannel!, controlChannel!);
                 _completer.complete(true);
             }
         };
@@ -184,6 +226,7 @@ class Connection
         }
     }
 
+    /// Sendet die zwischengespeicherten ICE-Kandidaten an den anderen Peer.
     Future<void> _sendPufferedIceCandidates() async
     {
         if (_iceCandidateBuffer.isNotEmpty)
@@ -204,12 +247,28 @@ class Connection
         try
         {
             await dataChannel?.close();
+        }
+        catch (e)
+        {
+            dprint("Unbekannter Fehler beim Schließen des Data-Kanals: $e");
+        }
+
+        try
+        {
             await controlChannel?.close();
+        }
+        catch (e)
+        {
+            dprint("Unbekannter Fehler beim Schließen des Control-Kanals.: $e");
+        }
+
+        try
+        {
             await peerConnection.close();
         }
         catch (e)
         {
-            dprint("Unbekannter Fehler beim Schließen der Verbindung: $e");
+            dprint("Unbekannter Fehler beim Schließen der PeerConnection: $e");
         }
     }
 }
