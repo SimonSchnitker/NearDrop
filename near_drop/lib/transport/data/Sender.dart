@@ -242,7 +242,7 @@ class Sender
                 dprint("Puffer über Schwellenwert. Warte, bis er unter $_lowWaterMark Bytes fällt...");
 
                 // ...dann warte so lange, bis er den UNTEREN Schwellenwert unterschreitet.
-                if (Platform.isAndroid)
+                if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS)
                 {
                     _lowAmountCompleter = Completer<void>();
                     await _lowAmountCompleter!.future;

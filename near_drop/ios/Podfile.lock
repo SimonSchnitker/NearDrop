@@ -47,9 +47,9 @@ PODS:
   - Flutter (1.0.0)
   - flutter_blue_plus (0.0.1):
     - Flutter
-  - flutter_webrtc (0.12.6):
+  - flutter_webrtc (1.0.0):
     - Flutter
-    - WebRTC-SDK (= 125.6422.06)
+    - WebRTC-SDK (= 137.7151.02)
   - gal (1.0.0):
     - Flutter
     - FlutterMacOS
@@ -72,16 +72,16 @@ PODS:
   - qr_code_scanner_plus (0.2.6):
     - Flutter
     - MTBBarcodeScanner
-  - SDWebImage (5.21.0):
-    - SDWebImage/Core (= 5.21.0)
-  - SDWebImage/Core (5.21.0)
+  - SDWebImage (5.21.1):
+    - SDWebImage/Core (= 5.21.1)
+  - SDWebImage/Core (5.21.1)
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
   - SwiftyGif (5.4.5)
   - url_launcher_ios (0.0.1):
     - Flutter
-  - WebRTC-SDK (125.6422.06)
+  - WebRTC-SDK (137.7151.02)
 
 DEPENDENCIES:
   - app_links (from `.symlinks/plugins/app_links/ios`)
@@ -167,7 +167,7 @@ SPEC CHECKSUMS:
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_blue_plus: e5808fc4e5ebc58bb911635f8fdaf5e2b4da2754
-  flutter_webrtc: 57f32415b8744e806f9c2a96ccdb60c6a627ba33
+  flutter_webrtc: 6f7da106613d52ade777d5b4875a43f48c28b457
   gal: baecd024ebfd13c441269ca7404792a7152fde89
   image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
   in_app_review: 5596fe56fab799e8edb3561c03d053363ab13457
@@ -178,12 +178,12 @@ SPEC CHECKSUMS:
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   qr_code_scanner_plus: 7e087021bc69873140e0754750eb87d867bed755
-  SDWebImage: f84b0feeb08d2d11e6a9b843cb06d75ebf5b8868
+  SDWebImage: f29024626962457f3470184232766516dee8dfea
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
-  WebRTC-SDK: 79942c006ea64f6fb48d7da8a4786dfc820bc1db
+  WebRTC-SDK: d20de357dcbf7c9696b124b39f3ff62125107e4b
 
-PODFILE CHECKSUM: 6b2014e27be1acfe2771f5fd188e9c0316c9021c
+PODFILE CHECKSUM: af3a46fa6e25dd9a4ebbb219723878605ea2f939
 
 COCOAPODS: 1.16.2
