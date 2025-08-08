@@ -189,14 +189,13 @@ class Receiver
     /// Verarbeitet eine eingehende FileInfoMessage, die Informationen über die zu empfangende Datei enthält.
     Future<void> _handleFileInfoMessage(FileInfoMessage message) async
     {
+        _currentFileName = message.name;
+        _currentFileSize = message.size;
+        _currentMimeType = message.mimeType;
+        _currentFileBytes = 0;
+
         try
         {
-            _currentFileName = message.name;
-            _currentFileSize = message.size;
-            _currentMimeType = message.mimeType;
-            _currentFileBytes = 0;
-
-            // Datei im Zielordner erstellen
             final file = await _createFile(_filesDirectory, _currentFileName);
             _currentFilePath = file.path;
             _currentRaf = await file.open(mode: FileMode.writeOnly);
@@ -225,6 +224,11 @@ class Receiver
     /// Sendet dem Sender, dass wir den Transfer akzeptieren.
     Future<void> sendAccept() async
     {
+        if (_receiveState != ReceiveState.waitingForRequest || _controlChannel.state != RTCDataChannelState.RTCDataChannelOpen)
+        {
+            return;
+        }
+
         dprint("Empfänger: Sende TransferAcceptMessage.");
         _receiveState = ReceiveState.waitingForFileInfoOrFinish;
         final acceptMessage = TransferAcceptMessage();
@@ -247,6 +251,11 @@ class Receiver
     /// Sendet dem Senderr, dass wir den Transfer ablehnen.
     Future<void> sendDecline() async
     {
+        if (_receiveState != ReceiveState.waitingForRequest || _controlChannel.state != RTCDataChannelState.RTCDataChannelOpen)
+        {
+            return;
+        }
+
         dprint("Empfänger: Sende TransferDeclineMessage.");
         _receiveState = ReceiveState.finished;
         final declineMessage = TransferDeclineMessage();
@@ -284,9 +293,11 @@ class Receiver
         _progressTimer = Timer.periodic(_progressInterval, (timer) async
         {
             // Wenn die Übertragung beendet wurde, den Timer stoppen
-            if (_receiveState == ReceiveState.finished)
+            if (_receiveState == ReceiveState.finished || _dataChannel.state != RTCDataChannelState.RTCDataChannelOpen)
             {
+                _receiveState = ReceiveState.finished; // Sicherheitshalbar
                 timer.cancel();
+                return;
             }
 
             if (_totalSize == 0) return;

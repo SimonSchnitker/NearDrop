@@ -45,14 +45,19 @@ class Sender
     final RTCDataChannel _dataChannel;
     final RTCDataChannel _controlChannel;
     int startTime = 0;
+    bool _isCanceled = false;
 
     // Stream für eingehende Kontrollnachrichten
     final _controlStreamController = StreamController<ControlMessage>.broadcast();
     Stream<ControlMessage> get _controlStream => _controlStreamController.stream;
 
     // Die Completer, der aufgelöst wird, wenn das Senden abgeschlossen wurde (oder fehlschlug)
-    final _completer = Completer<SendResult>();
-    Future<SendResult> get isFinished => _completer.future;
+    final _sendCompleter = Completer<SendResult>();
+    Future<SendResult> get sendResult => _sendCompleter.future;
+
+    // Die Completer, der aufgelöst wird, wenn das das Anfragen abgeschlossen wurde
+    final _requestCompleter = Completer<RequestResult>();
+    Future<RequestResult> get requestResult => _requestCompleter.future;
 
     // Completer für das Event, wenn der Puffer wieder Platz hat
     Completer<void>? _lowAmountCompleter;
@@ -82,7 +87,7 @@ class Sender
     }
 
     /// Senden eine Anfrage an den Empfänger.
-    Future<RequestResult> request(int filesCount, int totalSize, MimeTypeGroup mimeTypeGroup) async
+    void request(int filesCount, int totalSize, MimeTypeGroup mimeTypeGroup) async
     {
         // 1. Handshake: Transfer anfragen
         dprint("Sender: TransferRequestMessage senden");
@@ -100,24 +105,27 @@ class Sender
             if (response is TransferDeclineMessage)
             {
                 dprint("Sender: Transfer abgelehnt vom Empfänger.");
-                return RequestResult.declined;
+                _requestCompleter.complete(RequestResult.declined);
+                return;
             }
         }
         on TimeoutException
         {
-            return RequestResult.timeout;
+            _requestCompleter.complete(RequestResult.timeout);
+            return;
         }
         catch (e)
         {
-            return RequestResult.connectionError;
+            _requestCompleter.complete(RequestResult.connectionError);
+            return;
         }
 
         dprint("Sender: Transfer akzeptiert. Starte Dateiübertragung...");
-        return RequestResult.accepted;
+        _requestCompleter.complete(RequestResult.accepted);
     }
 
     /// Startet den gesamten Sendevorgang.
-    Future<void> start(List<File> files, Function(double progress) onProgress) async
+    void start(List<File> files, Function(double progress) onProgress) async
     {
         startTime = DateTime.now().millisecondsSinceEpoch;
 
@@ -130,12 +138,15 @@ class Sender
         // Auf Cancel-Flag vom Empfänger lauschen
         _controlStream.where((msg) => msg is CancelMessage).listen((msg)
         {
-            _completer.complete(SendResult.userCanceled);
+            _isCanceled = true;
+            _sendCompleter.complete(SendResult.userCanceled);
         });
 
         // Datei-Loop: Metadaten und Chunks senden
         for (final file in files)
         {
+            if (_isCanceled) return; // Regelmäßig nach _isCanceled prüfen
+
             String filename = basename(file.path);
             int size = await file.length();
             String mimeType = lookupMimeType(file.path) ?? "";
@@ -147,12 +158,12 @@ class Sender
             }
             on TimeoutException
             {
-                _completer.complete(SendResult.timeout);
+                _sendCompleter.complete(SendResult.timeout);
                 return;
             }
             catch (e)
             {
-                _completer.complete(SendResult.connectionError);
+                _sendCompleter.complete(SendResult.connectionError);
                 return;
             }
 
@@ -163,19 +174,19 @@ class Sender
             }
             on TimeoutException
             {
-                _completer.complete(SendResult.timeout);
+                _sendCompleter.complete(SendResult.timeout);
                 return;
             }
             catch (e)
             {
-                _completer.complete(SendResult.connectionError);
+                _sendCompleter.complete(SendResult.connectionError);
                 return;
             }
         }
 
         // Finale Nachricht senden, dass der Transfer abgeschlossen ist
         await _sendFinished();
-        _completer.complete(SendResult.ok);
+        _sendCompleter.complete(SendResult.ok);
     }
 
     /// Sendet dem Empfänger, dass die Übertragung abgeschlossen ist
@@ -211,6 +222,8 @@ class Sender
         int bytesSent = 0;
         while (bytesSent < size)
         {
+            if (_isCanceled) return; // Regelmäßig nach _isCanceled prüfen
+
             // Einen Chunk senden
             dprint("Sende Chunks mit $_chunkSize Bytes.");
             final chunk = await raf.read(_chunkSize);
@@ -238,6 +251,8 @@ class Sender
                 {
                     while (currentBufferedAmount > _lowWaterMark)
                     {
+                        if (_isCanceled) return; // Regelmäßig nach _isCanceled prüfen
+
                         await Future.delayed(const Duration(milliseconds: 25));
                         currentBufferedAmount = await _dataChannel.getBufferedAmount();
                         dprint("Aktueller Pufferstand: $currentBufferedAmount Bytes");
@@ -262,6 +277,7 @@ class Sender
     /// Sendet dem Empfänger, dass wir als Sender die Übertragung abbrechen möchten.
     Future<void> sendCancel() async
     {
+        _isCanceled = true;
         final cancelMessage = CancelMessage();
 
         try
@@ -272,10 +288,14 @@ class Sender
         {
             dprint("Fehler beim Senden des Abbrechen-Flags: $e");
         }
+
+        _requestCompleter.complete(RequestResult.declined);
+        _sendCompleter.complete(SendResult.userCanceled);
     }
 
     void dispose()
     {
+        _isCanceled = true;
         _controlStreamController.close();
     }
 }

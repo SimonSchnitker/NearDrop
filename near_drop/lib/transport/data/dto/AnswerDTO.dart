@@ -1,11 +1,11 @@
 class AnswerDTO
 {
-    String sender;
+    String nearbyUuid;
     String connectionId;
     String sdp;
     String sdpType;
 
-    AnswerDTO(this.sender, this.connectionId, this.sdp, this.sdpType);
+    AnswerDTO(this.nearbyUuid, this.connectionId, this.sdp, this.sdpType);
 
     static AnswerDTO fromMap(Map<String, dynamic> map)
     {

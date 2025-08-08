@@ -1,12 +1,12 @@
 /// Definiert die Struktur eines Angebots (Offer) für WebRTC-Verbindungen.
 class OfferDTO
 {
-    String sender;
+    String nearbyUuid;
     String connectionId;
     String sdp;
     String sdpType;
 
-    OfferDTO(this.sender, this.connectionId, this.sdp, this.sdpType);
+    OfferDTO(this.nearbyUuid, this.connectionId, this.sdp, this.sdpType);
 
     static OfferDTO fromMap(Map<String, dynamic> map)
     {

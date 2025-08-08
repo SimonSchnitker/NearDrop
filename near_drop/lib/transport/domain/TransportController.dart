@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:mime/mime.dart';
+import 'package:near_drop/core/domain/enums/CommunicationState.dart';
 import 'package:near_drop/core/domain/enums/SuccessState.dart';
 import 'package:near_drop/transport/data/Receiver.dart';
 import 'package:near_drop/transport/data/Sender.dart';
@@ -85,9 +86,40 @@ class TransportController
         dprint("Signalisierung gestartet.");
     }
 
+    /// Bricht die Übertragung zwischen einem Gerät ab.
     Future<void> cancelTransport(Device device) async
     {
-        //Connection? connection = _signalingController.getConnection(connectionId);
+        device.communicationInfo.setCanceling();
+        Connection? connection = _signalingController.getCurrentConnection(device);
+        if (connection == null)
+        {
+            device.communicationInfo.setErrorState(ErrorState.userCanceled);
+            return;
+        }
+
+        // Im connection-State den Completer verwenden
+        if (device.communicationInfo.communicationState == CommunicationState.connecting)
+        {
+            connection.completer.complete(false);
+            device.communicationInfo.setErrorState(ErrorState.userCanceled);
+            return;
+        }
+
+        // Ansonsten eine Cancel-Nachricht an den anderen Peer senden
+        if (connection.role == Role.sender)
+        {
+            await connection.sender!.sendCancel();
+            connection.sender!.dispose();
+        }
+        else if (connection.role == Role.receiver)
+        {
+            await connection.receiver!.sendCancel();
+            connection.receiver!.dispose();
+        }
+
+        // Hinweis: Verbindung nicht schließen, da der andere Peer die Verbindung schließt.
+
+        device.communicationInfo.setErrorState(ErrorState.userCanceled);
     }
 
     /// Sendet Dateien an ein Gerät.
@@ -122,27 +154,31 @@ class TransportController
 
         // Sendeanfrage stellen
         device.communicationInfo.setRequesting();
-        RequestResult requestResult = await sender.request(files.length, totalSize, mimeTypeGroup);
+        sender.request(files.length, totalSize, mimeTypeGroup);
+        RequestResult requestResult = await sender.requestResult;
         switch (requestResult)
         {
             case RequestResult.accepted:
                 break;
             case RequestResult.declined:
+                device.communicationInfo.setErrorState(ErrorState.receiverDeclined);
                 return SendResponse.receiverDeclined;
             case RequestResult.timeout:
+                device.communicationInfo.setErrorState(ErrorState.error);
                 return SendResponse.timeout;
             case RequestResult.connectionError:
+                device.communicationInfo.setErrorState(ErrorState.error);
                 return SendResponse.connectionError;
         }
 
         // Dateien senden
         device.communicationInfo.setSending(0);
-        await sender.start(files, (progress) {
+        sender.start(files, (progress) {
             device.communicationInfo.setSending(progress);
         });
-        SendResult sendResult = await sender.isFinished;
+        SendResult sendResult = await sender.sendResult;
 
-        _signalingController.closeConnection(connection.connectionId); // Nicht darauf warten!
+        _signalingController.closeConnection(connection.device); // Nicht darauf warten!
         sender.dispose();
 
         switch (sendResult)
@@ -228,25 +264,25 @@ class TransportController
             args.device.communicationInfo.setReceiving(progress);
         });
 
-        ReceiveResult response = await receiver.isFinished;
-        if (response == ReceiveResult.ok)
+        ReceiveResult receiveResult = await receiver.isFinished;
+        if (receiveResult == ReceiveResult.ok)
         {
             args.device.communicationInfo.setSuccessState(SuccessState.receivedSuccessfully);
         }
-        else if (response == ReceiveResult.fileWriteError || response == ReceiveResult.connectionError)
+        else if (receiveResult == ReceiveResult.fileWriteError || receiveResult == ReceiveResult.connectionError)
         {
             args.device.communicationInfo.setErrorState(ErrorState.error);
             await receiver.deleteCurrentBrokenFile();
             await _deleteReceivedFiles(receivedFiles);
         }
-        else if (response == ReceiveResult.userCanceled)
+        else if (receiveResult == ReceiveResult.userCanceled)
         {
             args.device.communicationInfo.setErrorState(ErrorState.userCanceled);
             await receiver.deleteCurrentBrokenFile();
             await _deleteReceivedFiles(receivedFiles);
         }
 
-        _signalingController.closeConnection(args.connection.connectionId);
+        _signalingController.closeConnection(args.device);
         receiver.dispose();
 
         // Dialog mit den empfangenen Dateien anzeigen

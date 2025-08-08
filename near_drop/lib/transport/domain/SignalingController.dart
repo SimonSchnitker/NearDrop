@@ -18,7 +18,7 @@ import '../data/SignalingGateway.dart';
 class SignalingController
 {
     final SignalingGateway _signalingGateway;
-    final Map<String, Connection> _connections = {};
+    final Map<Device, Connection> _connections = {};
 
     StreamController<IncomingConnectionEventArgs> onIncomingConnection = StreamController<IncomingConnectionEventArgs>.broadcast();
 
@@ -37,21 +37,28 @@ class SignalingController
 
     Connection? getCurrentConnection(Device device)
     {
-
+        return _connections[device];
     }
 
     /// Wird aufgerufen, wenn ein Angebot empfangen wurde.
     Future<void> _onOfferReceived(OfferDTO offer) async
     {
-        Device? device = await NearbyDevicesContainer.getByUuid(offer.sender);
+        Device? device = await NearbyDevicesContainer.getByUuid(offer.nearbyUuid);
         if (device == null)
         {
-            dprint("SignalingController: _onOfferReceived: Device not found for UUID ${offer.sender}");
+            dprint("SignalingController: _onOfferReceived: Device not found for UUID ${offer.nearbyUuid}");
             return;
         }
 
-        final connection = Connection(_signalingGateway, device, offer.connectionId);
-        _connections[connection.connectionId] = connection;
+        // Alter Verbindung schließen, falls vorhanden
+        Connection? connection = _connections[device];
+        if (connection != null)
+        {
+            await connection.close();
+        }
+
+        connection = Connection(_signalingGateway, device, offer.connectionId);
+        _connections[device] = connection;
 
         await connection.initializeAsAnswerer(RTCSessionDescription(offer.sdp, offer.sdpType));
 
@@ -72,8 +79,15 @@ class SignalingController
     /// Wird aufgerufen, wenn eine Antwort empfangen wurde.
     Future<void> _onAnswerReceived(AnswerDTO answer) async
     {
-        Connection? connection = _connections[answer.connectionId];
-        if (connection == null || connection.device.nearbyUuid != answer.sender)
+        // Wenn das Gerät unbekannt ist, abbrechen
+        Device? device = await NearbyDevicesContainer.getByUuid(answer.nearbyUuid);
+        if (device == null)
+        {
+            return;
+        }
+
+        Connection? connection = _connections[device];
+        if (connection == null || device.nearbyUuid != answer.nearbyUuid)
         {
             dprint("SignalingController: _onAnswerReceived: Connection not found for ID ${answer.connectionId}");
             return;
@@ -85,8 +99,15 @@ class SignalingController
     /// Wird aufgerufen, wenn ein ICE-Kandidat empfangen wurde.
     Future<void> _onIceCandidateReceived(IceCandidateDTO ice) async
     {
-        Connection? connection = _connections[ice.connectionId];
-        if (connection == null || connection.device.nearbyUuid != ice.sender)
+        // Wenn das Gerät unbekannt ist, abbrechen
+        Device? device = await NearbyDevicesContainer.getByUuid(ice.nearbyUuid);
+        if (device == null)
+        {
+            return;
+        }
+
+        Connection? connection = _connections[device];
+        if (connection == null || connection.device.nearbyUuid != ice.nearbyUuid)
         {
             dprint("SignalingController: _onIceCandidateReceived: Connection not found for ID ${ice.connectionId}");
             return;
@@ -98,9 +119,16 @@ class SignalingController
     /// Versucht, eine Verbindung zu einem Gerät herzustellen.
     Future<Connection?> connect(Device device) async
     {
+        // Alte Verbindung schließen, falls vorhanden
+        Connection? connection = _connections[device];
+        if (connection != null)
+        {
+            await connection.close();
+        }
+
         String connectionId = Uuid().v4(); // Zufällige ConnectionId generieren
-        final connection = Connection(_signalingGateway, device, connectionId);
-        _connections[connectionId] = connection;
+        connection = Connection(_signalingGateway, device, connectionId);
+        _connections[device] = connection;
 
         connection.initializeAsOfferer(); // Nicht darauf warten!
 
@@ -114,24 +142,24 @@ class SignalingController
         {
             dprint("SignalingController: connect: Failed to establish connection with ${device.name}");
             await connection.close();
-            _connections.remove(connection.connectionId);
+            _connections.remove(device);
             return null;
         }
     }
 
     /// Schließt eine Verbindung und räumt alle Ressourcen auf.
-    Future<void> closeConnection(String connectionId) async
+    Future<void> closeConnection(Device device) async
     {
-        Connection? connection = _connections[connectionId];
+        Connection? connection = _connections[device];
         if (connection != null)
         {
             await connection.close();
-            _connections.remove(connectionId);
-            dprint("SignalingController: closeConnection: Connection $connectionId closed.");
+            _connections.remove(device);
+            dprint("SignalingController: closeConnection: Connection ${connection.connectionId} closed.");
         }
         else
         {
-            dprint("SignalingController: closeConnection: Connection $connectionId not found.");
+            dprint("SignalingController: closeConnection: Connection of $device not found.");
         }
     }
 }

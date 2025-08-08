@@ -1,3 +1,4 @@
+import 'package:near_drop/main.dart';
 import 'package:near_drop/transport/data/messages/CancelMessage.dart';
 import 'package:near_drop/transport/data/messages/FileInfoMessage.dart';
 import 'package:near_drop/transport/data/messages/FileReadyMessage.dart';

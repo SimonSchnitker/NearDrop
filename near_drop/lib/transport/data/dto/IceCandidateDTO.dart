@@ -1,12 +1,12 @@
 class IceCandidateDTO
 {
-    String sender;
+    String nearbyUuid;
     String connectionId;
     String candidate;
     String? sdpMid;
     int? sdpMLineIndex;
 
-    IceCandidateDTO(this.sender, this.connectionId, this.candidate, this.sdpMid, this.sdpMLineIndex);
+    IceCandidateDTO(this.nearbyUuid, this.connectionId, this.candidate, this.sdpMid, this.sdpMLineIndex);
 
     static IceCandidateDTO fromMap(Map<String, dynamic> map)
     {

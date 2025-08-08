@@ -43,13 +43,13 @@ class Connection
     RTCDataChannel? dataChannel;
     RTCDataChannel? controlChannel;
 
-    Role _role = Role.none;
+    Role role = Role.none;
     Sender? sender;
     Receiver? receiver;
 
     // Die Completer, der aufgelöst wird, wenn die Verbindung steht (oder fehlschlägt)
-    final _completer = Completer<bool>();
-    Future<bool> get isEstablished => _completer.future;
+    final completer = Completer<bool>();
+    Future<bool> get isEstablished => completer.future;
 
     final List<RTCIceCandidate> _iceCandidateBuffer = [];
     bool _isRemoteDescriptionSet = false;
@@ -59,7 +59,7 @@ class Connection
     /// Initialisiert die Verbindung als Offerer (Sender).
     Future<void> initializeAsOfferer() async
     {
-        _role = Role.sender;
+        role = Role.sender;
         peerConnection = await createPeerConnection(configuration);
 
         // Sender erstellt aktiv die DataChannels
@@ -77,9 +77,9 @@ class Connection
 
         // Timeout einrichten
         Future.delayed(_timeout, () {
-            if (!_completer.isCompleted)
+            if (!completer.isCompleted)
             {
-                _completer.complete(false);
+                completer.complete(false);
             }
         });
 
@@ -94,7 +94,7 @@ class Connection
             await Future.delayed(_waitingForAnswerDuration * 2);
             if (!_isRemoteDescriptionSet)
             {
-                _completer.complete(false);
+                completer.complete(false);
             }
         }
     }
@@ -102,7 +102,7 @@ class Connection
     /// Initialisiert die Verbindung als Answerer (Empfänger).
     Future<void> initializeAsAnswerer(RTCSessionDescription offer) async
     {
-        _role = Role.receiver;
+        role = Role.receiver;
         peerConnection = await createPeerConnection(configuration);
         _setPeerConnectionListener();
         _setIceCandidateListener();
@@ -174,7 +174,7 @@ class Connection
             if (dataChannel!.state == RTCDataChannelState.RTCDataChannelOpen && controlChannel!.state == RTCDataChannelState.RTCDataChannelOpen)
             {
                 sender = Sender(dataChannel!, controlChannel!);
-                _completer.complete(true);
+                completer.complete(true);
             }
         }
 
@@ -203,7 +203,7 @@ class Connection
             if (dataChannel?.state == RTCDataChannelState.RTCDataChannelOpen && controlChannel?.state == RTCDataChannelState.RTCDataChannelOpen)
             {
                 receiver = Receiver(dataChannel!, controlChannel!);
-                _completer.complete(true);
+                completer.complete(true);
             }
         };
     }

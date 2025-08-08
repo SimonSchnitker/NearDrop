@@ -34,6 +34,6 @@ class TransportViewModel extends ChangeNotifier
     /// Bricht den Transport von Dateien zu einem Gerät ab.
     Future<void> cancelTransport(Device device) async
     {
-
+        await _transportController.cancelTransport(device);
     }
 }
