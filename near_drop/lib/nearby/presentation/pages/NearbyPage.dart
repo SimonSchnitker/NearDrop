@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:balloon_widget/balloon_widget.dart';
+import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -8,12 +9,15 @@ import 'package:near_drop/nearby/presentation/viewmodel/NearbyViewModel.dart';
 import 'package:near_drop/nearby/presentation/widgets/AnimatedFadeSwitcher.dart';
 import 'package:near_drop/nearby/presentation/widgets/ManuallyConnectingBottomSheet.dart';
 import 'package:near_drop/nearby/presentation/widgets/PlusingCircleLoader.dart';
+import 'package:near_drop/tools/MimeTypeHelper.dart';
 import 'package:near_drop/tools/ui/FlexibleAppBar.dart';
 import 'package:near_drop/tools/ui/ShapedMaterial.dart';
 import 'package:near_drop/tools/ui/WidgetModifier.dart';
 import 'package:near_drop/transport/domain/enums/SendResponse.dart';
 import 'package:near_drop/transport/presentation/TransportViewModel.dart';
+import 'package:path/path.dart';
 import 'package:provider/provider.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import '../../../Routes.dart';
 import '../../../Runtime.dart';
@@ -78,6 +82,8 @@ class NearbyPage extends StatelessWidget
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                     _infoArea(context),
+                    _sharedFilesView(context)
+                      .visible(context.watch<TransportViewModel>().sharedFiles.isNotEmpty),
                     _howItWorksView(context)
                         .visible(!context.watch<TransportViewModel>().hasFilesSent),
                     _bottomBar(context).visible(context.watch<NearbyViewModel>().isInitializingFailed == false),
@@ -88,6 +94,96 @@ class NearbyPage extends StatelessWidget
           ],
         ),
       ),
+    );
+  }
+
+  Widget _sharedFilesView(BuildContext context) {
+    final sharedFiles = context.watch<TransportViewModel>().sharedFiles;
+    final mimeTypeGroup = MimeTypeHelper.getMimeTypeGroup(sharedFiles.map((f) => File(f.path)).toList());
+
+    return DottedBorder(
+      options: RoundedRectDottedBorderOptions(
+        color: Theme.of(context).colorScheme.primary,
+          dashPattern: [5, 5],
+          radius: Radius.circular(12)),
+        child: Material(
+          color: Theme.of(context).colorScheme.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  spacing: 16,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Tippe auf ein Gerät zum Senden",
+                          style: TextStyle(color: Theme.of(context).colorScheme.primary).copyWith(fontWeight: FontWeight.w500),
+                        ),
+                        Text("${sharedFiles.length} ${MimeTypeHelper.getMimeTypeString(context, mimeTypeGroup, sharedFiles.length)}"),
+                      ],
+                    ),
+                    Spacer(),
+                    IconButton(
+                      color: Theme.of(context).colorScheme.onSurface,
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStateProperty.all<Color>(
+                            Theme.of(context).colorScheme.surfaceContainer,
+                          ),
+                        ),
+                        onPressed: () {
+                          context.read<TransportViewModel>().clearSharedFiles();
+                        },
+                        icon: Icon(Icons.close)),
+                  ],
+                ),
+              ),
+              if (sharedFiles.every((file) => file.type == SharedMediaType.image))
+                SizedBox(
+                  height: 68,
+                  child: ListView.builder(
+                    padding: EdgeInsets.only(left: 16, right: 16, bottom: 8),
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: sharedFiles.length,
+                    itemBuilder: (context, index) {
+                      final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+                      final cacheSize = (60 * devicePixelRatio).round();
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(
+                              File(sharedFiles[index].path),
+                              cacheWidth: cacheSize,
+                              width: 60,
+                              height: 60,
+                              fit: BoxFit.cover,
+                              frameBuilder: (ctx, child, frame, wasSynchronouslyLoaded) {
+                                if (wasSynchronouslyLoaded) {
+                                  return child;
+                                }
+                                return AnimatedOpacity(
+                                  opacity: frame != null ? 1.0 : 0.0,
+                                  duration: Duration(milliseconds: 400),
+                                  curve: Curves.easeInOut,
+                                  child: child,
+                                );
+                              }
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+            ],
+          ),
+        )
     );
   }
 
@@ -491,6 +587,15 @@ class NearbyPage extends StatelessWidget
 
               if (device.communicationInfo.communicationState == CommunicationState.none) {
                   if (!context.read<NearbyViewModel>().isConnectedWithNetwork) {
+                      return;
+                  }
+
+                  // Wenn SharedFiles vorhanden sind, diese senden
+                  if (context.read<TransportViewModel>().sharedFiles.isNotEmpty) {
+                      final files = context.read<TransportViewModel>().sharedFiles.map((f) => File(f.path)).toList();
+                      context.read<TransportViewModel>().sharedFiles.clear();
+                      context.read<TransportViewModel>().clearSharedFiles();
+                      await _handleSendFiles(context, device, files);
                       return;
                   }
 

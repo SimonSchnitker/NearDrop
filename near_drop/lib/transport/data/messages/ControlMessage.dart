@@ -1,4 +1,3 @@
-import 'package:near_drop/main.dart';
 import 'package:near_drop/transport/data/messages/CancelAck.dart';
 import 'package:near_drop/transport/data/messages/CancelMessage.dart';
 import 'package:near_drop/transport/data/messages/FileInfoMessage.dart';
@@ -9,7 +8,7 @@ import 'package:near_drop/transport/data/messages/TransferAcceptMessage.dart';
 import 'package:near_drop/transport/data/messages/TransferDeclineMessage.dart';
 import 'package:near_drop/transport/data/messages/TransferFinishedMessage.dart';
 import 'package:near_drop/transport/data/messages/TransferRequestMessage.dart';
-import 'package:near_drop/transport/domain/enums/MimeTypeGroup.dart';
+import '../../../tools/MimeTypeHelper.dart';
 
 abstract class ControlMessage
 {

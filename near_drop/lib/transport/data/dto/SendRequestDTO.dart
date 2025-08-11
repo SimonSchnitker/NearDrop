@@ -1,4 +1,4 @@
-import 'package:near_drop/transport/domain/enums/MimeTypeGroup.dart';
+import '../../../tools/MimeTypeHelper.dart';
 
 class SendRequestDTO
 {

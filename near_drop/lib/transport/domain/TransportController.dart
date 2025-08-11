@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:intl/intl.dart';
-import 'package:mime/mime.dart';
 import 'package:near_drop/core/domain/enums/CommunicationState.dart';
 import 'package:near_drop/core/domain/enums/SuccessState.dart';
 import 'package:near_drop/transport/data/Receiver.dart';
@@ -9,7 +8,6 @@ import 'package:near_drop/transport/data/dto/ReceivedFileDTO.dart';
 import 'package:near_drop/transport/data/dto/SendRequestDTO.dart';
 import 'package:near_drop/transport/domain/SignalingController.dart';
 import 'package:near_drop/transport/domain/TransportDialogs.dart';
-import 'package:near_drop/transport/domain/enums/MimeTypeGroup.dart';
 import 'package:near_drop/transport/domain/event-args/IncomingConnectionEventArgs.dart';
 import 'package:near_drop/transport/domain/models/Connection.dart';
 import 'package:near_drop/transport/domain/models/ReceivedFile.dart';
@@ -20,6 +18,7 @@ import '../../core/domain/entity/Device.dart';
 import '../../core/domain/enums/ErrorState.dart';
 import '../../main.dart';
 import '../../nearby/presentation/pages/NearbyPage.dart';
+import '../../tools/MimeTypeHelper.dart';
 import 'enums/SendResponse.dart';
 import 'package:external_path/external_path.dart';
 import 'package:media_scanner/media_scanner.dart';
@@ -126,7 +125,7 @@ class TransportController
         try
         {
             totalSize = await _getTotalFileSize(files);
-            mimeTypeGroup = _getMimeTypeGroup(files);
+            mimeTypeGroup = MimeTypeHelper.getMimeTypeGroup(files);
         }
         on FileSystemException catch (e)
         {
@@ -198,36 +197,6 @@ class TransportController
             totalSize += await file.length();
         }
         return totalSize;
-    }
-
-    /// Bestimmt die Gruppe der MIME-Typen basierend auf den übergebenen Dateien.
-    MimeTypeGroup _getMimeTypeGroup(List<File> files)
-    {
-        List<String> mimeTypes = [];
-        for (File file in files)
-        {
-            String mimeType = lookupMimeType(file.path) ?? "";
-            mimeTypes.add(mimeType);
-        }
-
-        if (mimeTypes.every((element) => element.startsWith("image/")))
-        {
-            return MimeTypeGroup.images;
-        }
-        else if (mimeTypes.every((element) => element.startsWith("video/")))
-        {
-            return MimeTypeGroup.videos;
-        }
-        else if (mimeTypes.every((element) => element.startsWith("audio/")))
-        {
-            return MimeTypeGroup.audios;
-        }
-        else if (mimeTypes.every((element) => element.startsWith("image/") || element.startsWith("video/") || element.startsWith("audio/")))
-        {
-            return MimeTypeGroup.media;
-        }
-
-        return MimeTypeGroup.mixed;
     }
 
     /// Wirf aufgerufen, wenn eine Verbindung von einem anderen Gerät eingegangen ist.

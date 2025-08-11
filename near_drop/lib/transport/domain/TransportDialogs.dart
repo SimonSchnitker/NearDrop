@@ -4,40 +4,14 @@ import 'package:android_intent_plus/flag.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:near_drop/tools/FileSizeHelper.dart';
+import 'package:near_drop/tools/MimeTypeHelper.dart';
 import 'package:near_drop/transport/domain/TransportController.dart';
 import 'package:open_file/open_file.dart';
 import '../../core/domain/entity/Device.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../main.dart';
 import '../../nearby/presentation/pages/NearbyPage.dart';
-import 'enums/MimeTypeGroup.dart';
 import 'models/ReceivedFile.dart';
-
-/// Gibt den MIME-Typ-String basierend auf der Gruppe und der Anzahl der Dateien zurück.
-String getMimeTypeString(BuildContext context, MimeTypeGroup mimeTypeGroup, int filesCount)
-{
-    switch (mimeTypeGroup)
-    {
-        case MimeTypeGroup.images:
-            return filesCount == 1
-                ? AppLocalizations.of(context)!.mime_type_image
-                : AppLocalizations.of(context)!.mime_type_images;
-        case MimeTypeGroup.videos:
-            return filesCount == 1
-                ? AppLocalizations.of(context)!.mime_type_video
-                : AppLocalizations.of(context)!.mime_type_videos;
-        case MimeTypeGroup.audios:
-            return filesCount == 1
-                ? AppLocalizations.of(context)!.mime_type_audio
-                : AppLocalizations.of(context)!.mime_type_audios;
-        case MimeTypeGroup.media:
-            return AppLocalizations.of(context)!.mime_type_media;
-        default:
-            return filesCount == 1
-                ? AppLocalizations.of(context)!.mime_type_file
-                : AppLocalizations.of(context)!.mime_type_files;
-    }
-}
 
 /// Zeigt ein Dialogfeld an, um die Sendeanfrage des Geräts zu akzeptieren oder abzulehnen.
 Future<bool> showSendRequestDialog(Device device, int filesCount, int totalSize, MimeTypeGroup mimeTypeGroup) async
@@ -49,7 +23,7 @@ Future<bool> showSendRequestDialog(Device device, int filesCount, int totalSize,
     }
 
     BuildContext context = NearbyPage.scaffoldKey.currentContext!;
-    String mimeTypeString = getMimeTypeString(context, mimeTypeGroup, filesCount);
+    String mimeTypeString = MimeTypeHelper.getMimeTypeString(context, mimeTypeGroup, filesCount);
     String dialogContentText = AppLocalizations.of(context)!.send_request_dialog_content(device.firstname, filesCount, mimeTypeString);
 
     // Wenn das Gerät keine WLAN- oder Ethernet-Verbindung hat und die Gesamtgröße einen bestimmten Wert übersteigt, Datenvolumen-Warnung anzeigen
@@ -319,7 +293,7 @@ Future<void> showImagePreviewDialog({
     return showDialog<void>(
         context: context,
         builder: (BuildContext dialogContext) {
-            String mimeTypeString = getMimeTypeString(dialogContext, mimeTypeGroup, allFiles.length);
+            String mimeTypeString = MimeTypeHelper.getMimeTypeString(dialogContext, mimeTypeGroup, allFiles.length);
             String titleText = AppLocalizations.of(context)!.received_files_dialog_title(allFiles.length, mimeTypeString, device.firstname);
 
             Widget contentWidget = SizedBox();
