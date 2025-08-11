@@ -13,7 +13,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get welcome_subtitle =>
-      'Dateien schnell & drahtlos in der Nähe teilen';
+      'Sende Fotos, Videos und Dokumente schnell & kabellos an Freunde in der Nähe.';
 
   @override
   String get app_info_button => 'App-Info';

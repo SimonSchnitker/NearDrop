@@ -12,7 +12,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get app_name => 'Near Drop';
 
   @override
-  String get welcome_subtitle => 'Share files nearby';
+  String get welcome_subtitle =>
+      'Send photos, videos and documents quickly & wirelessly to friends nearby.';
 
   @override
   String get app_info_button => 'App information';

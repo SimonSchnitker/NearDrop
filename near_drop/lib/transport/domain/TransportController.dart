@@ -106,26 +106,18 @@ class TransportController
         }
 
         // Ansonsten eine Cancel-Nachricht an den anderen Peer senden
-        if (connection.role == Role.sender)
-        {
-            await connection.sender!.sendCancel();
-            connection.sender!.dispose();
-        }
-        else if (connection.role == Role.receiver)
-        {
-            await connection.receiver!.sendCancel();
-            connection.receiver!.dispose();
-        }
-
-        // Hinweis: Verbindung nicht schließen, da der andere Peer die Verbindung schließt.
+        await connection.sender?.sendCancel();
+        await connection.receiver?.sendCancel();
 
         device.communicationInfo.setErrorState(ErrorState.userCanceled);
+        await _signalingController.closeConnection(device);
+        connection.sender?.dispose();
+        connection.receiver?.dispose();
     }
 
     /// Sendet Dateien an ein Gerät.
     Future<SendResponse> sendFiles(Device device, List<File> files) async
     {
-        //await device.closeCurrentConnection(); // Aktuelle Verbindung zum Gerät schließen, falls vorhanden
         device.communicationInfo.setConnecting();
 
         // Gesamtgröße und MIME-Typ-Gruppe der Dateien ermitteln
@@ -150,9 +142,8 @@ class TransportController
             return SendResponse.connectionError;
         }
 
-        final sender = Sender(connection.dataChannel!, connection.controlChannel!);
-
         // Sendeanfrage stellen
+        Sender sender = connection.sender!;
         device.communicationInfo.setRequesting();
         sender.request(files.length, totalSize, mimeTypeGroup);
         RequestResult requestResult = await sender.requestResult;
@@ -242,7 +233,7 @@ class TransportController
     /// Wirf aufgerufen, wenn eine Verbindung von einem anderen Gerät eingegangen ist.
     Future<void> _onIncomingConnection(IncomingConnectionEventArgs args) async
     {
-        final receiver = Receiver(args.connection.dataChannel!, args.connection.controlChannel!);
+        Receiver receiver = args.connection.receiver!;
         final List<ReceivedFile> receivedFiles = [];
         MimeTypeGroup mimeTypeGroup = MimeTypeGroup.mixed; // Wird bei Sendeanfrage gesetzt
 
@@ -286,7 +277,10 @@ class TransportController
         receiver.dispose();
 
         // Dialog mit den empfangenen Dateien anzeigen
-        await showImagePreviewDialog(context: NearbyPage.scaffoldKey.currentContext!, allFiles: receivedFiles, device: args.device, targetDirectory: filesDirectory, mimeTypeGroup: mimeTypeGroup);
+        if (receivedFiles.isNotEmpty)
+        {
+            await showImagePreviewDialog(context: NearbyPage.scaffoldKey.currentContext!, allFiles: receivedFiles, device: args.device, targetDirectory: filesDirectory, mimeTypeGroup: mimeTypeGroup);
+        }
     }
 
     /// Löscht alle empfangenen Dateien.
@@ -304,14 +298,14 @@ class TransportController
                 // Ignorieren
             }
         }
+
+        receivedFiles.clear();
     }
 
     /// Modifiziert das Erstellungsdatum der empfangenen Datei.
     Future<void> _modifyCreationDate(ReceivedFile receivedFile, DateTime dateTime) async
     {
         final file = File(receivedFile.path);
-
-        // Erstellungdatum der Datei auf das aktuelle Datum setzen
         try
         {
             await file.setLastAccessed(dateTime);

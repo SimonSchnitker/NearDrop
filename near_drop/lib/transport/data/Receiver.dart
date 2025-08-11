@@ -5,6 +5,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:mutex/mutex.dart';
 import 'package:near_drop/transport/data/dto/ReceivedFileDTO.dart';
 import 'package:near_drop/transport/data/dto/SendRequestDTO.dart';
+import 'package:near_drop/transport/data/messages/CancelAck.dart';
 import 'package:near_drop/transport/data/messages/CancelMessage.dart';
 import 'package:near_drop/transport/data/messages/FileInfoMessage.dart';
 import 'package:near_drop/transport/data/messages/FileReadyMessage.dart';
@@ -39,6 +40,7 @@ enum ReceiveResult
 class Receiver
 {
     static const Duration _progressInterval = Duration(milliseconds: 250);
+    static const Duration _cancelTimeoutDuration = Duration(seconds: 8);
     static late final Directory _filesDirectory;
 
     final RTCDataChannel _dataChannel;
@@ -60,6 +62,8 @@ class Receiver
     // Die Completer, der aufgelöst wird, wenn die Verbindung steht (oder fehlschlägt)
     final _completer = Completer<ReceiveResult>();
     Future<ReceiveResult> get isFinished => _completer.future;
+
+    final _cancelAckCompleter = Completer<void>();
 
     late final Function(ReceivedFileDTO file) _onFileReceived;
     late final Function(double progress) _onProgress;
@@ -103,22 +107,45 @@ class Receiver
             case FileInfoMessage():
                 if (_receiveState != ReceiveState.waitingForFileInfoOrFinish) return;
                 dprint("Empfänger: FileInfoMessage empfangen: ${controlMessage.name}, Größe: ${controlMessage.size}");
-                _handleFileInfoMessage(controlMessage);
+                await _handleFileInfoMessage(controlMessage);
                 break;
             case TransferFinishedMessage():
                 if (_receiveState != ReceiveState.waitingForFileInfoOrFinish) return;
                 _receiveState = ReceiveState.finished;
                 int endTime = DateTime.now().millisecondsSinceEpoch;
                 dprint("Empfänger: TransferFinishedMessage empfangen. Dauer: ${(endTime - startTime) / 1000} Sekunden");
-                _completer.complete(ReceiveResult.ok);
+                if (!_completer.isCompleted) _completer.complete(ReceiveResult.ok);
+                break;
             case CancelMessage():
                 dprint("Sender möchte das Senden abbrechen.");
                 _receiveState = ReceiveState.finished;
-                _completer.complete(ReceiveResult.userCanceled);
+                await _sendCancelAck();
+                if (!_completer.isCompleted) _completer.complete(ReceiveResult.userCanceled);
+                break;
+            case CancelAck():
+                dprint("Empfänger: CancelAck empfangen.");
+                _cancelAckCompleter.complete();
+                break;
             default:
                 // Unbekannter Steuerbefehl, ignorieren
                 dprint("Unbekannter Steuerbefehl empfangen: ${controlMessage.runtimeType}");
                 return;
+        }
+    }
+
+    /// Sendet eine Bestätigung, dass der Abbruch des Transfers empfangen wurde.
+    Future<void> _sendCancelAck() async
+    {
+        final cancelAckMessage = CancelAck();
+        try
+        {
+            await _controlChannel.send(RTCDataChannelMessage(jsonEncode(cancelAckMessage.toMap())));
+            await Future.delayed(Duration(seconds: 1)); // Kurze Verzögerung, um sicherzustellen, dass die Nachricht gesendet wurde
+            dprint("Empfänger: CancelAck gesendet.");
+        }
+        catch (e)
+        {
+            dprint("Fehler beim Senden des CancelAck: $e");
         }
     }
 
@@ -137,53 +164,43 @@ class Receiver
             await _currentRaf?.writeFrom(chunk);
             _currentFileBytes += chunk.length;
             _totalReceivedBytes += chunk.length;
-        }
-        catch (e)
-        {
-            dprint("Fehler beim Schreiben der Datei: $e");
-            _completer.complete(ReceiveResult.fileWriteError);
-            return;
-        }
-        finally
-        {
-            _writeMutex.release();
-        }
 
-        // Prüfen, ob die Datei vollständig empfangen wurde
-        if (_currentFileBytes >= _currentFileSize)
-        {
-            await _writeMutex.acquire();
-            try
+            // Prüfen, ob die Datei vollständig empfangen wurde
+            if (_currentFileBytes >= _currentFileSize)
             {
                 final dto = ReceivedFileDTO(_currentFileName, _currentFilePath, _currentFileSize, _currentMimeType);
                 _onFileReceived(dto);
-
-                // Zustand zurücksetzen
-                _currentFileName = "";
-                _currentFilePath = "";
-                _currentFileSize = 0;
-                _currentFileBytes = 0;
-                _currentMimeType = "";
-                _currentRaf?.close();
-                _currentRaf = null;
-                _receiveState = ReceiveState.waitingForFileInfoOrFinish;
+                _resetCurrentFile();
 
                 // Bestätigungsnachricht senden
                 dprint("Empfänger: Sende FileReceivedMessage.");
                 final receivedMessage = FileReceivedMessage();
                 await _controlChannel.send(RTCDataChannelMessage(jsonEncode(receivedMessage.toMap())));
             }
-            catch (e)
-            {
-                dprint("Fehler beim Verarbeiten der empfangenen Datei: $e");
-                _completer.complete(ReceiveResult.connectionError);
-                return;
-            }
-            finally
-            {
-                _writeMutex.release();
-            }
         }
+        catch (e)
+        {
+            dprint("Fehler beim Schreiben der Datei: $e");
+            if (!_completer.isCompleted) _completer.complete(ReceiveResult.fileWriteError);
+            return;
+        }
+        finally
+        {
+            _writeMutex.release();
+        }
+    }
+
+    /// Setzt den Zustand der aktuellen Datei zurück.
+    void _resetCurrentFile()
+    {
+        _currentFileName = "";
+        _currentFilePath = "";
+        _currentFileSize = 0;
+        _currentFileBytes = 0;
+        _currentMimeType = "";
+        _receiveState = ReceiveState.waitingForFileInfoOrFinish;
+        _currentRaf?.close();
+        _currentRaf = null;
     }
 
     /// Verarbeitet eine eingehende FileInfoMessage, die Informationen über die zu empfangende Datei enthält.
@@ -203,7 +220,7 @@ class Receiver
         catch (e)
         {
             dprint("Fehler beim Erstellen der zu empfangenen Datei: $e");
-            _completer.complete(ReceiveResult.fileWriteError);
+            if (!_completer.isCompleted) _completer.complete(ReceiveResult.fileWriteError);
             return;
         }
 
@@ -217,7 +234,7 @@ class Receiver
         catch (e)
         {
             dprint("Fehler beim Senden der FileReadyMessage: $e");
-            _completer.complete(ReceiveResult.connectionError);
+            if (!_completer.isCompleted) _completer.complete(ReceiveResult.connectionError);
         }
     }
 
@@ -240,7 +257,7 @@ class Receiver
         catch (e)
         {
             dprint("Fehler beim Senden der Transfer-Akzeptanz: $e");
-            _completer.complete(ReceiveResult.connectionError);
+            if (!_completer.isCompleted) _completer.complete(ReceiveResult.connectionError);
             return;
         }
 
@@ -279,6 +296,9 @@ class Receiver
         try
         {
             await _controlChannel.send(RTCDataChannelMessage(jsonEncode(cancelMessage.toMap())));
+            await _cancelAckCompleter.future.timeout(_cancelTimeoutDuration, onTimeout: () {
+                dprint("Empfänger: Timeout beim Warten auf CancelAck.");
+            });
         }
         catch (e)
         {
@@ -332,6 +352,8 @@ class Receiver
     /// Notwendig, wenn während der Übertragung ein Fehler auftritt.
     Future<void> deleteCurrentBrokenFile() async
     {
+        if (_currentFilePath.isEmpty) return;
+
         try
         {
             _currentRaf?.close();
@@ -355,5 +377,7 @@ class Receiver
     {
         _receiveState = ReceiveState.finished;
         _progressTimer?.cancel();
+        if (!_completer.isCompleted) _completer.complete(ReceiveResult.userCanceled);
+        _resetCurrentFile();
     }
 }

@@ -14,7 +14,6 @@ class CommunicationInfo extends ChangeNotifier
     SuccessState successState = SuccessState.none;
     ErrorState errorState = ErrorState.none;
     double? progress = 0.0;
-    bool cancelationRequested = false;
 
     StreamController<int> onCanceledCompleted = StreamController<int>.broadcast();
 
@@ -28,7 +27,6 @@ class CommunicationInfo extends ChangeNotifier
     /// Setzt den Status auf "Standardzustand".
     void reset()
     {
-        cancelationRequested = false;
         this.communicationState = CommunicationState.none;
         this.progress = 0.0;
         notifyListeners();
@@ -37,6 +35,8 @@ class CommunicationInfo extends ChangeNotifier
     /// Setzt den Status auf "Verbinden".
     void setConnecting() async
     {
+        if (communicationState == CommunicationState.canceling) return;
+
         this.communicationState = CommunicationState.connecting;
         this.progress = null;
         notifyListeners();
@@ -45,6 +45,8 @@ class CommunicationInfo extends ChangeNotifier
     /// Setzt den Status auf "Anfragen".
     void setRequesting()
     {
+        if (communicationState == CommunicationState.canceling) return;
+
         this.communicationState = CommunicationState.requesting;
         this.progress = null;
         notifyListeners();
@@ -53,6 +55,8 @@ class CommunicationInfo extends ChangeNotifier
     /// Setzt den Status auf "Senden".
     void setSending(double progress)
     {
+        if (communicationState == CommunicationState.canceling) return;
+
         this.communicationState = CommunicationState.sending;
         this.progress = progress;
         notifyListeners();
@@ -61,6 +65,8 @@ class CommunicationInfo extends ChangeNotifier
     /// Setzt den Status auf "Empfangen".
     void setReceiving(double progress)
     {
+        if (communicationState == CommunicationState.canceling) return;
+
         this.communicationState = CommunicationState.receiving;
         this.progress = progress;
         notifyListeners();
@@ -69,7 +75,6 @@ class CommunicationInfo extends ChangeNotifier
     /// Setzt den Status auf "Abbrechen".
     void setCanceling()
     {
-        this.cancelationRequested = true;
         this.communicationState = CommunicationState.canceling;
         this.progress = null;
         notifyListeners();
@@ -78,7 +83,6 @@ class CommunicationInfo extends ChangeNotifier
     /// Setzt einen Erfolg-Status.
     Future<void> setSuccessState(SuccessState successState) async
     {
-        this.cancelationRequested = false;
         this.communicationState = CommunicationState.none;
         this.progress = 0.0;
         this.successState = successState;
@@ -91,7 +95,6 @@ class CommunicationInfo extends ChangeNotifier
     /// Setzt einen Fehler-Status.
     Future<void> setErrorState(ErrorState errorState) async
     {
-        this.cancelationRequested = false;
         this.communicationState = CommunicationState.none;
         this.progress = 0.0;
         this.errorState = errorState;

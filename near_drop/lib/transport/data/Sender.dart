@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:mime/mime.dart';
+import 'package:near_drop/transport/data/messages/CancelAck.dart';
 import 'package:near_drop/transport/data/messages/CancelMessage.dart';
 import 'package:near_drop/transport/data/messages/ControlMessage.dart';
 import 'package:near_drop/transport/data/messages/FileInfoMessage.dart';
@@ -37,6 +38,7 @@ enum RequestResult
 class Sender
 {
     static const Duration _timeoutDuration = Duration(seconds: 30);
+    static const Duration _cancelTimeoutDuration = Duration(seconds: 8);
     static const int _chunkSize = 64 * 1024; // 64 KB: Größe eines einzelnen Chunks
     static const int _bufferedAmountThreshold = 64 * 1024; // Unter 64 KB: Schwellenwert, ab dem der Puffer wieder Platz hat
     static const int _highWaterMark = 128 * 1024; // Über 128 KB: Senden stoppen
@@ -45,7 +47,7 @@ class Sender
     final RTCDataChannel _dataChannel;
     final RTCDataChannel _controlChannel;
     int startTime = 0;
-    bool _isCanceled = false;
+    bool _isActive = true;
 
     // Stream für eingehende Kontrollnachrichten
     final _controlStreamController = StreamController<ControlMessage>.broadcast();
@@ -71,19 +73,23 @@ class Sender
             _controlStreamController.add(ControlMessage.fromMap(jsonDecode(message.text)));
         };
 
-        _dataChannel.onBufferedAmountChange = (amount, a) {
-            // Wird aufgerufen, wenn sich der Puffer ändert
-            dprint("Sender: Buffered Amount geändert: $amount, $a Bytes");
-        };
+        // Diese Events sind unter Windows nicht verfügbar
+        if (!Platform.isWindows)
+        {
+            _dataChannel.onBufferedAmountChange = (amount, a) {
+                // Wird aufgerufen, wenn sich der Puffer ändert
+                dprint("Sender: Buffered Amount geändert: $amount, $a Bytes");
+            };
 
-        // Wird aufgerufen, wenn der Puffer des DataChannels vorher voll war und jetzt wieder Platz hat
-        _dataChannel.onBufferedAmountLow = (amount) {
-            if (_lowAmountCompleter != null && !_lowAmountCompleter!.isCompleted && amount < _lowWaterMark)
-            {
-                dprint("✅ Event: Puffer hat wieder Platz. Setze Übertragung fort.");
-                _lowAmountCompleter!.complete();
-            }
-        };
+            // Wird aufgerufen, wenn der Puffer des DataChannels vorher voll war und jetzt wieder Platz hat
+            _dataChannel.onBufferedAmountLow = (amount) {
+                if (_lowAmountCompleter != null && !_lowAmountCompleter!.isCompleted && amount < _lowWaterMark)
+                {
+                    dprint("✅ Event: Puffer hat wieder Platz. Setze Übertragung fort.");
+                    _lowAmountCompleter!.complete();
+                }
+            };
+        }
     }
 
     /// Senden eine Anfrage an den Empfänger.
@@ -105,23 +111,23 @@ class Sender
             if (response is TransferDeclineMessage)
             {
                 dprint("Sender: Transfer abgelehnt vom Empfänger.");
-                _requestCompleter.complete(RequestResult.declined);
+                if (!_requestCompleter.isCompleted) _requestCompleter.complete(RequestResult.declined);
                 return;
             }
         }
         on TimeoutException
         {
-            _requestCompleter.complete(RequestResult.timeout);
+            if (!_requestCompleter.isCompleted) _requestCompleter.complete(RequestResult.timeout);
             return;
         }
         catch (e)
         {
-            _requestCompleter.complete(RequestResult.connectionError);
+            if (!_requestCompleter.isCompleted) _requestCompleter.complete(RequestResult.connectionError);
             return;
         }
 
         dprint("Sender: Transfer akzeptiert. Starte Dateiübertragung...");
-        _requestCompleter.complete(RequestResult.accepted);
+        if (!_requestCompleter.isCompleted) _requestCompleter.complete(RequestResult.accepted);
     }
 
     /// Startet den gesamten Sendevorgang.
@@ -132,20 +138,22 @@ class Sender
         // Auf asynchrone Progress-Updates vom Empfänger lauschen
         _controlStream.where((msg) => msg is ProgressMessage).listen((msg)
         {
+            if (!_isActive) return;
             onProgress((msg as ProgressMessage).progress);
         });
 
         // Auf Cancel-Flag vom Empfänger lauschen
-        _controlStream.where((msg) => msg is CancelMessage).listen((msg)
+        _controlStream.where((msg) => msg is CancelMessage).listen((msg) async
         {
-            _isCanceled = true;
-            _sendCompleter.complete(SendResult.userCanceled);
+            _isActive = false;
+            await _sendCancelAck(); // Bestätigung senden, dass der Abbruch empfangen wurde
+            if (!_sendCompleter.isCompleted) _sendCompleter.complete(SendResult.userCanceled);
         });
 
         // Datei-Loop: Metadaten und Chunks senden
         for (final file in files)
         {
-            if (_isCanceled) return; // Regelmäßig nach _isCanceled prüfen
+            if (!_isActive) return; // Regelmäßig nach _isActive prüfen
 
             String filename = basename(file.path);
             int size = await file.length();
@@ -158,12 +166,12 @@ class Sender
             }
             on TimeoutException
             {
-                _sendCompleter.complete(SendResult.timeout);
+                if (!_sendCompleter.isCompleted) _sendCompleter.complete(SendResult.timeout);
                 return;
             }
             catch (e)
             {
-                _sendCompleter.complete(SendResult.connectionError);
+                if (!_sendCompleter.isCompleted) _sendCompleter.complete(SendResult.connectionError);
                 return;
             }
 
@@ -174,19 +182,44 @@ class Sender
             }
             on TimeoutException
             {
-                _sendCompleter.complete(SendResult.timeout);
+                if (!_sendCompleter.isCompleted) _sendCompleter.complete(SendResult.timeout);
                 return;
             }
             catch (e)
             {
-                _sendCompleter.complete(SendResult.connectionError);
+                if (!_sendCompleter.isCompleted) _sendCompleter.complete(SendResult.connectionError);
                 return;
             }
         }
 
+        if (!_isActive) return;
         // Finale Nachricht senden, dass der Transfer abgeschlossen ist
-        await _sendFinished();
-        _sendCompleter.complete(SendResult.ok);
+        try
+        {
+            await _sendFinished();
+            if (!_sendCompleter.isCompleted) _sendCompleter.complete(SendResult.ok);
+        }
+        catch (e)
+        {
+            if (!_sendCompleter.isCompleted) _sendCompleter.complete(SendResult.connectionError);
+        }
+    }
+
+    /// Sendet eine Bestätigung, dass der Abbruch des Transfers empfangen wurde.
+    Future<void> _sendCancelAck() async
+    {
+        await _waitUntilBufferIsEmpty();
+        final cancelAckMessage = CancelAck();
+        try
+        {
+            await _controlChannel.send(RTCDataChannelMessage(jsonEncode(cancelAckMessage.toMap())));
+            await Future.delayed(Duration(seconds: 1)); // Kurze Verzögerung, um sicherzustellen, dass die Nachricht gesendet wurde
+            dprint("Empfänger: CancelAck gesendet.");
+        }
+        catch (e)
+        {
+            dprint("Fehler beim Senden des CancelAck: $e");
+        }
     }
 
     /// Sendet dem Empfänger, dass die Übertragung abgeschlossen ist
@@ -222,7 +255,7 @@ class Sender
         int bytesSent = 0;
         while (bytesSent < size)
         {
-            if (_isCanceled) return; // Regelmäßig nach _isCanceled prüfen
+            if (!_isActive) return; // Regelmäßig nach _isCanceled prüfen
 
             // Einen Chunk senden
             dprint("Sende Chunks mit $_chunkSize Bytes.");
@@ -242,21 +275,27 @@ class Sender
                 dprint("Puffer über Schwellenwert. Warte, bis er unter $_lowWaterMark Bytes fällt...");
 
                 // ...dann warte so lange, bis er den UNTEREN Schwellenwert unterschreitet.
-                if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS)
+                if (Platform.isWindows)
                 {
-                    _lowAmountCompleter = Completer<void>();
-                    await _lowAmountCompleter!.future;
-                }
-                else
-                {
+                    final timeout = DateTime.now().add(_timeoutDuration);
                     while (currentBufferedAmount > _lowWaterMark)
                     {
-                        if (_isCanceled) return; // Regelmäßig nach _isCanceled prüfen
+                        if (!_isActive) return; // Regelmäßig nach _isCanceled prüfen
+
+                        if (DateTime.now().isAfter(timeout))
+                        {
+                            throw TimeoutException("Sender: Timeout beim Warten auf leeren Puffer.");
+                        }
 
                         await Future.delayed(const Duration(milliseconds: 25));
                         currentBufferedAmount = await _dataChannel.getBufferedAmount();
                         dprint("Aktueller Pufferstand: $currentBufferedAmount Bytes");
                     }
+                }
+                else
+                {
+                    _lowAmountCompleter = Completer<void>();
+                    await _lowAmountCompleter!.future.timeout(_timeoutDuration);
                 }
 
                 dprint("Puffer hat wieder ausreichend Platz. Pufferstand: $currentBufferedAmount Bytes");
@@ -277,25 +316,42 @@ class Sender
     /// Sendet dem Empfänger, dass wir als Sender die Übertragung abbrechen möchten.
     Future<void> sendCancel() async
     {
-        _isCanceled = true;
+        _isActive = false;
         final cancelMessage = CancelMessage();
+        await _waitUntilBufferIsEmpty(); // Warten, bis der Puffer leer ist, bevor wir abbrechen
 
         try
         {
             await _controlChannel.send(RTCDataChannelMessage(jsonEncode(cancelMessage.toMap())));
+            await _controlStream.firstWhere((msg) => msg is CancelAck).timeout(_cancelTimeoutDuration);
         }
         catch (e)
         {
             dprint("Fehler beim Senden des Abbrechen-Flags: $e");
         }
+    }
 
-        _requestCompleter.complete(RequestResult.declined);
-        _sendCompleter.complete(SendResult.userCanceled);
+    Future<void> _waitUntilBufferIsEmpty() async
+    {
+        final timeout = DateTime.now().add(_cancelTimeoutDuration);
+        while (await _dataChannel.getBufferedAmount() > 0)
+        {
+            if (DateTime.now().isAfter(timeout))
+            {
+                dprint("Sender: Timeout beim Warten auf leeren Puffer.");
+                return;
+            }
+            await Future.delayed(const Duration(milliseconds: 100));
+        }
     }
 
     void dispose()
     {
-        _isCanceled = true;
+        _isActive = false;
         _controlStreamController.close();
+
+        if (!_requestCompleter.isCompleted) _requestCompleter.completeError(RequestResult.declined);
+        if (!_sendCompleter.isCompleted) _sendCompleter.complete(SendResult.userCanceled);
+        if (_lowAmountCompleter?.isCompleted == false) _lowAmountCompleter?.complete();
     }
 }

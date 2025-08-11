@@ -1,4 +1,5 @@
 import 'package:near_drop/main.dart';
+import 'package:near_drop/transport/data/messages/CancelAck.dart';
 import 'package:near_drop/transport/data/messages/CancelMessage.dart';
 import 'package:near_drop/transport/data/messages/FileInfoMessage.dart';
 import 'package:near_drop/transport/data/messages/FileReadyMessage.dart';
@@ -37,6 +38,8 @@ abstract class ControlMessage
                 return TransferFinishedMessage();
             case CancelMessage.label:
                 return CancelMessage();
+            case CancelAck.label:
+                return CancelAck();
             case FileReceivedMessage.label:
                 return FileReceivedMessage();
             case ProgressMessage.label:

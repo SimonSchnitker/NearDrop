@@ -7,13 +7,6 @@ import 'package:near_drop/transport/data/SignalingGateway.dart';
 import '../../../main.dart';
 import '../../data/Receiver.dart';
 
-enum Role
-{
-    none,
-    sender,
-    receiver
-}
-
 /// Stellt eine WebRTC-Verbindung zu einem anderen Gerät her und verwaltet die DataChannels für den Datenaustausch.
 class Connection
 {
@@ -43,7 +36,6 @@ class Connection
     RTCDataChannel? dataChannel;
     RTCDataChannel? controlChannel;
 
-    Role role = Role.none;
     Sender? sender;
     Receiver? receiver;
 
@@ -59,7 +51,6 @@ class Connection
     /// Initialisiert die Verbindung als Offerer (Sender).
     Future<void> initializeAsOfferer() async
     {
-        role = Role.sender;
         peerConnection = await createPeerConnection(configuration);
 
         // Sender erstellt aktiv die DataChannels
@@ -102,7 +93,6 @@ class Connection
     /// Initialisiert die Verbindung als Answerer (Empfänger).
     Future<void> initializeAsAnswerer(RTCSessionDescription offer) async
     {
-        role = Role.receiver;
         peerConnection = await createPeerConnection(configuration);
         _setPeerConnectionListener();
         _setIceCandidateListener();
@@ -141,6 +131,8 @@ class Connection
             if (state == RTCPeerConnectionState.RTCPeerConnectionStateClosed || state == RTCPeerConnectionState.RTCPeerConnectionStateFailed)
             {
                 close();
+                sender?.dispose();
+                receiver?.dispose();
             }
         };
     }
