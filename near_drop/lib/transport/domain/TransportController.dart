@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:near_drop/core/domain/enums/CommunicationState.dart';
 import 'package:near_drop/core/domain/enums/SuccessState.dart';
@@ -16,8 +17,11 @@ import 'package:path_provider/path_provider.dart';
 import '../../Runtime.dart';
 import '../../core/domain/entity/Device.dart';
 import '../../core/domain/enums/ErrorState.dart';
+import '../../help/presentation/ReceivedFilesLocationInfoView.dart';
 import '../../main.dart';
 import '../../nearby/presentation/pages/NearbyPage.dart';
+import '../../settings/domain/Setting.dart';
+import '../../settings/domain/SettingsController.dart';
 import '../../tools/MimeTypeHelper.dart';
 import 'enums/SendResponse.dart';
 import 'package:external_path/external_path.dart';
@@ -30,11 +34,13 @@ class TransportController
 {
     static const String _folderName = Runtime.appName;
     static const int minBytesForDataVolumeWarning = 30 * 1024 * 1024; // 30 MB
+    static final Setting _isFirstTimeReceivingFilesSetting = Setting("isFirstTimeReceivingFiles", bool);
 
     final SignalingController _signalingController;
+    final SettingsController _settingsController;
     Directory? filesDirectory;
 
-    TransportController(this._signalingController);
+    TransportController(this._signalingController, this._settingsController);
 
     /// Initialisiert den Zielordner, in den empfangene Dateien gespeichert werden sollen.
     Future<bool> initFilesDirectory() async
@@ -248,6 +254,20 @@ class TransportController
         // Dialog mit den empfangenen Dateien anzeigen
         if (receivedFiles.isNotEmpty)
         {
+            // BottomSheet mit Erklärung anzeigen, wenn Dateien auf diesem Gerät zum allerersten Mal empfangen wurden
+            bool? isFirstTimeReceivingFiles = await _settingsController.get(_isFirstTimeReceivingFilesSetting);
+            if (isFirstTimeReceivingFiles == null)
+            {
+                await showModalBottomSheet(
+                    context: NearbyPage.scaffoldKey.currentContext!,
+                    builder: (_) => ReceivedFilesLocationInfoView(),
+                    showDragHandle: true
+                );
+
+                // Speichern, wenn ModalBottomSheet geschlossen wurde
+                await _settingsController.set(_isFirstTimeReceivingFilesSetting, true); // Merken, dass Dateien empfangen wurden
+            }
+
             await showImagePreviewDialog(context: NearbyPage.scaffoldKey.currentContext!, allFiles: receivedFiles, device: args.device, targetDirectory: filesDirectory, mimeTypeGroup: mimeTypeGroup);
         }
     }

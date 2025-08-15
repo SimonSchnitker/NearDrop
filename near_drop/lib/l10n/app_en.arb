@@ -151,7 +151,7 @@
   "help_page_install_on_windows_content": "Available on Microsoft Store",
   "help_page_faq_title": "Answered questions",
   "help_page_faq_received_files_question": "Where can I find received files?",
-  "help_page_received_files_bottom_sheet_title": "Received files",
+  "help_page_received_files_bottom_sheet_title": "Where can I find received files?",
   "help_page_received_files_bottom_sheet_media_label": "Photos & Videos",
   "help_page_received_files_bottom_sheet_media_content": "Received photos and videos can be found in your Photos app in the album 'Near Drop'.",
   "help_page_received_files_bottom_sheet_files_label": "Other files",
@@ -245,6 +245,7 @@
   "onboarding_external_storage_permission_title": "External storage",
   "onboarding_external_storage_permission_content": "Allow the app to access the external storage of your device. This allows us to save received files.",
   "how_it_works_title": "How it works",
-  "how_it_works_subtitle": "Start Near Drop on other devices. Nearby devices are automatically detected. Then select a device to send files."
+  "how_it_works_subtitle": "Start Near Drop on other devices. Nearby devices are automatically detected. Then select a device to send files.",
+  "shared_files_title": "Tip on a device to send files."
 
 }

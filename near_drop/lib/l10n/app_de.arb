@@ -151,7 +151,7 @@
     "help_page_install_on_windows_content": "Im Microsoft Store herunterladen",
     "help_page_faq_title": "Fragen & Antworten",
     "help_page_faq_received_files_question": "Wo finde ich empfangene Dateien?",
-    "help_page_received_files_bottom_sheet_title": "Empfangene Dateien",
+    "help_page_received_files_bottom_sheet_title": "Wo finde ich empfangene Dateien?",
     "help_page_received_files_bottom_sheet_media_label": "Fotos & Videos",
     "help_page_received_files_bottom_sheet_media_content": "Empfangene Fotos & Videos findest du in deiner Fotos-App im Album 'Near Drop'.",
     "help_page_received_files_bottom_sheet_files_label": "Andere Dateien",
@@ -245,5 +245,6 @@
     "onboarding_external_storage_permission_title": "Externer Speicher",
     "onboarding_external_storage_permission_content": "Erteile der App die Berechtigung, auf den externen Speicher deines Geräts zuzugreifen. Dadurch können wir empfangene Dateien speichern.",
     "how_it_works_title": "So funktioniert's",
-    "how_it_works_subtitle": "Starte Near Drop auf anderen Geräten. Geräte in der Nähe werden automatisch erkannt. Wähle dann ein Gerät aus, um Dateien zu senden."
+    "how_it_works_subtitle": "Starte Near Drop auf anderen Geräten. Geräte in der Nähe werden automatisch erkannt. Wähle dann ein Gerät aus, um Dateien zu senden.",
+    "shared_files_title": "Tippe auf ein Gerät zum Senden"
 }

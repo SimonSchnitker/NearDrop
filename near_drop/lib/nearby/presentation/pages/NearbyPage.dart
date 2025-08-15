@@ -122,7 +122,7 @@ class NearbyPage extends StatelessWidget
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Tippe auf ein Gerät zum Senden",
+                          AppLocalizations.of(context)!.shared_files_title,
                           style: TextStyle(color: Theme.of(context).colorScheme.primary).copyWith(fontWeight: FontWeight.w500),
                         ),
                         Text("${sharedFiles.length} ${MimeTypeHelper.getMimeTypeString(context, mimeTypeGroup, sharedFiles.length)}"),
@@ -873,9 +873,11 @@ class NearbyPage extends StatelessWidget
   /// Zeigt einen Dialog an, um Dateien an ein Gerät zu senden.
   Widget _sendDialog(BuildContext context, Device device) {
       return AlertDialog(
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
           actionsPadding: EdgeInsets.only(bottom: 16, right: 24),
           title: Text(
               AppLocalizations.of(context)!.send_dialog_title(device.firstname),
+              style: Theme.of(context).textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.w500),
           ),
           content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -884,7 +886,7 @@ class NearbyPage extends StatelessWidget
                 Material(
                     clipBehavior: Clip.hardEdge,
                     borderRadius: BorderRadius.vertical(top: Radius.circular(16), bottom: Radius.circular(4)),
-                    color: Theme.of(context).brightness == Brightness.light ? Theme.of(context).colorScheme.surfaceContainerHighest : Theme.of(context).colorScheme.surfaceContainer,
+                    color: Theme.of(context).brightness == Brightness.light ? Theme.of(context).colorScheme.surfaceContainerHighest : Theme.of(context).colorScheme.surfaceContainerHigh,
                     child: ListTile(
                         leading: Icon(Icons.insert_photo_outlined, color: Theme.of(context).colorScheme.onSurface,),
                         title: Text(
@@ -906,7 +908,7 @@ class NearbyPage extends StatelessWidget
                   Material(
                       clipBehavior: Clip.hardEdge,
                       borderRadius: BorderRadius.vertical(top: Radius.circular(4), bottom: Radius.circular(16)),
-                      color: Theme.of(context).brightness == Brightness.light ? Theme.of(context).colorScheme.surfaceContainerHighest : Theme.of(context).colorScheme.surfaceContainer,
+                      color: Theme.of(context).brightness == Brightness.light ? Theme.of(context).colorScheme.surfaceContainerHighest : Theme.of(context).colorScheme.surfaceContainerHigh,
                       child: ListTile(
                           leading: Icon(Icons.file_copy_outlined, color: Theme.of(context).colorScheme.onSurface,),
                           title: Text(

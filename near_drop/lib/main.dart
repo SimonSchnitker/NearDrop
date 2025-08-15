@@ -110,7 +110,7 @@ void initializeDIContainer()
     final nearbyController = NearbyController(bleScanner, bleAdvertiser, nsdScanner, nsdAdvertiser, supabaseDeviceGateway, localNetworkGateway);
     final signalingGateway = SignalingGateway();
     final signalingController = SignalingController(signalingGateway);
-    final transportController = TransportController(signalingController);
+    final transportController = TransportController(signalingController, settingsController);
     final coreGateway = CoreGateway();
     final coreController = CoreController(coreGateway, settingsController);
 

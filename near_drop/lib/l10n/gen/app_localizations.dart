@@ -739,7 +739,7 @@ abstract class AppLocalizations {
   /// No description provided for @help_page_received_files_bottom_sheet_title.
   ///
   /// In en, this message translates to:
-  /// **'Received files'**
+  /// **'Where can I find received files?'**
   String get help_page_received_files_bottom_sheet_title;
 
   /// No description provided for @help_page_received_files_bottom_sheet_media_label.
@@ -1099,6 +1099,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start Near Drop on other devices. Nearby devices are automatically detected. Then select a device to send files.'**
   String get how_it_works_subtitle;
+
+  /// No description provided for @shared_files_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip on a device to send files.'**
+  String get shared_files_title;
 }
 
 class _AppLocalizationsDelegate

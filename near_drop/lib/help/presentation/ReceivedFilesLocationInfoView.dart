@@ -53,7 +53,7 @@ class ReceivedFilesLocationInfoView extends StatelessWidget
                     backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
                     radius: 36,
                     child: Icon(
-                        Icons.insert_drive_file_outlined,
+                        Icons.file_copy_outlined,
                         size: 28,
                     ),
                 ),
@@ -75,7 +75,7 @@ class ReceivedFilesLocationInfoView extends StatelessWidget
                     backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
                     radius: 36,
                     child: Icon(
-                        Icons.image_outlined,
+                        Icons.file_copy_outlined,
                         size: 28,
                     ),
                 ),

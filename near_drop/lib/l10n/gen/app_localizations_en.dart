@@ -361,7 +361,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Where can I find received files?';
 
   @override
-  String get help_page_received_files_bottom_sheet_title => 'Received files';
+  String get help_page_received_files_bottom_sheet_title =>
+      'Where can I find received files?';
 
   @override
   String get help_page_received_files_bottom_sheet_media_label =>
@@ -577,4 +578,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get how_it_works_subtitle =>
       'Start Near Drop on other devices. Nearby devices are automatically detected. Then select a device to send files.';
+
+  @override
+  String get shared_files_title => 'Tip on a device to send files.';
 }
