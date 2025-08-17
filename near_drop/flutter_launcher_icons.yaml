@@ -12,8 +12,8 @@ flutter_launcher_icons:
   ios: true
   image_path_ios: "assets/app_icon/ios/icon_1024x1024.png"
   remove_alpha_channel_ios: true
-  image_path_ios_dark_transparent: "assets/app_icon/ios/icon_dark_transparent_512x512.png"
-  image_path_ios_tinted_grayscale: "assets/app_icon/ios/icon_tinted_transparent_512x512.png"
+  image_path_ios_dark_transparent: "assets/app_icon/ios/icon_transparent_1024x1024.png"
+  image_path_ios_tinted_grayscale: "assets/app_icon/ios/icon_transparent_1024x1024.png"
   # desaturate_tinted_to_grayscale_ios: true
 
   web:
@@ -24,8 +24,8 @@ flutter_launcher_icons:
 
   windows:
     generate: true
-    image_path: "assets/app_icon/windows/icon_round_192x192.png"
-    icon_size: 192 # min:48, max:256, default: 48
+    image_path: "assets/app_icon/windows/icon_1024x1024.png"
+    icon_size: 256 # min:48, max:256, default: 48
 
   macos:
     generate: true

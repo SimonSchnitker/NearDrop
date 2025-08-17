@@ -13,7 +13,13 @@ class Version
     if (this.major != other.major) {
       return false;
     }
-    // Minor- und Patch-Versionen können unterschiedlich sein, solange die Major-Version gleich ist
+
+    // Minor-Versionen müssen gleich sein, um kompatibel zu sein
+    if (this.minor != other.minor) {
+      return false;
+    }
+
+    // Patch-Versionen können unterschiedlich sein
     return true;
   }
 

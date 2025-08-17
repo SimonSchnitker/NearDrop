@@ -1,11 +1,26 @@
 import 'dart:async';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:mutex/mutex.dart';
 import 'package:near_drop/core/domain/entity/Device.dart';
 import 'package:near_drop/transport/data/Sender.dart';
 import 'package:near_drop/transport/data/SignalingGateway.dart';
 import '../../../main.dart';
 import '../../data/Receiver.dart';
+
+enum Role
+{
+    notSet, // Rolle ist noch nicht festgelegt
+    offerer, // Sender
+    answerer, // Empfänger
+}
+
+enum ConnectionResult
+{
+    success,
+    timeout,
+    canceled,
+}
 
 /// Stellt eine WebRTC-Verbindung zu einem anderen Gerät her und verwaltet die DataChannels für den Datenaustausch.
 class Connection
@@ -29,19 +44,20 @@ class Connection
     };
 
     final SignalingGateway _signalingGateway;
-    final int timestamp = DateTime.now().millisecondsSinceEpoch;
     final String connectionId;
     final Device device;
     late RTCPeerConnection peerConnection;
     RTCDataChannel? dataChannel;
     RTCDataChannel? controlChannel;
 
+    final Mutex _puferedIceCandidatesMutex = Mutex(); // Mutex gepufferte für ICE-Kandiden
+    Role role = Role.notSet; // Rolle des Verbindungsaufbaus (Offerer oder Answerer)
     Sender? sender;
     Receiver? receiver;
 
     // Die Completer, der aufgelöst wird, wenn die Verbindung steht (oder fehlschlägt)
-    final completer = Completer<bool>();
-    Future<bool> get isEstablished => completer.future;
+    final completer = Completer<ConnectionResult>();
+    Future<ConnectionResult> get result => completer.future;
 
     final List<RTCIceCandidate> _iceCandidateBuffer = [];
     bool _isRemoteDescriptionSet = false;
@@ -51,6 +67,7 @@ class Connection
     /// Initialisiert die Verbindung als Offerer (Sender).
     Future<void> initializeAsOfferer() async
     {
+        role = Role.offerer;
         peerConnection = await createPeerConnection(configuration);
 
         // Sender erstellt aktiv die DataChannels
@@ -66,12 +83,9 @@ class Connection
         RTCSessionDescription offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
 
-        // Timeout einrichten
+        // Allgemeinen Timeout einrichten
         Future.delayed(_timeout, () {
-            if (!completer.isCompleted)
-            {
-                completer.complete(false);
-            }
+            if (!completer.isCompleted) completer.complete(ConnectionResult.timeout);
         });
 
         // Angebot über Supabase senden und ggf. wiederholen
@@ -85,7 +99,7 @@ class Connection
             await Future.delayed(_waitingForAnswerDuration * 2);
             if (!_isRemoteDescriptionSet)
             {
-                completer.complete(false);
+                if (!completer.isCompleted) completer.complete(ConnectionResult.timeout);
             }
         }
     }
@@ -93,6 +107,7 @@ class Connection
     /// Initialisiert die Verbindung als Answerer (Empfänger).
     Future<void> initializeAsAnswerer(RTCSessionDescription offer) async
     {
+        role = Role.answerer;
         peerConnection = await createPeerConnection(configuration);
         _setPeerConnectionListener();
         _setIceCandidateListener();
@@ -105,10 +120,18 @@ class Connection
         RTCSessionDescription answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
         await _signalingGateway.sendAnswer(device, answer, connectionId);
-        _isRemoteDescriptionSet = true; // Erst jetzt setzen, damit erst jetzt neu erstellte ICE-Kandidaten gesendet werden
 
-        // Alle gepufferten ICE-Kandidaten senden
-        await _sendPufferedIceCandidates();
+        // Antwort nochmal senden, falls die Remote-Description nach einer gewissen Zeit noch nicht gesetzt wurde
+        await Future.delayed(_waitingForAnswerDuration);
+        if (!_isRemoteDescriptionSet)
+        {
+            await _signalingGateway.sendAnswer(device, answer, connectionId);
+            await Future.delayed(_waitingForAnswerDuration * 2);
+            if (!_isRemoteDescriptionSet)
+            {
+                if (!completer.isCompleted) completer.complete(ConnectionResult.timeout);
+            }
+        }
     }
 
     /// Setzt die Remote-Description für den Answerer.
@@ -141,7 +164,7 @@ class Connection
     {
         peerConnection.onIceCandidate = (RTCIceCandidate candidate)
         {
-            dprint("ICE-Kandidat empfangen: $candidate");
+            dprint("ICE-Kandidat erstellt.");
             if (_isRemoteDescriptionSet)
             {
                 _signalingGateway.sendIceCandidate(device, candidate, connectionId);
@@ -152,6 +175,7 @@ class Connection
             {
                 // Wenn die Remote-Description noch nicht gesetzt ist, speichern wir den Kandidaten im Puffer
                 _iceCandidateBuffer.add(candidate);
+                dprint("ICE-Kandidat gepuffert, da Remote-Description noch nicht gesetzt ist. Puffergröße: ${_iceCandidateBuffer.length}");
             }
         };
     }
@@ -166,7 +190,7 @@ class Connection
             if (dataChannel!.state == RTCDataChannelState.RTCDataChannelOpen && controlChannel!.state == RTCDataChannelState.RTCDataChannelOpen)
             {
                 sender = Sender(dataChannel!, controlChannel!);
-                completer.complete(true);
+                if (!completer.isCompleted) completer.complete(ConnectionResult.success);
             }
         }
 
@@ -195,7 +219,7 @@ class Connection
             if (dataChannel?.state == RTCDataChannelState.RTCDataChannelOpen && controlChannel?.state == RTCDataChannelState.RTCDataChannelOpen)
             {
                 receiver = Receiver(dataChannel!, controlChannel!);
-                completer.complete(true);
+                if (!completer.isCompleted) completer.complete(ConnectionResult.success);
             }
         };
     }
@@ -206,6 +230,12 @@ class Connection
     /// Wird aufgerufen, wenn ein ICE-Kandidat von einem anderen Gerät empfangen wird.
     Future<void> addIceCandidate(RTCIceCandidate candidate) async
     {
+        if (role == Role.answerer)
+        {
+            _isRemoteDescriptionSet = true; // Wenn der Empfänger einen ICE-Kandidaten erhält, ist die Answer beim Offerer angekommen
+            if (_iceCandidateBuffer.isNotEmpty) _sendPufferedIceCandidates(); // Alle gepufferten ICE-Kandidaten senden
+        }
+
         try
         {
             await peerConnection.addCandidate(candidate);
@@ -221,15 +251,18 @@ class Connection
     /// Sendet die zwischengespeicherten ICE-Kandidaten an den anderen Peer.
     Future<void> _sendPufferedIceCandidates() async
     {
-        if (_iceCandidateBuffer.isNotEmpty)
-        {
-            await _signalingGateway.sendIceCandidateBatch(device, _iceCandidateBuffer, connectionId);
+        // Verhindert, dass die gepufferten ICE-Kandidaten mehrmals gesendet werden, wenn mehrere ICE-Kandidaten vom Offerer gleichzeitig empfangen werden.
+        await _puferedIceCandidatesMutex.protect(() async {
+            if (_iceCandidateBuffer.isNotEmpty)
+            {
+                await _signalingGateway.sendIceCandidateBatch(device, _iceCandidateBuffer, connectionId);
 
-            iceSendCount += _iceCandidateBuffer.length;
-            dprint("Batch von ICE-Kandidaten gesendet: $iceSendCount");
+                iceSendCount += _iceCandidateBuffer.length;
+                dprint("Batch von ICE-Kandidaten gesendet: $iceSendCount");
 
-            _iceCandidateBuffer.clear();
-        }
+                _iceCandidateBuffer.clear();
+            }
+        });
     }
 
     /// Schließt die Verbindung und gibt alle Ressourcen frei.

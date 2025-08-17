@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:near_drop/core/domain/enums/CommunicationState.dart';
@@ -94,7 +95,6 @@ class TransportController
     /// Bricht die Übertragung zwischen einem Gerät ab.
     Future<void> cancelTransport(Device device) async
     {
-        device.communicationInfo.setCanceling();
         Connection? connection = _signalingController.getCurrentConnection(device);
         if (connection == null)
         {
@@ -105,12 +105,13 @@ class TransportController
         // Im connection-State den Completer verwenden
         if (device.communicationInfo.communicationState == CommunicationState.connecting)
         {
-            connection.completer.complete(false);
+            connection.completer.complete(ConnectionResult.canceled);
             device.communicationInfo.setErrorState(ErrorState.userCanceled);
             return;
         }
 
         // Ansonsten eine Cancel-Nachricht an den anderen Peer senden
+        device.communicationInfo.setCanceling();
         await connection.sender?.sendCancel();
         await connection.receiver?.sendCancel();
 
@@ -139,16 +140,32 @@ class TransportController
             return SendResponse.fileAccessError;
         }
 
+        // Wenn das Gerät keine WLAN- oder Ethernet-Verbindung hat und die Gesamtgröße einen bestimmten Wert übersteigt, Datenvolumen-Warnung anzeigen
+        List<ConnectivityResult> connectivity = await Connectivity().checkConnectivity();
+        if (!connectivity.contains(ConnectivityResult.wifi) && !connectivity.contains(ConnectivityResult.ethernet) && totalSize >= minBytesForDataVolumeWarning)
+        {
+            bool send = await showVolumeDataWarningDialog(totalSize);
+            if (!send)
+            {
+                device.communicationInfo.setErrorState(ErrorState.userCanceled);
+                return SendResponse.userCanceled;
+            }
+        }
+
         // Verbindung zum Gerät herstellen
-        Connection? connection = await _signalingController.connect(device);
-        if (connection == null)
+        final (connectionResult, connection) = await _signalingController.connect(device);
+        if (connectionResult == ConnectionResult.timeout)
         {
             device.communicationInfo.setErrorState(ErrorState.error);
             return SendResponse.connectionError;
         }
+        else if (connectionResult == ConnectionResult.canceled)
+        {
+            return SendResponse.userCanceled;
+        }
 
         // Sendeanfrage stellen
-        Sender sender = connection.sender!;
+        Sender sender = connection!.sender!;
         device.communicationInfo.setRequesting();
         sender.request(files.length, totalSize, mimeTypeGroup);
         RequestResult requestResult = await sender.requestResult;
@@ -235,15 +252,17 @@ class TransportController
         {
             args.device.communicationInfo.setSuccessState(SuccessState.receivedSuccessfully);
         }
-        else if (receiveResult == ReceiveResult.fileWriteError || receiveResult == ReceiveResult.connectionError)
+        else
         {
-            args.device.communicationInfo.setErrorState(ErrorState.error);
-            await receiver.deleteCurrentBrokenFile();
-            await _deleteReceivedFiles(receivedFiles);
-        }
-        else if (receiveResult == ReceiveResult.userCanceled)
-        {
-            args.device.communicationInfo.setErrorState(ErrorState.userCanceled);
+            if (receiveResult == ReceiveResult.userCanceled)
+            {
+                args.device.communicationInfo.setErrorState(ErrorState.userCanceled);
+            }
+            else
+            {
+                args.device.communicationInfo.setErrorState(ErrorState.error);
+            }
+
             await receiver.deleteCurrentBrokenFile();
             await _deleteReceivedFiles(receivedFiles);
         }

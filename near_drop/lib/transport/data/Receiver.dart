@@ -30,7 +30,6 @@ enum ReceiveState
 enum ReceiveResult
 {
     ok,
-    declined,
     fileWriteError,
     userCanceled,
     connectionError,
@@ -64,6 +63,7 @@ class Receiver
     Future<ReceiveResult> get isFinished => _completer.future;
 
     final _cancelAckCompleter = Completer<void>();
+    final _listenCompleter = Completer<void>(); // Wird aufgelöst, wenn der Listener bereit ist
 
     late final Function(ReceivedFileDTO file) _onFileReceived;
     late final Function(double progress) _onProgress;
@@ -88,6 +88,7 @@ class Receiver
         _onSendRequest = onSendRequest;
         _onFileReceived = onFileReceived;
         _onProgress = onProgress;
+        _listenCompleter.complete(); // Signalisiert, dass der Listener bereit ist
     }
 
     /// Verarbeitet eingehende Steuerbefehle.
@@ -100,9 +101,7 @@ class Receiver
         {
             case TransferRequestMessage():
                 if (_receiveState != ReceiveState.waitingForRequest) return;
-                dprint("Empfänger: TransferRequestMessage empfangen.");
-                _totalSize = controlMessage.totalSize;
-                _onSendRequest(SendRequestDTO(controlMessage.filesCount, controlMessage.totalSize, controlMessage.mimeTypeGroup));
+                await _handleTransferRequest(controlMessage);
                 break;
             case FileInfoMessage():
                 if (_receiveState != ReceiveState.waitingForFileInfoOrFinish) return;
@@ -131,6 +130,25 @@ class Receiver
                 dprint("Unbekannter Steuerbefehl empfangen: ${controlMessage.runtimeType}");
                 return;
         }
+    }
+
+    /// Verarbeitet eine eingehende TransferRequestMessage, die den Beginn eines Dateiübertragungsprozesses anzeigt.
+    Future<void> _handleTransferRequest(TransferRequestMessage messsage) async
+    {
+        dprint("Empfänger: TransferRequestMessage empfangen.");
+        _totalSize = messsage.totalSize;
+        try
+        {
+            await _listenCompleter.future.timeout(Duration(seconds: 5));
+        }
+        on TimeoutException
+        {
+            dprint("Empfänger: Timeout beim Warten auf den Listener.");
+            if (!_completer.isCompleted) _completer.complete(ReceiveResult.connectionError);
+            return;
+        }
+
+        _onSendRequest(SendRequestDTO(messsage.filesCount, messsage.totalSize, messsage.mimeTypeGroup));
     }
 
     /// Sendet eine Bestätigung, dass der Abbruch des Transfers empfangen wurde.

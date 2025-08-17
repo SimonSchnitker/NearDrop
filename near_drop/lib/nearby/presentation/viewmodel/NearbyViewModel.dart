@@ -110,15 +110,15 @@ class NearbyViewModel extends ChangeNotifier
 
     void addTestDevices()
     {
-        Device device1 = Device("Julian", "iPhone 16 Pro", DeviceType.phone, OS.ios, Version(1, 0, 0), "");
+        Device device1 = Device("Julian", "iPhone 16 Pro", DeviceType.phone, OS.ios, Version(2, 0, 0), "");
         //device1.communicationInfo.setSending(0.7);
         nearbyDevices.add(device1);
 
-        Device device2 = Device("Ava", "Pixel 9 Pro", DeviceType.phone, OS.android, Version(1, 0, 0), "");
+        Device device2 = Device("Ava", "Pixel 9 Pro", DeviceType.phone, OS.android, Version(2, 0, 0), "");
         //device2.communicationInfo.setReceiving(0.3);
         nearbyDevices.add(device2);
 
-        nearbyDevices.add(Device("Max", "MacBook Air", DeviceType.pc, OS.macos, Version(1, 0, 0), ""));
+        nearbyDevices.add(Device("Max", "MacBook Air", DeviceType.pc, OS.macos, Version(2, 0, 0), ""));
     }
 
     /// Initialisiert die Core-Funktionen der App.

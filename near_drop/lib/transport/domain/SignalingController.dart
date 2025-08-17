@@ -60,10 +60,9 @@ class SignalingController
         connection = Connection(_signalingGateway, device, offer.connectionId);
         _connections[device] = connection;
 
-        await connection.initializeAsAnswerer(RTCSessionDescription(offer.sdp, offer.sdpType));
-
-        bool established = await connection.isEstablished;
-        if (established)
+        connection.initializeAsAnswerer(RTCSessionDescription(offer.sdp, offer.sdpType)); // Nicht darauf warten!
+        ConnectionResult connectionResult = await connection.result;
+        if (connectionResult == ConnectionResult.success)
         {
             dprint("SignalingController: _onOfferReceived: Connection established with ${device.name}");
             onIncomingConnection.add(IncomingConnectionEventArgs(device, connection));
@@ -72,7 +71,7 @@ class SignalingController
         {
             dprint("SignalingController: _onOfferReceived: Failed to establish connection with ${device.name}");
             await connection.close();
-            _connections.remove(connection.connectionId);
+            _connections.remove(device);
         }
     }
 
@@ -117,7 +116,7 @@ class SignalingController
     }
 
     /// Versucht, eine Verbindung zu einem Gerät herzustellen.
-    Future<Connection?> connect(Device device) async
+    Future<(ConnectionResult, Connection?)> connect(Device device) async
     {
         // Alte Verbindung schließen, falls vorhanden
         Connection? connection = _connections[device];
@@ -132,18 +131,18 @@ class SignalingController
 
         connection.initializeAsOfferer(); // Nicht darauf warten!
 
-        bool established = await connection.isEstablished;
-        if (established)
+        ConnectionResult connectionResult = await connection.result;
+        if (connectionResult == ConnectionResult.success)
         {
             dprint("SignalingController: connect: Connection established with ${device.name}");
-            return connection;
+            return (connectionResult, connection);
         }
         else
         {
             dprint("SignalingController: connect: Failed to establish connection with ${device.name}");
             await connection.close();
             _connections.remove(device);
-            return null;
+            return (connectionResult, null);
         }
     }
 

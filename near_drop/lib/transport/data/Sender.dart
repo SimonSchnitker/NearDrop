@@ -226,6 +226,7 @@ class Sender
     Future<void> _sendFinished() async
     {
         dprint("Sender: Sende TransferFinishedMessage...");
+        _isActive = false; // Falg schon setzen, damit keine Progress-Updates vom Empfänger mehr verarbeitet werden
         final finishedMessage = TransferFinishedMessage();
         await _controlChannel.send(RTCDataChannelMessage(jsonEncode(finishedMessage.toMap())));
 
@@ -341,7 +342,7 @@ class Sender
                 dprint("Sender: Timeout beim Warten auf leeren Puffer.");
                 return;
             }
-            await Future.delayed(const Duration(milliseconds: 100));
+            await Future.delayed(const Duration(milliseconds: 200));
         }
     }
 
