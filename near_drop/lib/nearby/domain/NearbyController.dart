@@ -15,6 +15,8 @@ import '../../main.dart';
 /// Steuert das Suchen nach Geräten in der Nähe und den Austausch von Gerätedaten.
 class NearbyController
 {
+    static const Duration _removeExchangeTimeout = Duration(seconds: 2);
+
     final BleScanner _bleScanner;
     final BleAdvertiser _bleAdvertiser;
     final NsdScanner _nsdScanner;
@@ -113,8 +115,9 @@ class NearbyController
         if (exchange.isFinished)
         {
             await NearbyDevicesContainer.addIfNotContains(device);
-            _exchanges.remove(device.nearbyUuid);
             dprint("NearbyController: Austausch mit ${device.nearbyUuid} abgeschlossen. Gerät hinzugefügt.");
+            await Future.delayed(_removeExchangeTimeout); // In seltenen Fällen kommt es zu Endlosschleifen, wenn der Austausch direkt entfernt wird (TODO: In Zukunft verbessern)
+            _exchanges.remove(device.nearbyUuid);
         }
     }
 
@@ -135,8 +138,9 @@ class NearbyController
         if (exchange.isFinished)
         {
             await NearbyDevicesContainer.addIfNotContains(exchange.receivedDevice!);
-            _exchanges.remove(nearbyUuid);
             dprint("NearbyController: Austausch mit $nearbyUuid abgeschlossen. Gerät hinzugefügt.");
+            await Future.delayed(_removeExchangeTimeout); // In seltenen Fällen kommt es zu Endlosschleifen, wenn der Austausch direkt entfernt wird (TODO: In Zukunft verbessern)
+            _exchanges.remove(nearbyUuid);
         }
     }
 
@@ -158,7 +162,7 @@ class NearbyController
 
         // Ansonsten Gerätetaten austauschen
         dprint("NearbyController: NSD-Gerät gefunden: ${args.nearbyUuid}. Tausche Gerätedaten aus.)");
-        _exchanges.putIfAbsent(args.nearbyUuid, () => Exchange()); // Exchange anlegen, um zu verhindern, dass zeitgleich der Austausch über Supabase gestartet wird
+        //_exchanges.putIfAbsent(args.nearbyUuid, () => Exchange()); // Exchange anlegen, um zu verhindern, dass zeitgleich der Austausch über Supabase gestartet wird
         await _localNetworkGateway.exchangeDeviceData(args);
     }
 
@@ -166,7 +170,7 @@ class NearbyController
     Future<void> _onNetworkDeviceResolved(Device device) async
     {
         await NearbyDevicesContainer.addIfNotContains(device);
-        _exchanges.remove(device.nearbyUuid);
+        //_exchanges.remove(device.nearbyUuid);
     }
 
     /// Startet den BLE-Advertiser, um Gerätedaten zu bewerben.

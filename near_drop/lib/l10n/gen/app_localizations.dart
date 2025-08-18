@@ -107,7 +107,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcome_subtitle.
   ///
   /// In en, this message translates to:
-  /// **'Send photos, videos and documents quickly & wirelessly to friends nearby.'**
+  /// **'Share photos, videos, and documents quickly and easily with all your devices and nearby friends.'**
   String get welcome_subtitle;
 
   /// No description provided for @app_info_button.

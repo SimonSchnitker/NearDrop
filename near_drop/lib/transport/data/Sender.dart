@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:mime/mime.dart';
+import 'package:mutex/mutex.dart';
 import 'package:near_drop/transport/data/messages/CancelAck.dart';
 import 'package:near_drop/transport/data/messages/CancelMessage.dart';
 import 'package:near_drop/transport/data/messages/ControlMessage.dart';
@@ -52,6 +54,10 @@ class Sender
     // Stream für eingehende Kontrollnachrichten
     final _controlStreamController = StreamController<ControlMessage>.broadcast();
     Stream<ControlMessage> get _controlStream => _controlStreamController.stream;
+
+    // Eine Queue, um bestimmte Kontroll-Nachrichten zu puffern, die bereits angekommen sind
+    final _messageQueue = Queue<ControlMessage>();
+    final _queueMutex = Mutex();
 
     // Die Completer, der aufgelöst wird, wenn das Senden abgeschlossen wurde (oder fehlschlug)
     final _sendCompleter = Completer<SendResult>();
@@ -161,8 +167,16 @@ class Sender
 
             try
             {
+                // Schonmal auf FileReadyMessage warten, um zu verhindern, dass der Empfänger zu schnell antwortet und die Nachricht verloren geht
+                Completer<void> fileReadyCompleter = Completer<void>();
+                final sub = _controlStream.where((msg) => msg is FileReadyMessage).listen((msg)
+                {
+                    fileReadyCompleter.complete();
+                });
+
                 await _sendFileInfo(filename, size, mimeType);
-                await _waitForFileReady();
+                await fileReadyCompleter.future.timeout(_timeoutDuration);
+                sub.cancel();
             }
             on TimeoutException
             {
@@ -177,8 +191,16 @@ class Sender
 
             try
             {
+                // Schonmal auf FileReceivedMessage warten, um zu verhindern, dass der Empfänger zu schnell antwortet und die Nachricht verloren geht
+                Completer<void> fileReceivedCompleter = Completer<void>();
+                final sub = _controlStream.where((msg) => msg is FileReceivedMessage).listen((msg)
+                {
+                    fileReceivedCompleter.complete();
+                });
+
                 await _sendFile(file, size);
-                await _waitForFileReceived();
+                await fileReceivedCompleter.future.timeout(_timeoutDuration);
+                sub.cancel();
             }
             on TimeoutException
             {
@@ -351,7 +373,7 @@ class Sender
         _isActive = false;
         _controlStreamController.close();
 
-        if (!_requestCompleter.isCompleted) _requestCompleter.completeError(RequestResult.declined);
+        if (!_requestCompleter.isCompleted) _requestCompleter.complete(RequestResult.declined);
         if (!_sendCompleter.isCompleted) _sendCompleter.complete(SendResult.userCanceled);
         if (_lowAmountCompleter?.isCompleted == false) _lowAmountCompleter?.complete();
     }

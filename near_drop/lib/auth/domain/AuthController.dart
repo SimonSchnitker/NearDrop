@@ -1,8 +1,10 @@
+import 'package:kiwi/kiwi.dart';
 import 'package:near_drop/Runtime.dart';
 import 'package:near_drop/auth/data/AuthGateway.dart';
 import 'package:near_drop/auth/domain/model/Consent.dart';
 import 'package:near_drop/auth/domain/model/UserData.dart';
 import 'package:near_drop/auth/domain/model/UserSession.dart';
+import 'package:near_drop/nearby/domain/NearbyController.dart';
 import 'package:near_drop/settings/domain/SettingsController.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../settings/domain/Setting.dart';
@@ -50,8 +52,11 @@ class AuthController
 
         try
         {
-            await Runtime.realtimeChannel.unsubscribe();
             await _settingsController.clear();
+            await Runtime.realtimeChannel.unsubscribe();
+            await KiwiContainer().resolve<NearbyController>().stopNsdServices();
+            await KiwiContainer().resolve<NearbyController>().stopBleScanner();
+            await KiwiContainer().resolve<NearbyController>().stopBleAdvertiser();
         }
         catch (e)
         {

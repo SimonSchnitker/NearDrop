@@ -116,7 +116,7 @@ class TransportController
         await connection.receiver?.sendCancel();
 
         device.communicationInfo.setErrorState(ErrorState.userCanceled);
-        await _signalingController.closeConnection(device);
+        await _signalingController.closeConnection(device, connection);
         connection.sender?.dispose();
         connection.receiver?.dispose();
     }
@@ -191,7 +191,7 @@ class TransportController
         });
         SendResult sendResult = await sender.sendResult;
 
-        _signalingController.closeConnection(connection.device); // Nicht darauf warten!
+        _signalingController.closeConnection(connection.device, connection); // Nicht darauf warten!
         sender.dispose();
 
         switch (sendResult)
@@ -267,7 +267,7 @@ class TransportController
             await _deleteReceivedFiles(receivedFiles);
         }
 
-        _signalingController.closeConnection(args.device);
+        _signalingController.closeConnection(args.device, args.connection);
         receiver.dispose();
 
         // Dialog mit den empfangenen Dateien anzeigen

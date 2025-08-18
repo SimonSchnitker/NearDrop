@@ -70,8 +70,7 @@ class SignalingController
         else
         {
             dprint("SignalingController: _onOfferReceived: Failed to establish connection with ${device.name}");
-            await connection.close();
-            _connections.remove(device);
+            await closeConnection(device, connection);
         }
     }
 
@@ -140,25 +139,23 @@ class SignalingController
         else
         {
             dprint("SignalingController: connect: Failed to establish connection with ${device.name}");
-            await connection.close();
-            _connections.remove(device);
+            await closeConnection(device, connection);
             return (connectionResult, null);
         }
     }
 
     /// Schließt eine Verbindung und räumt alle Ressourcen auf.
-    Future<void> closeConnection(Device device) async
+    Future<void> closeConnection(Device device, Connection connection) async
     {
-        Connection? connection = _connections[device];
-        if (connection != null)
+        await connection.close();
+
+        // Verbindung nur entfernen, wenn sie die aktuelle Verbindung ist
+        Connection? currentConnection = _connections[device];
+        if (connection == currentConnection)
         {
-            await connection.close();
             _connections.remove(device);
-            dprint("SignalingController: closeConnection: Connection ${connection.connectionId} closed.");
         }
-        else
-        {
-            dprint("SignalingController: closeConnection: Connection of $device not found.");
-        }
+
+        dprint("SignalingController: closeConnection: Connection ${connection.connectionId} closed.");
     }
 }

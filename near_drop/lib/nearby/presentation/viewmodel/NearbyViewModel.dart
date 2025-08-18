@@ -105,6 +105,7 @@ class NearbyViewModel extends ChangeNotifier
         });
 
         initializeCore();
+        //_checkShowChangelogPage();
         _getVersionInfo();
     }
 
@@ -161,7 +162,18 @@ class NearbyViewModel extends ChangeNotifier
          */
 
         _listenForBluetoothStateChanges();
-        //_startBleRestartingProcess();
+        _startBleRestartingProcess();
+    }
+
+    /// Zeigt die Changelog-Seite an, wenn es sich um die erste Öffnung der App nach einer Aktualisierung handelt.
+    Future<void> _checkShowChangelogPage() async
+    {
+        if (_coreController.isFirstTimeNewerVersionOpened)
+        {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+                Navigator.of(NearbyPage.scaffoldKey.currentContext!).pushNamed(Routes.changelog);
+            });
+        }
     }
 
     /// Prüft, ob eine Aktualisierung verfügbar ist und ob es sich um eine wichtige Aktualisierung handelt.

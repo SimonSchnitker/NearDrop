@@ -17,7 +17,7 @@ class WelcomePage extends StatelessWidget
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
                 Icon(
-                    Icons.sensors_rounded,
+                    Icons.wifi_tethering_rounded,
                     size: 48,
                     color: Theme.of(context).colorScheme.primary,
                 ),

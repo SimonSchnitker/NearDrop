@@ -26,6 +26,7 @@ import '../../../core/domain/entity/Device.dart';
 import '../../../core/domain/enums/CommunicationState.dart';
 import '../../../core/domain/enums/DeviceType.dart';
 import '../../../core/domain/enums/ErrorState.dart';
+import '../../../core/domain/enums/OS.dart';
 import '../../../core/domain/enums/SuccessState.dart';
 import '../../../l10n/gen/app_localizations.dart';
 
@@ -295,10 +296,10 @@ class NearbyPage extends StatelessWidget
                   PulsingCirclesLoader()
                       .opacity(0.2),
                   Icon(
-                      Icons.sensors_rounded,
+                      Icons.wifi_tethering_rounded,
                       color: Theme.of(context).colorScheme.primary,
                       size: Platform.isAndroid || Platform.isIOS ? 48 : 40,
-                  )
+                  ).paddingOnly(bottom: 4)
               ],
           ).align(Alignment.center).paddingOnly(left: 32, right: 32, top: 110),
         ),
@@ -440,14 +441,14 @@ class NearbyPage extends StatelessWidget
   }
 
   /// Gibt je nach Gerätetyp ein passendes Icon zurück.
-  IconData _getDeviceIcon(DeviceType type) {
-      switch (type) {
+  IconData _getDeviceIcon(Device device) {
+      switch (device.type) {
           case DeviceType.phone:
-              return Icons.phone_iphone_outlined;
+              return device.os == OS.android ? Icons.phone_android_outlined : Icons.phone_iphone_outlined;
           case DeviceType.tablet:
-              return Icons.tablet_mac_outlined;
+              return device.os == OS.android ? Icons.tablet_android_outlined : Icons.tablet_mac_outlined;
           case DeviceType.laptop:
-              return Icons.laptop_mac_outlined;
+              return device.os == OS.windows ? Icons.laptop_windows_outlined : Icons.laptop_mac_outlined;
           case DeviceType.pc:
               return Icons.monitor;
           default:
@@ -478,7 +479,7 @@ class NearbyPage extends StatelessWidget
                               radius: 32,
                               backgroundColor: Theme.of(context).colorScheme.surface,
                               child: Icon(
-                                  _getDeviceIcon(device.type),
+                                  _getDeviceIcon(device),
                                   size: 28,
                               ),
                           ),

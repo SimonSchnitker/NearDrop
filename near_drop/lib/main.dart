@@ -10,6 +10,7 @@ import 'package:near_drop/WelcomePage.dart';
 import 'package:near_drop/auth/domain/AuthController.dart';
 import 'package:near_drop/auth/presentation/pages/GuestSettingsPage.dart';
 import 'package:near_drop/core/data/CoreGateway.dart';
+import 'package:near_drop/core/presentation/ChangelogPage.dart';
 import 'package:near_drop/core/presentation/UpdateRequiredPage.dart';
 import 'package:near_drop/help/presentation/HelpPage.dart';
 import 'package:near_drop/nearby/data/scan/ble/BleAdvertiser.dart';
@@ -71,6 +72,7 @@ void main() async
     if (Supabase.instance.client.auth.currentUser != null)
     {
         await KiwiContainer().resolve<AuthController>().loadUserData();
+        //await KiwiContainer().resolve<CoreController>().setIsFirstTimeNewerVersionOpened();
     }
 
     runApp(const MyApp());
@@ -134,6 +136,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+
       return DynamicColorBuilder(
           builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
               return MaterialApp(
@@ -198,6 +202,7 @@ class MyApp extends StatelessWidget {
                       Routes.onboarding: (context) => OnboardingPage(),
                       Routes.savedUserData: (context) => SavedUserDataPage(),
                       Routes.requiredUpdate: (context) => UpdateRequiredPage(),
+                      Routes.changelog: (context) => ChangelogPage(),
                   },
                   initialRoute: Supabase.instance.client.auth.currentUser == null ? Routes.welcome : Routes.nearby,
               );

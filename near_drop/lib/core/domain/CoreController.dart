@@ -17,11 +17,13 @@ class CoreController
 
     final CoreGateway _coreGateway;
     final SettingsController _settingsController;
+    bool _isFirstTimeNewerVersionOpened = false;
 
     CoreController(this._coreGateway, this._settingsController);
 
     static final nearbyUuidSetting = Setting("nearby_uuid", String);
     static final nearbyUuidCreationSetting = Setting("nearby_uuid_created_at", String);
+    static final Setting _previousVersionSetting = Setting("previous_version", String);
 
     /// Initialisiert die Nearby-UUID und den Realtime-Kanal.
     Future<void> initialize() async
@@ -97,4 +99,20 @@ class CoreController
             requiredVersion: Version.fromString(dto.requiredVersion),
         );
     }
+
+    /// Überprüft, ob es sich um das erste Öffnen der App mit einer neueren Version handelt.
+    Future<void> setIsFirstTimeNewerVersionOpened() async
+    {
+        String? previousVersion = await _settingsController.get(_previousVersionSetting);
+
+        if (previousVersion == null || Runtime.appVersion > Version.fromString(previousVersion))
+        {
+            await _settingsController.set(_previousVersionSetting, Runtime.appVersion.toString());
+            _isFirstTimeNewerVersionOpened = true;
+        }
+
+        _isFirstTimeNewerVersionOpened = true;
+    }
+
+    bool get isFirstTimeNewerVersionOpened => _isFirstTimeNewerVersionOpened;
 }
