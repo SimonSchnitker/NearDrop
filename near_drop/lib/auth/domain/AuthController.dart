@@ -48,7 +48,14 @@ class AuthController
     /// Meldet den aktuellen Benutzer ab, löscht die Einstellungen und unsubscribt vom Realtime-Kanal.
     Future<void> signOutAndDeleteAccount() async
     {
-        await _authGateway.deleteAccount();
+        try
+        {
+            await _authGateway.deleteAccount();
+        }
+        catch (e)
+        {
+            // Fehler ignorieren
+        }
 
         try
         {

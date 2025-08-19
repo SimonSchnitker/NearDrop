@@ -50,7 +50,7 @@ class SignalingController
             return;
         }
 
-        // Alter Verbindung schließen, falls vorhanden
+        // Alte Verbindung schließen, falls vorhanden
         Connection? connection = _connections[device];
         if (connection != null)
         {

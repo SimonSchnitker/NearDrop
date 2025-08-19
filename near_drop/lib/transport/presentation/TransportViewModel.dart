@@ -26,8 +26,12 @@ class TransportViewModel extends ChangeNotifier
     TransportViewModel()
     {
         _initFilesDirectory();
-        _checkHasSharedFiles();
-        _listenForMediaSharing();
+
+        if (Platform.isAndroid)
+        {
+            _checkHasSharedFiles();
+            _listenForMediaSharing();
+        }
     }
 
     /// Prüft, ob die App Dateien empfangen hat, die über die Teilen-Funktion des Betriebssystems gesendet wurden.
@@ -35,7 +39,12 @@ class TransportViewModel extends ChangeNotifier
     {
         ReceiveSharingIntent.instance.getInitialMedia().then((value) {
             sharedFiles.clear();
-            sharedFiles.addAll(value);
+            for (var file in value)
+            {
+                if (file.type == SharedMediaType.text) continue;
+                sharedFiles.add(file);
+            }
+            notifyListeners();
             ReceiveSharingIntent.instance.reset();
         });
     }
@@ -45,7 +54,11 @@ class TransportViewModel extends ChangeNotifier
     {
         ReceiveSharingIntent.instance.getMediaStream().listen((value) {
             sharedFiles.clear();
-            sharedFiles.addAll(value);
+            for (var file in value)
+            {
+                if (file.type == SharedMediaType.text) continue;
+                sharedFiles.add(file);
+            }
             notifyListeners();
         }, onError: (err) {
             print("getIntentDataStream error: $err");

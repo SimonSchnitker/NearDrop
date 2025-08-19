@@ -173,7 +173,7 @@ class Receiver
         if (_receiveState != ReceiveState.receivingFile) return;
         if (!message.isBinary) return;
 
-        dprint("Empfänger: Datenchunk empfangen. Größe: ${message.binary.length} Bytes");
+        //dprint("Empfänger: Datenchunk empfangen. Größe: ${message.binary.length} Bytes");
         final chunk = message.binary;
         await _writeMutex.acquire();
 
@@ -396,6 +396,5 @@ class Receiver
         _receiveState = ReceiveState.finished;
         _progressTimer?.cancel();
         if (!_completer.isCompleted) _completer.complete(ReceiveResult.userCanceled);
-        _resetCurrentFile();
     }
 }

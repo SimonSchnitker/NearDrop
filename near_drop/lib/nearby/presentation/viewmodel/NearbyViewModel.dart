@@ -232,8 +232,8 @@ class NearbyViewModel extends ChangeNotifier
             }
             notifyListeners();
 
-            // Wenn eine WLAN-Verbindung besteht, NSD-Services starten
-            if (result.contains(ConnectivityResult.wifi))
+            // Wenn eine WLAN- oder Ethernet-Verbindung besteht, NSD-Services starten
+            if (result.contains(ConnectivityResult.wifi) || result.contains(ConnectivityResult.ethernet))
             {
                 await _nearbyController.startNsdServices();
             }

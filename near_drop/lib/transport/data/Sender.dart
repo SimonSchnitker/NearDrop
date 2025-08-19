@@ -290,12 +290,12 @@ class Sender
 
             // Prüfe den Pufferstand nach dem Senden des Batches
             int currentBufferedAmount = await _dataChannel.getBufferedAmount();
-            dprint("Sender: Aktueller Pufferstand: $currentBufferedAmount Bytes");
+            //dprint("Sender: Aktueller Pufferstand: $currentBufferedAmount Bytes");
 
             // Wenn der obere Schwellenwert überschritten ist...
             if (currentBufferedAmount > _highWaterMark)
             {
-                dprint("Puffer über Schwellenwert. Warte, bis er unter $_lowWaterMark Bytes fällt...");
+                //dprint("Puffer über Schwellenwert. Warte, bis er unter $_lowWaterMark Bytes fällt...");
 
                 // ...dann warte so lange, bis er den UNTEREN Schwellenwert unterschreitet.
                 if (Platform.isWindows)
@@ -312,7 +312,7 @@ class Sender
 
                         await Future.delayed(const Duration(milliseconds: 25));
                         currentBufferedAmount = await _dataChannel.getBufferedAmount();
-                        dprint("Aktueller Pufferstand: $currentBufferedAmount Bytes");
+                        //dprint("Aktueller Pufferstand: $currentBufferedAmount Bytes");
                     }
                 }
                 else
@@ -321,7 +321,7 @@ class Sender
                     await _lowAmountCompleter!.future.timeout(_timeoutDuration);
                 }
 
-                dprint("Puffer hat wieder ausreichend Platz. Pufferstand: $currentBufferedAmount Bytes");
+                //dprint("Puffer hat wieder ausreichend Platz. Pufferstand: $currentBufferedAmount Bytes");
             }
         }
 
