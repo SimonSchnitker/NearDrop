@@ -55,10 +55,6 @@ class Sender
     final _controlStreamController = StreamController<ControlMessage>.broadcast();
     Stream<ControlMessage> get _controlStream => _controlStreamController.stream;
 
-    // Eine Queue, um bestimmte Kontroll-Nachrichten zu puffern, die bereits angekommen sind
-    final _messageQueue = Queue<ControlMessage>();
-    final _queueMutex = Mutex();
-
     // Die Completer, der aufgelöst wird, wenn das Senden abgeschlossen wurde (oder fehlschlug)
     final _sendCompleter = Completer<SendResult>();
     Future<SendResult> get sendResult => _sendCompleter.future;
