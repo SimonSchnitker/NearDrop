@@ -9,4 +9,5 @@ class Routes
     static String savedUserData = "/savedUserData";
     static String requiredUpdate = "/requiredUpdate";
     static String changelog = "/changelog";
+    static String privacyUpdate = "/privacyUpdate";
 }

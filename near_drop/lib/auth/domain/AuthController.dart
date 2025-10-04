@@ -15,6 +15,7 @@ class AuthController
     final AuthGateway _authGateway;
     final SettingsController _settingsController;
     static final firstnameSetting = Setting("firstname", String);
+    static final privacyPolicyVersionAcceptedSetting = Setting("privacyPolicyVersionAccepted", int);
 
     AuthController(this._authGateway, this._settingsController);
 
@@ -32,6 +33,7 @@ class AuthController
         {
             // Eintragen in der Supabase-Datenbank, dass der Benutzer alle Einwilligungen gegeben hat.
             await _authGateway.recordAllConsents();
+            await _settingsController.set(privacyPolicyVersionAcceptedSetting, Runtime.privacyPolicyVersion);
         }
         catch (e)
         {
@@ -43,6 +45,11 @@ class AuthController
         await _settingsController.set(firstnameSetting, firstname);
         Runtime.firstname = firstname;
         return response;
+    }
+
+    Future<void> recordNewestPrivacyConsent() async
+    {
+        await _authGateway.recordAllConsents();
     }
 
     /// Meldet den aktuellen Benutzer ab, löscht die Einstellungen und unsubscribt vom Realtime-Kanal.
@@ -80,8 +87,10 @@ class AuthController
         {
             firstname = "???";
         }
+        int? acceptedVersion = await _settingsController.get(privacyPolicyVersionAcceptedSetting);
 
         Runtime.firstname = firstname;
+        Runtime.hasNewestPrivacyPolicyAccepted = acceptedVersion != null && acceptedVersion >= Runtime.privacyPolicyVersion;
     }
 
     /// Ruft alle Daten des Benutzers ab, die auf dem Supabase-Server gespeichert sind.

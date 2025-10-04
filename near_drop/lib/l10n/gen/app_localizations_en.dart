@@ -581,4 +581,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shared_files_title => 'Tip on a device to send files.';
+
+  @override
+  String get privacy_updated_title => 'New privacy policy';
+
+  @override
+  String get privacy_updated_subtitle =>
+      'We have updated our privacy policy. To continue, please read and accept the new terms.';
+
+  @override
+  String get privacy_updated_accept_button => 'Accept';
+
+  @override
+  String get privacy_updated_read_button => 'View privacy policy';
+
+  @override
+  String get privacy_updated_delete_account_button => 'Delete account';
 }

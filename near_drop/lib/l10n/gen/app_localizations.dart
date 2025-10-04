@@ -1105,6 +1105,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tip on a device to send files.'**
   String get shared_files_title;
+
+  /// No description provided for @privacy_updated_title.
+  ///
+  /// In en, this message translates to:
+  /// **'New privacy policy'**
+  String get privacy_updated_title;
+
+  /// No description provided for @privacy_updated_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We have updated our privacy policy. To continue, please read and accept the new terms.'**
+  String get privacy_updated_subtitle;
+
+  /// No description provided for @privacy_updated_accept_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get privacy_updated_accept_button;
+
+  /// No description provided for @privacy_updated_read_button.
+  ///
+  /// In en, this message translates to:
+  /// **'View privacy policy'**
+  String get privacy_updated_read_button;
+
+  /// No description provided for @privacy_updated_delete_account_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get privacy_updated_delete_account_button;
 }
 
 class _AppLocalizationsDelegate

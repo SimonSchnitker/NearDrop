@@ -347,7 +347,7 @@ class NearbyPage extends StatelessWidget
                     shapePosition: ShapePosition.middle,
                     color: Theme.of(context).colorScheme.surfaceContainerHigh,
                     onTap: () async {
-                        await launchUrlString(Runtime.privacyPolicyUrl, mode: LaunchMode.externalApplication);
+                        await launchUrlString(Runtime.privacyPolicyV2Url, mode: LaunchMode.externalApplication);
                     },
                     child: ListTile(
                         title: Text(AppLocalizations.of(context)!.data_privacy_title, style: TextStyle(color: Theme.of(context).colorScheme.onSurface),),

@@ -192,13 +192,13 @@ class NearbyViewModel extends ChangeNotifier
             return;
         }
 
-        // Wenn eine wichtige Aktualisierung verfügbar ist, den Nutzer informieren und alle Projekte stoppen.
+        // Wenn eine wichtige Aktualisierung verfügbar ist, den Nutzer informieren und alle Prozesse stoppen.
         if (isRequiredUpdateAvailable)
         {
             await Navigator.of(NearbyPage.scaffoldKey.currentContext!).pushNamedAndRemoveUntil(Routes.requiredUpdate, (route) => false);
-            await _nearbyController.startBleScanner();
+            await _nearbyController.stopBleScanner();
             await _nearbyController.stopBleAdvertiser();
-            await _nearbyController.startNsdServices();
+            await _nearbyController.stopNsdServices();
             await Runtime.unsubscribeChannel();
         }
     }

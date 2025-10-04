@@ -68,7 +68,7 @@ class GuestLoginPage extends StatelessWidget
                                                             ),
                                                             recognizer: TapGestureRecognizer()
                                                                 ..onTap = () async {
-                                                                    await launchUrlString(Runtime.privacyPolicyUrl, mode: LaunchMode.externalApplication);
+                                                                    await launchUrlString(Runtime.privacyPolicyV2Url, mode: LaunchMode.externalApplication);
                                                                 }
                                                         ),
                                                         TextSpan(

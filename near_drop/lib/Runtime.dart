@@ -11,6 +11,7 @@ class Runtime
 {
     static const String nearDropWebsiteUrl = "https://neardrop.app";
     static const String privacyPolicyUrl = "https://neardrop.app/privacy";
+    static const String privacyPolicyV2Url = "https://neardrop.app/privacy/v2";
     static const String imprintUrl = "https://neardrop.app/imprint";
     static const String termsOfUseUrl = "https://neardrop.app/termsofuse";
     static const String androidAppUrl = "https://play.google.com/store/apps/details?id=de.neardrop.app";
@@ -23,6 +24,7 @@ class Runtime
     static final appVersion = Version(2, 0, 1);
     static final int privacyPolicyVersion = 1;
     static final int termsOfUseVersion = 1;
+    static bool hasNewestPrivacyPolicyAccepted = false;
 
     static StreamController<String> onFirstnameChanged = StreamController<String>.broadcast();
 

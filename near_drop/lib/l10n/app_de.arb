@@ -13,7 +13,7 @@
     "terms_of_use_title": "Nutzungsbedingungen",
     "version_title": "Version",
     "guest_login_title": "Profil anlegen",
-    "firstname_textfield_label": "Vorname",
+    "firstname_textfield_label": "Benutzername",
     "firstname_textfield_helper_text": "Diesen Namen sehen andere Geräte in der Nähe.",
     "guest_login_error_message": "Beim Anmelden ist ein Fehler aufgetreten. Versuche es später erneut.",
     "data_protection_info_text_1": "Ich habe die ",
@@ -130,9 +130,9 @@
     "bluetooth_error_info_bar_subtitle": "Einige Bluetooth-Prozesse sind fehlgeschlagen. Schaue in der Hilfe nach für Problemlösungen.",
     "drawer_close": "Schließen",
     "account_page_title": "Mein Profil",
-    "account_page_change_firstname_label": "Vorname ändern",
-    "account_page_change_firstname_dialog_title": "Vorname ändern",
-    "account_page_change_firstname_textfield_label": "Neuer Vorname",
+    "account_page_change_firstname_label": "Benutzername ändern",
+    "account_page_change_firstname_dialog_title": "Benutzername ändern",
+    "account_page_change_firstname_textfield_label": "Neuer Benutzername",
     "account_page_change_firstname_dialog_save_button": "Speichern",
     "account_page_show_my_data_label": "Gespeicherte Daten",
     "account_page_delete_account_label": "Alle Daten löschen",
@@ -246,5 +246,10 @@
     "onboarding_external_storage_permission_content": "Erteile der App die Berechtigung, auf den externen Speicher deines Geräts zuzugreifen. Dadurch können wir empfangene Dateien speichern.",
     "how_it_works_title": "So funktioniert's",
     "how_it_works_subtitle": "Starte Near Drop auf anderen Geräten. Geräte in der Nähe werden automatisch erkannt. Wähle dann ein Gerät aus, um Dateien zu senden.",
-    "shared_files_title": "Tippe auf ein Gerät zum Senden"
+    "shared_files_title": "Tippe auf ein Gerät zum Senden",
+    "privacy_updated_title": "Neue Datenschutz-richtlinie",
+    "privacy_updated_subtitle": "Wir haben unsere Datenschutzrichtlinie aktualisiert. Um fortzufahren, lies und akzeptiere bitte die neuen Bedingungen.",
+    "privacy_updated_accept_button": "Akzeptieren",
+    "privacy_updated_read_button": "Datenschutzrichtlinie aufrufen",
+    "privacy_updated_delete_account_button": "Account löschen"
 }

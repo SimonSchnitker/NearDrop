@@ -13,7 +13,7 @@
     "terms_of_use_title": "Terms of Use",
 	"version_title": "Version",
 	"guest_login_title": "Create profile",
-	"firstname_textfield_label": "First name",
+	"firstname_textfield_label": "Username",
 	"firstname_textfield_helper_text": "Other devices nearby will see this name.",
 	"guest_login_error_message": "An error occurred while logging in. Please try again later.",
 	"data_protection_info_text_1": "I have read and accept the ",
@@ -130,9 +130,9 @@
   "bluetooth_error_info_bar_subtitle": "Schaue in der Hilfe nach für Problemlösungen. Some Bluetooth processes have failed. Check the help for troubleshooting.",
   "drawer_close": "Close",
   "account_page_title": "My profile",
-  "account_page_change_firstname_label": "Change first name",
-  "account_page_change_firstname_dialog_title": "Change first name",
-  "account_page_change_firstname_textfield_label": "New first name",
+  "account_page_change_firstname_label": "Change username",
+  "account_page_change_firstname_dialog_title": "Change username",
+  "account_page_change_firstname_textfield_label": "New username",
   "account_page_change_firstname_dialog_save_button": "Save",
   "account_page_show_my_data_label": "Saved data",
   "account_page_delete_account_label": "Delete all data",
@@ -246,6 +246,10 @@
   "onboarding_external_storage_permission_content": "Allow the app to access the external storage of your device. This allows us to save received files.",
   "how_it_works_title": "How it works",
   "how_it_works_subtitle": "Start Near Drop on other devices. Nearby devices are automatically detected. Then select a device to send files.",
-  "shared_files_title": "Tip on a device to send files."
-
+  "shared_files_title": "Tip on a device to send files.",
+  "privacy_updated_title": "New privacy policy",
+  "privacy_updated_subtitle": "We have updated our privacy policy. To continue, please read and accept the new terms.",
+  "privacy_updated_accept_button": "Accept",
+  "privacy_updated_read_button": "View privacy policy",
+  "privacy_updated_delete_account_button": "Delete account"
 }
